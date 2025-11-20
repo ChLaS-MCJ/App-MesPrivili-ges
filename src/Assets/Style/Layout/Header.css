@@ -1,0 +1,316 @@
+/* ==================== HEADER PRINCIPAL ==================== */
+.app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 140px;
+    z-index: 1000;
+    overflow: visible;
+}
+
+/* ==================== VAGUE SVG avec dégradé ==================== */
+.wave-container {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    min-width: 1200px;
+    height: 110px;
+    z-index: 1;
+}
+
+.wave-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ==================== CLOCHE NOTIFICATION ==================== */
+.notification-bell {
+    font-size: 20px;
+    color: white;
+    position: absolute;
+    top: 40px;
+    right: 20px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.notification-bell svg {
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.bell-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    top: -1px;
+    right: -2px;
+    background: #1a1a1a;
+    border-radius: 50%;
+
+}
+
+.anticon-bell {
+    font-size: 20px;
+    color: white;
+    right: 5px;
+    position: absolute;
+}
+
+/* ==================== CERCLE DE PROFIL ==================== */
+.profile-container {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    width: 70px;
+    height: 70px;
+}
+
+.profile-circle {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid white;
+    background: white;
+    overflow: visible;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+}
+
+/* ==================== NOTIFICATION DOT ==================== */
+.notification-dot {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 16px;
+    height: 16px;
+    background: #1a1a1a;
+    border: 2px solid white;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+/* ==================== BADGE LOSANGE ==================== */
+.badge-container {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    z-index: 6;
+}
+
+.losange-icon {
+    width: 17px;
+    height: 17px;
+    object-fit: cover;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1200px) {
+    .wave-container {
+        min-width: 1400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .wave-container {
+        min-width: 1600px;
+    }
+
+    .app-header {
+        height: 130px;
+    }
+
+    .wave-container {
+        height: 100px;
+    }
+
+    .profile-container {
+        top: 60px;
+        width: 60px;
+        height: 60px;
+    }
+
+    .profile-circle {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* ==================== PROFILE DRAWER ==================== */
+.profile-container {
+    cursor: pointer;
+}
+
+.drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.profile-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70vh;
+    background: white;
+    z-index: 1001;
+    transform: translateY(-100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0 0 30px 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.profile-drawer.open {
+    transform: translateY(0);
+}
+
+.drawer-content {
+    padding: 160px 30px 30px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.drawer-content h2 {
+    margin: 0 0 30px;
+    font-size: 24px;
+    color: #1a1a1a;
+    text-align: center;
+}
+
+.profile-info {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.drawer-profile-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border: 4px solid #f0f0f0;
+}
+
+.profile-info h3 {
+    margin: 10px 0 5px;
+    font-size: 20px;
+    color: #1a1a1a;
+}
+
+.profile-info p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.drawer-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.drawer-menu-item {
+    padding: 15px 20px;
+    background: #f5f5f5;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.drawer-menu-item:hover {
+    background: #e8e8e8;
+    transform: translateX(5px);
+}
+
+.drawer-menu-item.logout {
+    background: #ff4444;
+    color: white;
+}
+
+.drawer-menu-item.logout:hover {
+    background: #cc0000;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .profile-drawer {
+        height: 80vh;
+    }
+
+    .drawer-content {
+        padding: 50px 20px 20px;
+    }
+}
+
+/* ==================== BOUTON FERMETURE DRAWER ==================== */
+.drawer-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.drawer-close-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+    transform: rotate(90deg);
+}
+
+.drawer-close-btn .anticon {
+    font-size: 20px;
+    color: #1a1a1a;
+}

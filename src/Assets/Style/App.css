@@ -1,0 +1,19 @@
+/*--------------Utils-----------------*/
+@import './Utils/Normalizer.css';
+@import './Utils/Variables.css';
+@import './Utils/Fonts.css';
+
+/*--------------Template-----------------*/
+@import './Template/Template.css';
+
+/*--------------Layout-----------------*/
+@import './Layout/LayoutPublic.css';
+@import './Layout/Header.css';
+@import './Layout/Footer.css';
+
+/*--------------Pages-----------------*/
+@import './Pages/Home.css';
+@import './Pages/Login.css';
+
+/*--------------Components-----------------*/
+@import './Components/Loader.css';

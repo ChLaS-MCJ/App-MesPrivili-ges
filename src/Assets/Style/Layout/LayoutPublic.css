@@ -1,0 +1,38 @@
+.layout-public {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+    position: relative;
+}
+
+.main-content {
+    flex: 1;
+    padding: 140px 0 90px 0;
+    /* Espace pour header et footer */
+    overflow-y: auto;
+    min-height: calc(100vh - 230px);
+}
+
+/* Style pour le mode sombre */
+.dark-theme {
+    background: linear-gradient(180deg, #000000 0%, #0d0d0d 100%);
+}
+
+.dark-theme .main-content {
+    color: #ffffff;
+}
+
+/* Empêcher le défilement du body */
+body {
+    overflow: hidden;
+}
+
+/* Style pour le contenu Ionic */
+ion-content {
+    --background: transparent;
+}
+
+ion-page {
+    background: transparent;
+}

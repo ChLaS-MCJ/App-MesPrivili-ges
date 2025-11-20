@@ -1,0 +1,143 @@
+.app-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 90px;
+    z-index: 1000;
+}
+
+.footer-wave {
+    width: 100%;
+    height: 90px;
+    display: block;
+}
+
+.footer-buttons {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    /* Enlever display: flex et justify-content */
+}
+
+.footer-btn {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    gap: 16px;
+}
+
+/* Position fixe pour chaque bouton - ajuste ces valeurs */
+.footer-btn-left {
+    left: 82px;
+    /* Distance depuis la gauche */
+    transform: translateX(-50%);
+
+}
+
+.footer-btn-center {
+    left: 50%;
+    /* Au centre - MODIFIE CETTE VALEUR si besoin */
+    transform: translateX(-50%);
+    /* Centre le bouton */
+}
+
+.footer-btn-right {
+    right: 82px;
+    /* Distance depuis la droite - MODIFIE CETTE VALEUR */
+    transform: translateX(50%);
+    /* Centre le bouton sur sa position */
+}
+
+/* Cercle extérieur noir avec opacité - taille identique pour tous */
+.btn-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+/* Cercle intérieur blanc qui apparaît quand actif */
+.btn-circle::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: white;
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+.footer-btn.active .btn-circle::before {
+    width: 38px;
+    height: 38px;
+    opacity: 1;
+}
+
+/* Icônes - taille identique pour toutes */
+.btn-icon {
+    font-size: 20px;
+    color: white;
+    position: relative;
+    z-index: 1;
+    transition: color 0.3s ease;
+}
+
+/* Icône devient noire quand actif */
+.footer-btn.active .btn-icon {
+    color: #000000;
+}
+
+/* Labels */
+.btn-label {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 200;
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+    font-family: var(--myriada-regular);
+}
+
+/* Animation au clic */
+.footer-btn:active .btn-circle {
+    transform: scale(0.95);
+}
+
+/* Responsive */
+@media (max-width: 375px) {
+    .footer-btn-left {
+        left: 60px;
+    }
+
+    .footer-btn-right {
+        right: 60px;
+    }
+
+    .btn-circle {
+        width: 44px;
+        height: 44px;
+    }
+
+    .footer-btn.active .btn-circle::before {
+        width: 34px;
+        height: 34px;
+    }
+
+    .btn-icon {
+        font-size: 18px;
+    }
+}
