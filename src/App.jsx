@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import { IonApp, setupIonicReact } from '@ionic/react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import PublicRouter from './Router/PublicRouter';
 import PrivateRouter from './Router/PrivateRouter';
+import ModernLoader from './components/Loader';
 
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
@@ -18,21 +20,40 @@ import './Assets/Style/App.css';
 
 setupIonicReact();
 
-const App = () => (
-  <IonApp>
-    <BrowserRouter>
-      {/* Routes de l'application */}
-      <Routes>
-        <Route path="/*" element={<PublicRouter />} />
-        <Route
-          path="/auth/*"
-          element={
-            <PrivateRouter />
-          }
-        />
-      </Routes>
-    </BrowserRouter>
-  </IonApp>
-);
+const App = () => {
+  // TEMPORAIRE : Pour voir le loader en permanence pendant le design
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Commenté temporairement pour garder le loader visible
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+
+  return (
+    <>
+      {/* Le loader reste visible tant que isLoading = true */}
+      {isLoading && <ModernLoader onFinish={() => setIsLoading(false)} />}
+
+      <IonApp>
+        <BrowserRouter>
+          {/* Routes de l'application */}
+          <Routes>
+            <Route path="/*" element={<PublicRouter />} />
+            <Route
+              path="/auth/*"
+              element={<PrivateRouter />}
+            />
+          </Routes>
+        </BrowserRouter>
+      </IonApp>
+    </>
+  );
+};
 
 export default App;

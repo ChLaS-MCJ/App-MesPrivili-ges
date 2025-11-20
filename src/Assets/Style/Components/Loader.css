@@ -1,24 +1,132 @@
-.loader-content {
-    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* Loader.css - Simple & Mobile-First */
+
+.modern-loader {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2d2d2d;
+    z-index: 99999;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
 }
 
-.loader-container {
-    height: 100%;
+.modern-loader.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Cache le background */
+.loader-background {
+    display: none;
+}
+
+/* Main content */
+.loader-content {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    color: white;
+    gap: 2rem;
+    transform: scale(1);
+    transition: transform 0.5s ease-out;
 }
 
-.loader-spinner {
-    width: 50px;
-    height: 50px;
-    color: white;
-    margin-bottom: 20px;
+.modern-loader.fade-out .loader-content {
+    transform: scale(0.95);
 }
 
-.loader-container h2 {
-    font-size: 24px;
-    font-weight: 300;
+/* Spinner simple - 3 points qui bougent */
+.loader-icon-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+}
+
+.loader-icon {
+    display: none;
+}
+
+.loader-ring {
+    display: none;
+}
+
+/* 3 dots animés */
+.loader-dots {
+    display: flex;
+    gap: 8px;
+}
+
+.loader-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ada59a 0%, #ffffff 100%);
+    animation: dotPulse 1.4s ease-in-out infinite;
+}
+
+.loader-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.loader-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loader-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+/* Titre simple */
+.loader-title {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+/* Cache la barre de progression */
+.progress-bar-container {
+    display: none;
+}
+
+.progress-percentage {
+    display: none;
+}
+
+/* Tagline simple */
+.loader-tagline {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.875rem;
+    letter-spacing: 0.1em;
+    font-weight: 400;
+}
+
+/* Animation des dots */
+@keyframes dotPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(0.5);
+        opacity: 0.5;
+    }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .loader-title {
+        font-size: 1.25rem;
+    }
+
+    .loader-content {
+        gap: 1.5rem;
+    }
 }
