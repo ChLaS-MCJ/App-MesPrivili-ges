@@ -1,0 +1,82 @@
+/* ========================================
+   TOAST CUSTOM STYLES - IONIC
+   ======================================== */
+
+/* Variables globales pour tous les toasts */
+ion-toast {
+    --border-radius: 12px;
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Toast Success */
+ion-toast.toast-success::part(container),
+ion-toast[color="success"]::part(container) {
+    background: rgba(46, 125, 50, 0.95) !important;
+    color: white !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+ion-toast.toast-success::part(message),
+ion-toast[color="success"]::part(message) {
+    color: white !important;
+}
+
+/* Toast Danger/Error */
+ion-toast.toast-danger::part(container),
+ion-toast[color="danger"]::part(container) {
+    background: rgba(211, 47, 47, 0.95) !important;
+    color: white !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+ion-toast.toast-danger::part(message),
+ion-toast[color="danger"]::part(message) {
+    color: white !important;
+}
+
+/* Toast Warning */
+ion-toast.toast-warning::part(container),
+ion-toast[color="warning"]::part(container) {
+    background: rgba(237, 108, 2, 0.95) !important;
+    color: white !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+ion-toast.toast-warning::part(message),
+ion-toast[color="warning"]::part(message) {
+    color: white !important;
+}
+
+/* Toast Primary/Info */
+ion-toast.toast-primary::part(container),
+ion-toast[color="primary"]::part(container) {
+    background: rgba(25, 118, 210, 0.95) !important;
+    color: white !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+ion-toast.toast-primary::part(message),
+ion-toast[color="primary"]::part(message) {
+    color: white !important;
+}
+
+/* Toast par défaut */
+ion-toast::part(container) {
+    background: rgba(50, 50, 50, 0.95) !important;
+    color: white !important;
+    border-radius: 12px !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+ion-toast::part(message) {
+    color: white !important;
+    font-weight: 500;
+}

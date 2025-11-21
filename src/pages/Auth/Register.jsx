@@ -105,11 +105,11 @@ const Register = () => {
                     </button>
 
                     <div className="register-header">
-                        <h1 className="register-title">Create</h1>
-                        <h1 className="register-title">your account</h1>
+                        <h1 className="register-title">Créer</h1>
+                        <h1 className="register-title">votre compte</h1>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="register-form">
+                    <form onSubmit={handleSubmit} className="register-form" autoComplete="off">
                         <div className="input-group">
                             <IonInput
                                 className="register-input"
@@ -117,7 +117,8 @@ const Register = () => {
                                 placeholder="Prénom *"
                                 value={formData.prenom}
                                 onIonChange={(e) => handleChange('prenom', e.detail.value)}
-                                clearInput
+                                autocomplete="given-name"
+                                name="prenom"
                             />
                         </div>
 
@@ -128,7 +129,8 @@ const Register = () => {
                                 placeholder="Nom *"
                                 value={formData.nom}
                                 onIonChange={(e) => handleChange('nom', e.detail.value)}
-                                clearInput
+                                autocomplete="family-name"
+                                name="nom"
                             />
                         </div>
 
@@ -139,7 +141,8 @@ const Register = () => {
                                 placeholder="Email *"
                                 value={formData.email}
                                 onIonChange={(e) => handleChange('email', e.detail.value)}
-                                clearInput
+                                autocomplete="email"
+                                name="email"
                             />
                         </div>
 
@@ -150,7 +153,8 @@ const Register = () => {
                                 placeholder="Téléphone"
                                 value={formData.telephone}
                                 onIonChange={(e) => handleChange('telephone', e.detail.value)}
-                                clearInput
+                                autocomplete="tel"
+                                name="telephone"
                             />
                         </div>
 
@@ -161,6 +165,8 @@ const Register = () => {
                                 placeholder="Mot de passe *"
                                 value={formData.password}
                                 onIonChange={(e) => handleChange('password', e.detail.value)}
+                                autocomplete="new-password"
+                                name="password"
                             />
                         </div>
 
@@ -171,6 +177,8 @@ const Register = () => {
                                 placeholder="Confirmer le mot de passe *"
                                 value={formData.confirmPassword}
                                 onIonChange={(e) => handleChange('confirmPassword', e.detail.value)}
+                                autocomplete="new-password"
+                                name="confirmPassword"
                             />
                         </div>
 
@@ -182,14 +190,14 @@ const Register = () => {
                             className="register-button"
                             disabled={loading}
                         >
-                            Sign Up
+                            S'inscrire
                         </IonButton>
                     </form>
 
                     <div className="login-group">
-                        <span className="login-text">Already have an account? </span>
+                        <span className="login-text">Vous avez déjà un compte ? </span>
                         <button className="login-link" onClick={() => navigate('/login')}>
-                            Log In
+                            Se connecter
                         </button>
                     </div>
                 </div>
@@ -201,6 +209,7 @@ const Register = () => {
                     message={toast.message}
                     duration={3000}
                     color={toast.color}
+                    cssClass={`toast-${toast.color}`}
                     onDidDismiss={() => setToast({ ...toast, show: false })}
                 />
             </IonContent>

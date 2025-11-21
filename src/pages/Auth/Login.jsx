@@ -7,7 +7,9 @@ import {
     IonCheckbox,
     IonToast,
     IonLoading,
+    IonIcon,
 } from '@ionic/react';
+import { logoGoogle, logoApple } from 'ionicons/icons';
 import { useAuth } from '../../Utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,6 +23,9 @@ const Login = () => {
 
     const { login, loginWithGoogle, loginWithApple } = useAuth();
     const navigate = useNavigate();
+
+    // Détecter si on est sur iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -82,8 +87,8 @@ const Login = () => {
             <IonContent className="login-screen">
                 <div className="login-container">
                     <div className="login-header">
-                        <h1 className="login-title">Log into</h1>
-                        <h1 className="login-title">your account</h1>
+                        <h1 className="login-title">Connectez-vous</h1>
+                        <h1 className="login-title">à votre compte</h1>
                     </div>
 
                     <form onSubmit={handleLogin} className="login-form">
@@ -91,10 +96,9 @@ const Login = () => {
                             <IonInput
                                 className="login-input"
                                 type="email"
-                                placeholder="Username/Email"
+                                placeholder="Nom d'utilisateur/Email"
                                 value={email}
                                 onIonChange={(e) => setEmail(e.detail.value)}
-                                clearInput
                             />
                         </div>
 
@@ -102,7 +106,7 @@ const Login = () => {
                             <IonInput
                                 className="login-input"
                                 type="password"
-                                placeholder="Password"
+                                placeholder="Mot de passe"
                                 value={password}
                                 onIonChange={(e) => setPassword(e.detail.value)}
                             />
@@ -111,7 +115,7 @@ const Login = () => {
                                 className="forgot-link"
                                 onClick={() => navigate('/forgot-password')}
                             >
-                                Forgot?
+                                Oublié?
                             </button>
                         </div>
 
@@ -121,7 +125,7 @@ const Login = () => {
                                 onIonChange={(e) => setRememberMe(e.detail.checked)}
                                 className="remember-checkbox"
                             />
-                            <label className="remember-label">Remember me</label>
+                            <label className="remember-label">Se souvenir de moi</label>
                         </div>
 
                         <IonButton
@@ -130,7 +134,7 @@ const Login = () => {
                             className="login-button"
                             disabled={loading}
                         >
-                            Log In
+                            Connexion
                         </IonButton>
 
                         <IonButton
@@ -140,29 +144,31 @@ const Login = () => {
                             onClick={handleGoogleLogin}
                             disabled={loading}
                         >
-                            <ion-icon name="logo-google" slot="start"></ion-icon>
-                            Log in with Google
+                            <IonIcon icon={logoGoogle} slot="start" />
+                            Connexion avec Google
                         </IonButton>
 
-                        <IonButton
-                            expand="block"
-                            fill="outline"
-                            className="apple-button"
-                            onClick={handleAppleLogin}
-                            disabled={loading}
-                        >
-                            <ion-icon name="logo-apple" slot="start"></ion-icon>
-                            Log in with Apple
-                        </IonButton>
+                        {isIOS && (
+                            <IonButton
+                                expand="block"
+                                fill="outline"
+                                className="apple-button"
+                                onClick={handleAppleLogin}
+                                disabled={loading}
+                            >
+                                <IonIcon icon={logoApple} slot="start" />
+                                Connexion avec Apple
+                            </IonButton>
+                        )}
                     </form>
 
                     <div className="signup-group">
-                        <span className="signup-text">Don't have an account? </span>
+                        <span className="signup-text">Vous n'avez pas de compte ? </span>
                         <button
                             className="signup-link"
                             onClick={() => navigate('/register')}
                         >
-                            Sign Up
+                            S'inscrire
                         </button>
                     </div>
                 </div>
@@ -182,3 +188,7 @@ const Login = () => {
 };
 
 export default Login;
+
+
+
+
