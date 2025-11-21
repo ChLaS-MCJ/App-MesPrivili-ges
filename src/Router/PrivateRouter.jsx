@@ -1,7 +1,13 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import Maps from '../pages/Private/Maps';
 import { useAuth } from '../Utils/AuthContext';
 import LayoutPublic from '../Layout/LayoutPublic';
+
+import Maps from '../pages/Private/Maps';
+import AccountSettings from '../pages/Private/AccountSettings';
+import History from '../pages/Private/History';
+import LegalMentions from '../pages/Private/LegalMentions';
+import TermsOfService from '../pages/Private/TermsOfService';
+
 
 const PrivateRouter = () => {
     const { isAuthenticated, loading } = useAuth();
@@ -17,12 +23,18 @@ const PrivateRouter = () => {
     }
 
     return (
+
         <Routes>
             <Route path="/" element={<LayoutPublic />}>
                 <Route path="maps" element={<Maps />} />
+                <Route path="account-settings" element={<AccountSettings />} />
+                <Route path="history" element={<History />} />
+                <Route path="legal-mentions" element={<LegalMentions />} />
+                <Route path="terms-of-service" element={<TermsOfService />} />
                 <Route index element={<Navigate to="maps" replace />} />
             </Route>
         </Routes>
+
     );
 };
 

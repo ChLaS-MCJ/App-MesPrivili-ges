@@ -22,16 +22,7 @@ const Maps = () => {
             <IonContent fullscreen className="maps-screen">
                 <div className="maps-container">
                     <h1>🗺️ Carte Interactive</h1>
-                    <p>Bienvenue {user?.email} !</p>
 
-                    <div className="placeholder-map">
-                        <p>📍 La carte interactive des commerces sera ici</p>
-                        <p>Avec géolocalisation et catégories</p>
-                    </div>
-
-                    <IonButton expand="block" onClick={logout} color="danger">
-                        Déconnexion
-                    </IonButton>
                 </div>
             </IonContent>
         </IonPage>

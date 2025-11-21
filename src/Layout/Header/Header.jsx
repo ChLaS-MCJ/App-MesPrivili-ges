@@ -260,7 +260,7 @@ const Header = () => {
                     <div className="drawer-menu">
                         <button
                             className="drawer-menu-item"
-                            onClick={() => handleNavigation('/account-settings')}
+                            onClick={() => handleNavigation('/auth/account-settings')}
                         >
                             <UserOutlined className="menu-icon" />
                             <span>Mes informations</span>
@@ -268,7 +268,7 @@ const Header = () => {
 
                         <button
                             className="drawer-menu-item"
-                            onClick={() => handleNavigation('/history')}
+                            onClick={() => handleNavigation('/auth/history')}
                         >
                             <HistoryOutlined className="menu-icon" />
                             <span>Historique</span>
@@ -279,7 +279,7 @@ const Header = () => {
                         {/* Mentions légales & CGU */}
                         <button
                             className="drawer-menu-item secondary"
-                            onClick={() => handleNavigation('/legal-mentions')}
+                            onClick={() => handleNavigation('/auth/legal-mentions')}
                         >
                             <FileTextOutlined className="menu-icon" />
                             <span>Mentions légales</span>
@@ -287,7 +287,7 @@ const Header = () => {
 
                         <button
                             className="drawer-menu-item secondary"
-                            onClick={() => handleNavigation('/terms-of-service')}
+                            onClick={() => handleNavigation('/auth/terms-of-service')}
                         >
                             <SafetyOutlined className="menu-icon" />
                             <span>Conditions d'utilisation</span>

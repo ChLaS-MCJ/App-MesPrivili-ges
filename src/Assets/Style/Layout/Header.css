@@ -52,7 +52,6 @@
     right: -2px;
     background: #1a1a1a;
     border-radius: 50%;
-
 }
 
 .anticon-bell {
@@ -71,6 +70,7 @@
     z-index: 10;
     width: 70px;
     height: 70px;
+    cursor: pointer;
 }
 
 .profile-circle {
@@ -128,6 +128,231 @@
     object-fit: cover;
 }
 
+/* ========================================
+   DRAWER OVERLAY (NOUVEAU)
+   ======================================== */
+.drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1998;
+    animation: fadeIn 0.3s ease;
+    backdrop-filter: blur(2px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   PROFILE DRAWER (NOUVEAU - STYLE LATÉRAL)
+   ======================================== */
+.profile-drawer {
+    position: fixed;
+    top: 0;
+    right: -350px;
+    width: 320px;
+    height: 100vh;
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    z-index: 1999;
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-drawer.open {
+    right: 0;
+}
+
+/* Scrollbar personnalisée */
+.profile-drawer::-webkit-scrollbar {
+    width: 6px;
+}
+
+.profile-drawer::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.profile-drawer::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.profile-drawer::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ========================================
+   DRAWER CLOSE BUTTON (NOUVEAU)
+   ======================================== */
+.drawer-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.drawer-close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.drawer-close-btn .anticon {
+    font-size: 18px;
+    color: white;
+}
+
+/* ========================================
+   DRAWER CONTENT (NOUVEAU)
+   ======================================== */
+.drawer-content {
+    padding: 30px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Profile Info Section */
+.profile-info {
+    text-align: center;
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+}
+
+.drawer-profile-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.profile-info h3 {
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+}
+
+.profile-info p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    margin: 0;
+}
+
+.auth-provider-badge {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    font-size: 12px;
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+/* ========================================
+   DRAWER MENU (NOUVEAU)
+   ======================================== */
+.drawer-menu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.drawer-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.drawer-menu-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.drawer-menu-item.secondary {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.drawer-menu-item.secondary:hover {
+    opacity: 1;
+}
+
+.drawer-menu-item.logout {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff6b6b;
+    margin-top: 10px;
+}
+
+.drawer-menu-item.logout:hover {
+    background: rgba(255, 68, 68, 0.2);
+}
+
+.menu-icon {
+    font-size: 18px;
+}
+
+.drawer-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 15px 0;
+}
+
+/* ========================================
+   DRAWER FOOTER (NOUVEAU)
+   ======================================== */
+.drawer-footer {
+    text-align: center;
+    padding: 20px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+}
+
+.drawer-footer p {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    margin: 0;
+}
+
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1200px) {
     .wave-container {
@@ -158,159 +383,16 @@
         width: 60px;
         height: 60px;
     }
-}
 
-/* ==================== PROFILE DRAWER ==================== */
-.profile-container {
-    cursor: pointer;
-}
-
-.drawer-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-.profile-drawer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 70vh;
-    background: white;
-    z-index: 1001;
-    transform: translateY(-100%);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 0 0 30px 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-}
-
-.profile-drawer.open {
-    transform: translateY(0);
-}
-
-.drawer-content {
-    padding: 160px 30px 30px;
-    height: 100%;
-    overflow-y: auto;
-}
-
-.drawer-content h2 {
-    margin: 0 0 30px;
-    font-size: 24px;
-    color: #1a1a1a;
-    text-align: center;
-}
-
-.profile-info {
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-.drawer-profile-image {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 15px;
-    border: 4px solid #f0f0f0;
-}
-
-.profile-info h3 {
-    margin: 10px 0 5px;
-    font-size: 20px;
-    color: #1a1a1a;
-}
-
-.profile-info p {
-    margin: 0;
-    color: #666;
-    font-size: 14px;
-}
-
-.drawer-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.drawer-menu-item {
-    padding: 15px 20px;
-    background: #f5f5f5;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    color: #1a1a1a;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: left;
-}
-
-.drawer-menu-item:hover {
-    background: #e8e8e8;
-    transform: translateX(5px);
-}
-
-.drawer-menu-item.logout {
-    background: #ff4444;
-    color: white;
-}
-
-.drawer-menu-item.logout:hover {
-    background: #cc0000;
-}
-
-/* ==================== RESPONSIVE ==================== */
-@media (max-width: 768px) {
+    /* Drawer responsive */
     .profile-drawer {
-        height: 80vh;
-    }
-
-    .drawer-content {
-        padding: 50px 20px 20px;
+        width: 280px;
     }
 }
 
-/* ==================== BOUTON FERMETURE DRAWER ==================== */
-.drawer-close-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.05);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    transition: all 0.3s ease;
-}
-
-.drawer-close-btn:hover {
-    background: rgba(0, 0, 0, 0.1);
-    transform: rotate(90deg);
-}
-
-.drawer-close-btn .anticon {
-    font-size: 20px;
-    color: #1a1a1a;
+@media (max-width: 480px) {
+    .profile-drawer {
+        width: 100%;
+        right: -100%;
+    }
 }

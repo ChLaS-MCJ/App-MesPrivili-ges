@@ -19,6 +19,8 @@
 @import './Pages/ForgotPassword.css';
 @import './Pages/History.css';
 @import './Pages/TermsOfService.css';
+@import './Pages/AccountSettings.css';
+
 
 /*--------------Components-----------------*/
 @import './Components/Loader.css';
