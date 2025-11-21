@@ -1,22 +1,50 @@
-.login-screen {
+.register-screen {
     --background: linear-gradient(135deg, #e0c3b3 0%, #c5a68f 50%, #9ea8b8 100%);
 }
 
-.login-container {
+.register-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     min-height: 100%;
     padding: 40px 20px;
+    position: relative;
+}
+
+/* Back button */
+.back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.back-button ion-icon {
+    color: white;
+    font-size: 24px;
 }
 
 /* Header */
-.login-header {
-    margin-bottom: 40px;
+.register-header {
+    margin-bottom: 30px;
     animation: fadeInUp 0.6s ease-out;
 }
 
-.login-title {
+.register-title {
     font-size: 32px;
     font-weight: 600;
     color: white;
@@ -26,7 +54,7 @@
 }
 
 /* Form */
-.login-form {
+.register-form {
     background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -40,10 +68,10 @@
 /* Input groups */
 .input-group {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
-.login-input {
+.register-input {
     --background: rgba(255, 255, 255, 0.9);
     --color: #333;
     --placeholder-color: #999;
@@ -55,41 +83,15 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.forgot-link {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #666;
-    font-size: 13px;
-    cursor: pointer;
-    padding: 0;
+.required-text {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    margin: 0 0 20px 0;
+    font-style: italic;
 }
 
-/* Remember me */
-.remember-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 24px;
-    gap: 8px;
-}
-
-.remember-checkbox {
-    --background: rgba(255, 255, 255, 0.9);
-    --border-radius: 6px;
-    --size: 20px;
-}
-
-.remember-label {
-    color: white;
-    font-size: 14px;
-    user-select: none;
-}
-
-/* Buttons */
-.login-button {
+/* Button */
+.register-button {
     --background: #2d2d2d;
     --background-hover: #1a1a1a;
     --color: white;
@@ -98,43 +100,23 @@
     font-size: 16px;
     font-weight: 600;
     text-transform: none;
-    margin-bottom: 16px;
+    margin-top: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.google-button,
-.apple-button {
-    --background: white;
-    --background-hover: #f5f5f5;
-    --color: #333;
-    --border-color: rgba(0, 0, 0, 0.1);
-    --border-radius: 25px;
-    height: 50px;
-    font-size: 15px;
-    font-weight: 500;
-    text-transform: none;
-    margin-bottom: 12px;
-}
-
-.google-button ion-icon,
-.apple-button ion-icon {
-    font-size: 20px;
-    margin-right: 8px;
-}
-
-/* Sign up */
-.signup-group {
+/* Login group */
+.login-group {
     text-align: center;
     margin-top: 24px;
     animation: fadeIn 0.6s ease-out 0.4s both;
 }
 
-.signup-text {
+.login-text {
     color: white;
     font-size: 14px;
 }
 
-.signup-link {
+.login-link {
     background: none;
     border: none;
     color: white;
@@ -170,7 +152,7 @@
 
 /* Responsive */
 @media (min-width: 768px) {
-    .login-container {
+    .register-container {
         max-width: 400px;
         margin: 0 auto;
     }

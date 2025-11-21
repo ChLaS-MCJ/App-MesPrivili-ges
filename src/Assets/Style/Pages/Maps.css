@@ -1,0 +1,32 @@
+.maps-screen {
+    --background: #f5f5f5;
+}
+
+.maps-container {
+    padding: 20px;
+    text-align: center;
+}
+
+.maps-container h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.maps-container p {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.placeholder-map {
+    background: white;
+    border-radius: 16px;
+    padding: 60px 20px;
+    margin: 40px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.placeholder-map p {
+    font-size: 18px;
+    margin: 10px 0;
+}
