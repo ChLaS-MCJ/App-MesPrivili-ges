@@ -22,6 +22,7 @@ body {
 
 ion-header {
     z-index: 0;
+    height: 10px;
 }
 
 ion-content {
