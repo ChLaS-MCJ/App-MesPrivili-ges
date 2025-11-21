@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { IonApp, setupIonicReact } from '@ionic/react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google'; // ← IMPORTANT !
 import { AuthProvider } from './Utils/AuthContext';
 import PublicRouter from './Router/PublicRouter';
 import PrivateRouter from './Router/PrivateRouter';
@@ -27,25 +28,30 @@ const App = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 2000); // 2 secondes de splash screen
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
+
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   return (
     <>
       {isLoading && <ModernLoader onFinish={() => setIsLoading(false)} />}
 
-      <IonApp>
-        <BrowserRouter>
-          <AuthProvider>
-            <Routes>
-              <Route path="/*" element={<PublicRouter />} />
-              <Route path="/auth/*" element={<PrivateRouter />} />
-            </Routes>
-          </AuthProvider>
-        </BrowserRouter>
-      </IonApp>
+      {/* ← IMPORTANT : Wrapper avec GoogleOAuthProvider */}
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <IonApp>
+          <BrowserRouter>
+            <AuthProvider>
+              <Routes>
+                <Route path="/*" element={<PublicRouter />} />
+                <Route path="/auth/*" element={<PrivateRouter />} />
+              </Routes>
+            </AuthProvider>
+          </BrowserRouter>
+        </IonApp>
+      </GoogleOAuthProvider>
     </>
   );
 };

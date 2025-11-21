@@ -1,14 +1,50 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../Utils/AuthContext';
 import losangeIcon from '../../Assets/Images/rhombe.png';
 import profilimg from '../../Assets/Images/profilimg.jpeg';
-import { BellOutlined, CloseOutlined } from '@ant-design/icons';
+import {
+    BellOutlined,
+    CloseOutlined,
+    UserOutlined,
+    HistoryOutlined,
+    LogoutOutlined,
+    FileTextOutlined,
+    SafetyOutlined
+} from '@ant-design/icons';
 
 const Header = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
 
     const toggleDrawer = () => {
         setIsDrawerOpen(!isDrawerOpen);
     };
+
+    const closeDrawer = () => {
+        setIsDrawerOpen(false);
+    };
+
+    // Navigation vers les différentes pages
+    const handleNavigation = (path) => {
+        closeDrawer();
+        navigate(path);
+    };
+
+    // Déconnexion
+    const handleLogout = async () => {
+        try {
+            await logout();
+            closeDrawer();
+            navigate('/login');
+        } catch (error) {
+            console.error('Erreur lors de la déconnexion:', error);
+        }
+    };
+
+    // Déterminer si l'utilisateur peut modifier son mot de passe
+    const canChangePassword = user?.authProvider === 'local' || !user?.authProvider;
 
     return (
         <>
@@ -50,8 +86,8 @@ const Header = () => {
 
                             {/* Spot lumineux radial */}
                             <radialGradient id="lightSpot" cx="30%" cy="40%">
-                                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.4" />  /* Réduit de 0.7 à 0.4 */
-                                <stop offset="50%" stopColor="#ffffff" stopOpacity="0.15" /> /* Réduit de 0.3 à 0.15 */
+                                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.4" />
+                                <stop offset="50%" stopColor="#ffffff" stopOpacity="0.15" />
                                 <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
                             </radialGradient>
 
@@ -80,11 +116,16 @@ const Header = () => {
                                        L1200,100 L1200,0 Z"
                                 />
                             </clipPath>
+
+                            <linearGradient id="topShine" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.5" />
+                                <stop offset="100%" stopColor="transparent" />
+                            </linearGradient>
                         </defs>
 
                         {/* Groupe avec clip-path pour contenir tous les effets dans le path */}
                         <g clipPath="url(#pathClip)">
-                            {/* Forme principale - VOTRE ONDULATION ORIGINALE */}
+                            {/* Forme principale */}
                             <path
                                 d="M0,0 L0,100 L545,100 
                                    Q568,100 572,92
@@ -96,7 +137,7 @@ const Header = () => {
                                 filter="url(#headerShadow)"
                             />
 
-                            {/* Overlay sombre sur tout le path */}
+                            {/* Overlay sombre */}
                             <path
                                 d="M0,0 L0,100 L545,100 
                                    Q568,100 572,92
@@ -108,7 +149,7 @@ const Header = () => {
                                 opacity="0.40"
                             />
 
-                            {/* Premier spot lumineux - gauche à droite (discret) */}
+                            {/* Spot lumineux animé */}
                             <ellipse
                                 cx="280"
                                 cy="50"
@@ -125,14 +166,13 @@ const Header = () => {
                                 />
                                 <animate
                                     attributeName="opacity"
-                                    values="0.3; 0.5; 0.3"  /* Réduit de 0.5-0.8 à 0.3-0.5 */
+                                    values="0.3; 0.5; 0.3"
                                     dur="4s"
                                     repeatCount="indefinite"
                                 />
                             </ellipse>
 
-
-                            {/* Bande lumineuse en haut du path */}
+                            {/* Bande lumineuse en haut */}
                             <rect
                                 x="0"
                                 y="0"
@@ -147,16 +187,11 @@ const Header = () => {
                                     repeatCount="indefinite"
                                 />
                             </rect>
-
-                            <linearGradient id="topShine" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.5" />
-                                <stop offset="100%" stopColor="transparent" />
-                            </linearGradient>
                         </g>
                     </svg>
                 </div>
 
-                {/* Icône cloche notification en haut à droite */}
+                {/* Icône cloche notification */}
                 <div className="notification-bell">
                     <BellOutlined style={{ fontSize: '20px', color: 'white' }} />
                     <div className="bell-dot"></div>
@@ -166,7 +201,7 @@ const Header = () => {
                 <div className="profile-container" onClick={toggleDrawer}>
                     <div className="profile-circle">
                         <img
-                            src={profilimg}
+                            src={user?.profileImage || profilimg}
                             alt="Profile"
                             className="profile-image"
                         />
@@ -174,7 +209,7 @@ const Header = () => {
                         {/* Point de notification */}
                         <div className="notification-dot"></div>
 
-                        {/* Badge losange avec image */}
+                        {/* Badge losange */}
                         <div className="badge-container">
                             <img src={losangeIcon} alt="Losange" className="losange-icon" />
                         </div>
@@ -195,16 +230,84 @@ const Header = () => {
                 </button>
 
                 <div className="drawer-content">
+                    {/* Informations utilisateur */}
                     <div className="profile-info">
-                        <img src={profilimg} alt="Profile" className="drawer-profile-image" />
-                        <h3>Nom d'utilisateur</h3>
-                        <p>email@example.com</p>
+                        <img
+                            src={user?.profileImage || profilimg}
+                            alt="Profile"
+                            className="drawer-profile-image"
+                        />
+                        <h3>
+                            {user?.prenom && user?.nom
+                                ? `${user.prenom} ${user.nom}`
+                                : user?.client?.prenom && user?.client?.nom
+                                    ? `${user.client.prenom} ${user.client.nom}`
+                                    : 'Utilisateur'}
+                        </h3>
+                        <p>{user?.email || 'email@example.com'}</p>
+
+                        {/* Badge du type de connexion */}
+                        {user?.authProvider && (
+                            <div className="auth-provider-badge">
+                                {user.authProvider === 'google' && '🔵 Google'}
+                                {user.authProvider === 'apple' && '🍎 Apple'}
+                                {user.authProvider === 'local' && '🔐 Compte local'}
+                            </div>
+                        )}
                     </div>
 
+                    {/* Menu principal */}
                     <div className="drawer-menu">
-                        <button className="drawer-menu-item">Mes informations</button>
-                        <button className="drawer-menu-item">Historique</button>
-                        <button className="drawer-menu-item logout">Déconnexion</button>
+                        <button
+                            className="drawer-menu-item"
+                            onClick={() => handleNavigation('/account-settings')}
+                        >
+                            <UserOutlined className="menu-icon" />
+                            <span>Mes informations</span>
+                        </button>
+
+                        <button
+                            className="drawer-menu-item"
+                            onClick={() => handleNavigation('/history')}
+                        >
+                            <HistoryOutlined className="menu-icon" />
+                            <span>Historique</span>
+                        </button>
+
+                        <div className="drawer-divider"></div>
+
+                        {/* Mentions légales & CGU */}
+                        <button
+                            className="drawer-menu-item secondary"
+                            onClick={() => handleNavigation('/legal-mentions')}
+                        >
+                            <FileTextOutlined className="menu-icon" />
+                            <span>Mentions légales</span>
+                        </button>
+
+                        <button
+                            className="drawer-menu-item secondary"
+                            onClick={() => handleNavigation('/terms-of-service')}
+                        >
+                            <SafetyOutlined className="menu-icon" />
+                            <span>Conditions d'utilisation</span>
+                        </button>
+
+                        <div className="drawer-divider"></div>
+
+                        {/* Déconnexion */}
+                        <button
+                            className="drawer-menu-item logout"
+                            onClick={handleLogout}
+                        >
+                            <LogoutOutlined className="menu-icon" />
+                            <span>Déconnexion</span>
+                        </button>
+                    </div>
+
+                    {/* Footer avec version */}
+                    <div className="drawer-footer">
+                        <p>Version 1.0.0</p>
                     </div>
                 </div>
             </div>

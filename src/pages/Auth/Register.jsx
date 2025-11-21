@@ -8,10 +8,10 @@ import {
     IonLoading,
     IonIcon,
 } from '@ionic/react';
-import { arrowBack } from 'ionicons/icons';
+import { arrowBack, logoGoogle, logoApple } from 'ionicons/icons';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../Utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
-
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -25,8 +25,11 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', color: '' });
 
-    const { register } = useAuth();
+    const { register, loginWithGoogle, loginWithApple } = useAuth();
     const navigate = useNavigate();
+
+    // Détecter si on est sur iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
     const handleChange = (field, value) => {
         setFormData({ ...formData, [field]: value });
@@ -93,6 +96,109 @@ const Register = () => {
                 message: result.message || 'Erreur lors de l\'inscription',
                 color: 'danger',
             });
+        }
+    };
+
+    // 🔥 VRAIE INTÉGRATION GOOGLE OAUTH
+    const handleGoogleRegister = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            setLoading(true);
+
+            try {
+                // Récupérer les infos de l'utilisateur depuis Google
+                const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: {
+                        Authorization: `Bearer ${tokenResponse.access_token}`,
+                    },
+                });
+
+                const userInfo = await userInfoResponse.json();
+
+                console.log('Google User Info:', userInfo);
+
+                // Envoyer les données au backend
+                const result = await loginWithGoogle({
+                    googleId: userInfo.sub,
+                    email: userInfo.email,
+                    prenom: userInfo.given_name,
+                    nom: userInfo.family_name,
+                });
+
+                if (result.success) {
+                    setToast({
+                        show: true,
+                        message: 'Inscription Google réussie !',
+                        color: 'success',
+                    });
+
+                    setTimeout(() => {
+                        navigate('/auth/maps');
+                    }, 500);
+                } else {
+                    setToast({
+                        show: true,
+                        message: result.message || 'Erreur lors de l\'inscription Google',
+                        color: 'danger',
+                    });
+                }
+            } catch (error) {
+                console.error('Erreur lors de la récupération des infos Google:', error);
+                setToast({
+                    show: true,
+                    message: 'Erreur lors de l\'inscription Google',
+                    color: 'danger',
+                });
+            } finally {
+                setLoading(false);
+            }
+        },
+        onError: () => {
+            console.error('Erreur Google Register');
+            setToast({
+                show: true,
+                message: 'Échec de l\'inscription Google',
+                color: 'danger',
+            });
+        },
+    });
+
+    const handleAppleRegister = async () => {
+        setLoading(true);
+
+        try {
+            // TODO: Intégrer Apple Sign In
+            const appleData = {
+                appleId: `apple-${Date.now()}`,
+                email: 'test.apple@icloud.com'
+            };
+
+            const result = await loginWithApple(appleData);
+
+            if (result.success) {
+                setToast({
+                    show: true,
+                    message: 'Inscription Apple réussie !',
+                    color: 'success',
+                });
+
+                setTimeout(() => {
+                    navigate('/auth/maps');
+                }, 500);
+            } else {
+                setToast({
+                    show: true,
+                    message: result.message || 'Erreur lors de l\'inscription Apple',
+                    color: 'danger',
+                });
+            }
+        } catch (error) {
+            setToast({
+                show: true,
+                message: 'Erreur lors de l\'inscription Apple',
+                color: 'danger',
+            });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -192,6 +298,31 @@ const Register = () => {
                         >
                             S'inscrire
                         </IonButton>
+
+                        {/* 🔥 BOUTON GOOGLE AVEC VRAIE INTÉGRATION */}
+                        <IonButton
+                            expand="block"
+                            fill="outline"
+                            className="google-button"
+                            onClick={() => handleGoogleRegister()}
+                            disabled={loading}
+                        >
+                            <IonIcon icon={logoGoogle} slot="start" />
+                            S'inscrire avec Google
+                        </IonButton>
+
+                        {isIOS && (
+                            <IonButton
+                                expand="block"
+                                fill="outline"
+                                className="apple-button"
+                                onClick={handleAppleRegister}
+                                disabled={loading}
+                            >
+                                <IonIcon icon={logoApple} slot="start" />
+                                S'inscrire avec Apple
+                            </IonButton>
+                        )}
                     </form>
 
                     <div className="login-group">

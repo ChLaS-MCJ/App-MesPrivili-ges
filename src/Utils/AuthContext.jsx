@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import AuthService from '../Services/Auth.services';
 
 const AuthContext = createContext();
 
@@ -16,199 +17,216 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
-    // Vérifier le token au démarrage
+    // Vérifier l'authentification au démarrage
     useEffect(() => {
         checkAuth();
     }, []);
 
+    /**
+     * Vérifier si l'utilisateur est connecté
+     */
     const checkAuth = async () => {
         try {
-            const storedToken = localStorage.getItem('token');
+            const storedToken = await AuthService.getToken();
+            const storedUser = await AuthService.getUser();
 
-            if (!storedToken) {
-                setLoading(false);
-                return;
-            }
+            if (storedToken && storedUser) {
+                // Vérifier que le token est toujours valide
+                const result = await AuthService.getProfile();
 
-            // Vérifier si le token est valide
-            const response = await fetch(`${API_URL}/users/me`, {
-                headers: {
-                    'Authorization': `Bearer ${storedToken}`
+                if (result.success) {
+                    setToken(storedToken);
+                    setUser(result.data);
+                    setIsAuthenticated(true);
+                } else {
+                    // Token invalide, nettoyer
+                    await AuthService.clearStorage();
                 }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setUser(data.data);
-                setToken(storedToken);
-                setIsAuthenticated(true);
-            } else {
-                // Token invalide
-                localStorage.removeItem('token');
-                localStorage.removeItem('refreshToken');
             }
         } catch (error) {
-            console.error('Erreur vérification auth:', error);
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
+            console.error('Erreur checkAuth:', error);
+            await AuthService.clearStorage();
         } finally {
             setLoading(false);
         }
     };
 
-    // Connexion classique (email/password)
+    /**
+     * Connexion classique (email/password)
+     */
     const login = async (email, password, rememberMe = false) => {
         try {
-            const response = await fetch(`${API_URL}/users/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
+            const result = await AuthService.login(email, password, rememberMe);
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Erreur de connexion');
+            if (result.success) {
+                setUser(result.data.user);
+                setToken(result.data.token);
+                setIsAuthenticated(true);
             }
 
-            // Stocker le token
-            localStorage.setItem('token', data.data.token);
-            localStorage.setItem('refreshToken', data.data.refreshToken);
-
-            if (rememberMe) {
-                localStorage.setItem('rememberMe', 'true');
-            }
-
-            setToken(data.data.token);
-            setUser(data.data.user);
-            setIsAuthenticated(true);
-
-            return { success: true, data: data.data };
+            return result;
         } catch (error) {
             console.error('Erreur login:', error);
             return { success: false, message: error.message };
         }
     };
 
-    // Connexion Google
-    const loginWithGoogle = async (googleData) => {
-        try {
-            const response = await fetch(`${API_URL}/users/google`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(googleData),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Erreur de connexion Google');
-            }
-
-            localStorage.setItem('token', data.data.token);
-            localStorage.setItem('refreshToken', data.data.refreshToken);
-
-            setToken(data.data.token);
-            setUser(data.data.user);
-            setIsAuthenticated(true);
-
-            return { success: true, data: data.data };
-        } catch (error) {
-            console.error('Erreur login Google:', error);
-            return { success: false, message: error.message };
-        }
-    };
-
-    // Connexion Apple
-    const loginWithApple = async (appleData) => {
-        try {
-            const response = await fetch(`${API_URL}/users/apple`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(appleData),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Erreur de connexion Apple');
-            }
-
-            localStorage.setItem('token', data.data.token);
-            localStorage.setItem('refreshToken', data.data.refreshToken);
-
-            setToken(data.data.token);
-            setUser(data.data.user);
-            setIsAuthenticated(true);
-
-            return { success: true, data: data.data };
-        } catch (error) {
-            console.error('Erreur login Apple:', error);
-            return { success: false, message: error.message };
-        }
-    };
-
-    // Inscription
+    /**
+     * Inscription
+     */
     const register = async (userData) => {
         try {
-            const response = await fetch(`${API_URL}/users/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(userData),
-            });
+            const result = await AuthService.register(userData);
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Erreur lors de l\'inscription');
+            if (result.success) {
+                setUser(result.data.user);
+                setToken(result.data.token);
+                setIsAuthenticated(true);
             }
 
-            // Auto-login après inscription
-            localStorage.setItem('token', data.data.token);
-            localStorage.setItem('refreshToken', data.data.refreshToken);
-
-            setToken(data.data.token);
-            setUser(data.data.user);
-            setIsAuthenticated(true);
-
-            return { success: true, data: data.data };
+            return result;
         } catch (error) {
             console.error('Erreur register:', error);
             return { success: false, message: error.message };
         }
     };
 
-    // Déconnexion
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('rememberMe');
-        setToken(null);
-        setUser(null);
-        setIsAuthenticated(false);
+    /**
+     * Connexion avec Google OAuth
+     */
+    const loginWithGoogle = async (googleData) => {
+        try {
+            const result = await AuthService.loginWithGoogle(googleData);
+
+            if (result.success) {
+                setUser(result.data.user);
+                setToken(result.data.token);
+                setIsAuthenticated(true);
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Erreur loginWithGoogle:', error);
+            return { success: false, message: error.message };
+        }
+    };
+
+    /**
+     * Connexion avec Apple OAuth
+     */
+    const loginWithApple = async (appleData) => {
+        try {
+            const result = await AuthService.loginWithApple(appleData);
+
+            if (result.success) {
+                setUser(result.data.user);
+                setToken(result.data.token);
+                setIsAuthenticated(true);
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Erreur loginWithApple:', error);
+            return { success: false, message: error.message };
+        }
+    };
+
+    /**
+     * Déconnexion
+     */
+    const logout = async () => {
+        try {
+            await AuthService.logout();
+            setUser(null);
+            setToken(null);
+            setIsAuthenticated(false);
+        } catch (error) {
+            console.error('Erreur logout:', error);
+        }
+    };
+
+    /**
+     * Mettre à jour le profil
+     */
+    const updateProfile = async (data) => {
+        try {
+            const result = await AuthService.updateProfile(data);
+
+            if (result.success) {
+                setUser(result.data);
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Erreur updateProfile:', error);
+            return { success: false, message: error.message };
+        }
+    };
+
+    /**
+     * Changer le mot de passe
+     */
+    const changePassword = async (currentPassword, newPassword) => {
+        try {
+            return await AuthService.changePassword(currentPassword, newPassword);
+        } catch (error) {
+            console.error('Erreur changePassword:', error);
+            return { success: false, message: error.message };
+        }
+    };
+
+    /**
+     * Supprimer le compte
+     */
+    const deleteAccount = async () => {
+        try {
+            const result = await AuthService.deleteAccount();
+
+            if (result.success) {
+                setUser(null);
+                setToken(null);
+                setIsAuthenticated(false);
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Erreur deleteAccount:', error);
+            return { success: false, message: error.message };
+        }
+    };
+
+    /**
+     * Récupérer les statistiques
+     */
+    const getStats = async () => {
+        try {
+            return await AuthService.getStats();
+        } catch (error) {
+            console.error('Erreur getStats:', error);
+            return { success: false, message: error.message };
+        }
     };
 
     const value = {
+        // États
         user,
         token,
         loading,
         isAuthenticated,
+
+        // Méthodes d'authentification
         login,
+        register,
         loginWithGoogle,
         loginWithApple,
-        register,
         logout,
         checkAuth,
+
+        // Méthodes de gestion du profil
+        updateProfile,
+        changePassword,
+        deleteAccount,
+        getStats,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

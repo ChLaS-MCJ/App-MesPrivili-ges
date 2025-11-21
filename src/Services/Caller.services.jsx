@@ -1,5 +1,5 @@
 import Axios from 'axios';
-import AuthService from './Auth.service';
+import AuthService from './Auth.services';
 
 const axiosInstance = Axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'https://cacao.mesprivileges.fr/api',

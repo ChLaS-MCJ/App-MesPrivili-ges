@@ -10,9 +10,9 @@ import {
     IonIcon,
 } from '@ionic/react';
 import { logoGoogle, logoApple } from 'ionicons/icons';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../Utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
-
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -62,24 +62,108 @@ const Login = () => {
         }
     };
 
-    const handleGoogleLogin = async () => {
-        setToast({
-            show: true,
-            message: 'Connexion Google en cours...',
-            color: 'primary',
-        });
-        // TODO: Intégrer Google OAuth
-        console.log('Google login clicked');
-    };
+    // 🔥 VRAIE INTÉGRATION GOOGLE OAUTH
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            setLoading(true);
+
+            try {
+                // Récupérer les infos de l'utilisateur depuis Google
+                const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: {
+                        Authorization: `Bearer ${tokenResponse.access_token}`,
+                    },
+                });
+
+                const userInfo = await userInfoResponse.json();
+
+                console.log('Google User Info:', userInfo);
+
+                // Envoyer les données au backend
+                const result = await loginWithGoogle({
+                    googleId: userInfo.sub,
+                    email: userInfo.email,
+                    prenom: userInfo.given_name,
+                    nom: userInfo.family_name,
+                });
+
+                if (result.success) {
+                    setToast({
+                        show: true,
+                        message: 'Connexion Google réussie !',
+                        color: 'success',
+                    });
+
+                    setTimeout(() => {
+                        navigate('/auth/maps');
+                    }, 500);
+                } else {
+                    setToast({
+                        show: true,
+                        message: result.message || 'Erreur de connexion Google',
+                        color: 'danger',
+                    });
+                }
+            } catch (error) {
+                console.error('Erreur lors de la récupération des infos Google:', error);
+                setToast({
+                    show: true,
+                    message: 'Erreur de connexion Google',
+                    color: 'danger',
+                });
+            } finally {
+                setLoading(false);
+            }
+        },
+        onError: () => {
+            console.error('Erreur Google Login');
+            setToast({
+                show: true,
+                message: 'Échec de la connexion Google',
+                color: 'danger',
+            });
+        },
+    });
 
     const handleAppleLogin = async () => {
-        setToast({
-            show: true,
-            message: 'Connexion Apple en cours...',
-            color: 'primary',
-        });
-        // TODO: Intégrer Apple Sign In
-        console.log('Apple login clicked');
+        setLoading(true);
+
+        try {
+            // TODO: Intégrer Apple Sign In
+            // Pour l'instant, simulation
+            const appleData = {
+                appleId: `apple-${Date.now()}`,
+                email: 'test.apple@icloud.com'
+            };
+
+            const result = await loginWithApple(appleData);
+
+            if (result.success) {
+                setToast({
+                    show: true,
+                    message: 'Connexion Apple réussie !',
+                    color: 'success',
+                });
+
+                setTimeout(() => {
+                    navigate('/auth/maps');
+                }, 500);
+            } else {
+                setToast({
+                    show: true,
+                    message: result.message || 'Erreur de connexion Apple',
+                    color: 'danger',
+                });
+            }
+        } catch (error) {
+            setToast({
+                show: true,
+                message: 'Erreur de connexion Apple',
+                color: 'danger',
+            });
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -137,11 +221,12 @@ const Login = () => {
                             Connexion
                         </IonButton>
 
+                        {/* 🔥 BOUTON GOOGLE AVEC VRAIE INTÉGRATION */}
                         <IonButton
                             expand="block"
                             fill="outline"
                             className="google-button"
-                            onClick={handleGoogleLogin}
+                            onClick={() => handleGoogleLogin()}
                             disabled={loading}
                         >
                             <IonIcon icon={logoGoogle} slot="start" />
@@ -188,7 +273,3 @@ const Login = () => {
 };
 
 export default Login;
-
-
-
-

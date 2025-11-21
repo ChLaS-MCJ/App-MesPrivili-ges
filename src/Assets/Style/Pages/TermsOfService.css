@@ -1,0 +1,204 @@
+/* ========================================
+   LEGAL PAGES - STYLE COMMUN
+   ======================================== */
+.legal-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+.legal-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.legal-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+}
+
+.back-button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #666;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.back-button:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+/* ========================================
+   CONTENT
+   ======================================== */
+.legal-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.legal-section {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.legal-section h2 {
+    color: #333;
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.legal-section h3 {
+    color: #555;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 20px 0 10px 0;
+}
+
+.legal-section p {
+    color: #666;
+    font-size: 15px;
+    line-height: 1.8;
+    margin: 0 0 15px 0;
+    text-align: justify;
+}
+
+.legal-section ul {
+    color: #666;
+    font-size: 15px;
+    line-height: 1.8;
+    margin: 15px 0;
+    padding-left: 25px;
+}
+
+.legal-section li {
+    margin-bottom: 8px;
+}
+
+.legal-section strong {
+    color: #333;
+    font-weight: 600;
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+.legal-footer {
+    text-align: center;
+    padding: 30px 20px;
+    margin-top: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.legal-footer p {
+    color: #999;
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+.acceptance-note {
+    color: #666 !important;
+    font-weight: 500;
+    font-style: italic;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 20px;
+    margin-top: 20px !important;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+    .legal-header h1 {
+        font-size: 20px;
+    }
+
+    .legal-content {
+        padding: 20px 15px;
+    }
+
+    .legal-section {
+        padding: 20px;
+    }
+
+    .legal-section h2 {
+        font-size: 20px;
+    }
+
+    .legal-section h3 {
+        font-size: 16px;
+    }
+
+    .legal-section p,
+    .legal-section ul {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .legal-header {
+        padding: 15px;
+    }
+
+    .legal-header h1 {
+        font-size: 18px;
+    }
+
+    .legal-content {
+        padding: 15px 10px;
+    }
+
+    .legal-section {
+        padding: 15px;
+        border-radius: 8px;
+    }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+@media print {
+
+    .legal-header,
+    .back-button {
+        display: none;
+    }
+
+    .legal-page {
+        background: white;
+    }
+
+    .legal-section {
+        box-shadow: none;
+        page-break-inside: avoid;
+    }
+}

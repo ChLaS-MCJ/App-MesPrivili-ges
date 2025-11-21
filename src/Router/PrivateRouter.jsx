@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import LayoutAuth from '../Layout/LayoutAuth';
 import Maps from '../pages/Private/Maps';
 import { useAuth } from '../Utils/AuthContext';
+import LayoutPublic from '../Layout/LayoutPublic';
 
 const PrivateRouter = () => {
     const { isAuthenticated, loading } = useAuth();
@@ -18,7 +18,7 @@ const PrivateRouter = () => {
 
     return (
         <Routes>
-            <Route path="/" element={<LayoutAuth />}>
+            <Route path="/" element={<LayoutPublic />}>
                 <Route path="maps" element={<Maps />} />
                 <Route index element={<Navigate to="maps" replace />} />
             </Route>
