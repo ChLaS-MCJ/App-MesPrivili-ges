@@ -5,7 +5,22 @@ const axiosInstance = Axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'https://cacao.mesprivileges.fr/api',
 });
 
-// Intercepteur pour ajouter le token d'authentification dans les en-têtes
+// 🚨 FLAG pour éviter les boucles infinies
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+    failedQueue.forEach(prom => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token);
+        }
+    });
+    failedQueue = [];
+};
+
+// Intercepteur pour ajouter le token d'authentification
 axiosInstance.interceptors.request.use(
     async (config) => {
         const token = await AuthService.getToken();
@@ -19,29 +34,63 @@ axiosInstance.interceptors.request.use(
     }
 );
 
-// Intercepteur pour gérer les erreurs de réponse (token expiré, etc.)
+// Intercepteur pour gérer les erreurs de réponse
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
 
-        // Si le token est expiré (401) et qu'on n'a pas déjà tenté de le rafraîchir
+        // Si c'est une erreur 401
         if (error.response?.status === 401 && !originalRequest._retry) {
+
+            // ⚠️ NE PAS rafraîchir si c'est déjà une requête de refresh-token
+            if (originalRequest.url?.includes('/refresh-token')) {
+                console.log('❌ Refresh token invalide, déconnexion...');
+                isRefreshing = false;
+                processQueue(error, null);
+                await AuthService.logout();
+                window.location.href = '/login'; // Ou votre route de login
+                return Promise.reject(error);
+            }
+
+            // Si un refresh est déjà en cours, mettre en file d'attente
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
+                })
+                    .then(token => {
+                        originalRequest.headers['Authorization'] = `Bearer ${token}`;
+                        return axiosInstance(originalRequest);
+                    })
+                    .catch(err => {
+                        return Promise.reject(err);
+                    });
+            }
+
             originalRequest._retry = true;
+            isRefreshing = true;
 
             try {
-                // Tenter de rafraîchir le token
+                console.log('🔄 Tentative de refresh token...');
                 const newToken = await AuthService.refreshToken();
 
                 if (newToken) {
-                    // Mettre à jour le header avec le nouveau token
+                    console.log('✅ Token rafraîchi avec succès');
                     originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-                    // Réessayer la requête originale
+                    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+
+                    processQueue(null, newToken);
+                    isRefreshing = false;
+
                     return axiosInstance(originalRequest);
                 }
             } catch (refreshError) {
-                // Si le refresh échoue, déconnecter l'utilisateur
+                console.error('❌ Échec du refresh token:', refreshError);
+                processQueue(refreshError, null);
+                isRefreshing = false;
+
                 await AuthService.logout();
+                window.location.href = '/login'; // Ou votre route de login
                 return Promise.reject(refreshError);
             }
         }

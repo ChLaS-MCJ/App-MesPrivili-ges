@@ -1,4 +1,9 @@
 import axiosInstance from './Caller.services';
+import Axios from 'axios';
+
+const axiosWithoutInterceptor = Axios.create({
+    baseURL: import.meta.env.VITE_API_URL || 'https://cacao.mesprivileges.fr/api',
+});
 
 /**
  * 🔐 AuthService
@@ -194,13 +199,18 @@ const AuthService = {
                 throw new Error('Aucun refresh token disponible');
             }
 
-            const response = await axiosInstance.post('/users/refresh-token', {
+            // ✅ Utiliser l'instance SANS intercepteur
+            const response = await axiosWithoutInterceptor.post('/users/refresh-token', {
                 refreshToken
             });
 
             if (response.data.success && response.data.data.token) {
                 await this.setToken(response.data.data.token);
-                await this.setRefreshToken(response.data.data.refreshToken);
+
+                // Si le backend renvoie aussi un nouveau refreshToken
+                if (response.data.data.refreshToken) {
+                    await this.setRefreshToken(response.data.data.refreshToken);
+                }
 
                 return response.data.data.token;
             }
@@ -211,6 +221,7 @@ const AuthService = {
             throw error;
         }
     },
+
 
     // ========================================
     // 👤 PROFIL UTILISATEUR
