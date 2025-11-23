@@ -29,7 +29,6 @@ const ForgotPassword = () => {
             return;
         }
 
-        // Validation email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             setToast({
@@ -43,7 +42,7 @@ const ForgotPassword = () => {
         setLoading(true);
 
         try {
-            // TODO: Appeler l'API pour envoyer l'email de réinitialisation
+
             const response = await fetch(`${import.meta.env.VITE_API_URL}/users/forgot-password`, {
                 method: 'POST',
                 headers: {
@@ -61,7 +60,7 @@ const ForgotPassword = () => {
                     color: 'success',
                 });
 
-                // Retour au login après 2 secondes
+
                 setTimeout(() => {
                     navigate('/login');
                 }, 2000);
@@ -87,7 +86,7 @@ const ForgotPassword = () => {
         <IonPage>
             <IonContent className="forgot-password-screen">
                 <div className="forgot-password-container">
-                    <button className="back-button" onClick={() => navigate(-1)}>
+                    <button className="back-button-mdp" onClick={() => navigate(-1)}>
                         <IonIcon icon={arrowBack} />
                     </button>
 

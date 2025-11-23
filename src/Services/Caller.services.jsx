@@ -5,7 +5,7 @@ const axiosInstance = Axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'https://cacao.mesprivileges.fr/api',
 });
 
-// 🚨 FLAG pour éviter les boucles infinies
+// FLAG pour éviter les boucles infinies
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -45,11 +45,11 @@ axiosInstance.interceptors.response.use(
 
             // ⚠️ NE PAS rafraîchir si c'est déjà une requête de refresh-token
             if (originalRequest.url?.includes('/refresh-token')) {
-                console.log('❌ Refresh token invalide, déconnexion...');
+
                 isRefreshing = false;
                 processQueue(error, null);
                 await AuthService.logout();
-                window.location.href = '/login'; // Ou votre route de login
+                window.location.href = '/login';
                 return Promise.reject(error);
             }
 
@@ -71,11 +71,10 @@ axiosInstance.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                console.log('🔄 Tentative de refresh token...');
                 const newToken = await AuthService.refreshToken();
 
                 if (newToken) {
-                    console.log('✅ Token rafraîchi avec succès');
+
                     originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
                     axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
 
@@ -90,7 +89,7 @@ axiosInstance.interceptors.response.use(
                 isRefreshing = false;
 
                 await AuthService.logout();
-                window.location.href = '/login'; // Ou votre route de login
+                window.location.href = '/login';
                 return Promise.reject(refreshError);
             }
         }

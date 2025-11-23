@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { IonIcon } from '@ionic/react';
-import { gridOutline, mapOutline, sunnyOutline, moonOutline } from 'ionicons/icons';
+import { gridOutline, mapOutline, qrCodeOutline } from 'ionicons/icons';
 import { useNavigate } from 'react-router-dom';
+import QRCodeModal from '../../components/QRCodeModal';
+
 const Footer = () => {
     const [activeTab, setActiveTab] = useState('map');
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [isQRModalOpen, setIsQRModalOpen] = useState(false);
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
     const navigate = useNavigate();
@@ -20,9 +22,8 @@ const Footer = () => {
         return () => window.removeEventListener('resize', updateWidth);
     }, []);
 
-    const handleThemeToggle = () => {
-        setIsDarkMode(!isDarkMode);
-        document.body.classList.toggle('dark-mode');
+    const handleQRClick = () => {
+        setIsQRModalOpen(true);
     };
 
     const handleNavigation = (path) => {
@@ -77,42 +78,45 @@ const Footer = () => {
     };
 
     return (
-        <footer className="app-footer">
-            <svg className="footer-wave" viewBox={`0 0 ${width} 90`} preserveAspectRatio="none">
-                <defs>
-                    <linearGradient id="footerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" style={{ stopColor: '#1f1f1f', stopOpacity: 1 }} />
-                        <stop offset="50%" style={{ stopColor: '#1f1f1f', stopOpacity: 1 }} />
-                        <stop offset="100%" style={{ stopColor: '#1f1f1f', stopOpacity: 1 }} />
-                    </linearGradient>
+        <>
+            <QRCodeModal isOpen={isQRModalOpen} onClose={() => setIsQRModalOpen(false)} />
 
-                    <radialGradient id="footerLightSpot" cx="50%" cy="50%">
-                        <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
-                        <stop offset="50%" stopColor="#ffffff" stopOpacity="0.1" />
-                        <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-                    </radialGradient>
+            <footer className="app-footer">
+                <svg className="footer-wave" viewBox={`0 0 ${width} 90`} preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="footerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style={{ stopColor: '#1f1f1f', stopOpacity: 1 }} />
+                            <stop offset="50%" style={{ stopColor: '#1f1f1f', stopOpacity: 1 }} />
+                            <stop offset="100%" style={{ stopColor: '#1f1f1f', stopOpacity: 1 }} />
+                        </linearGradient>
 
-                    <linearGradient id="footerBottomShine" x1="0%" y1="100%" x2="0%" y2="0%">
-                        <stop offset="0%" stopColor="#ffffff" stopOpacity="0.3" />
-                        <stop offset="100%" stopColor="transparent" />
-                    </linearGradient>
+                        <radialGradient id="footerLightSpot" cx="50%" cy="50%">
+                            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
+                            <stop offset="50%" stopColor="#ffffff" stopOpacity="0.1" />
+                            <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+                        </radialGradient>
 
-                    <filter id="footerShadow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feDropShadow dx="0" dy="-4" stdDeviation="8" floodOpacity="0.15" />
-                    </filter>
+                        <linearGradient id="footerBottomShine" x1="0%" y1="100%" x2="0%" y2="0%">
+                            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="transparent" />
+                        </linearGradient>
 
-                    <filter id="footerGlow">
-                        <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-                        <feMerge>
-                            <feMergeNode in="coloredBlur" />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
-                </defs>
+                        <filter id="footerShadow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feDropShadow dx="0" dy="-4" stdDeviation="8" floodOpacity="0.15" />
+                        </filter>
 
-                {/* Vague principale avec effets lumineux */}
-                <path
-                    d={`M0,90 L0,32 
+                        <filter id="footerGlow">
+                            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                            <feMerge>
+                                <feMergeNode in="coloredBlur" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+                    </defs>
+
+                    {/* Vague principale avec effets lumineux */}
+                    <path
+                        d={`M0,90 L0,32 
                        L${leftWave.start},32
                        Q${leftWave.q1x},${leftWave.q1y} ${leftWave.q2x},${leftWave.q2y}
                        Q${leftWave.q3x},${leftWave.q3y} ${leftWave.center},${leftWave.centerY}
@@ -129,63 +133,64 @@ const Footer = () => {
                        Q${rightWave.q4x},${rightWave.q4y} ${rightWave.q5x},${rightWave.q5y}
                        Q${rightWave.q6x},${rightWave.q6y} ${rightWave.end},32
                        L${width},32 L${width},90 L0,90 Z`}
-                    fill="url(#footerGradient)"
-                    filter="url(#footerShadow)"
-                />
-
-
-                {/* Bande lumineuse en bas */}
-                <rect
-                    x="0"
-                    y="60"
-                    width={width}
-                    height="30"
-                    fill="url(#footerBottomShine)"
-                >
-                    <animate
-                        attributeName="opacity"
-                        values="0.20; 0.3; 0.20"
-                        dur="3s"
-                        repeatCount="indefinite"
+                        fill="url(#footerGradient)"
+                        filter="url(#footerShadow)"
                     />
-                </rect>
-            </svg>
 
-            <div className="footer-buttons">
-                <button
-                    className={`footer-btn ${activeTab === 'categories' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('categories')}
-                    style={{ left: `${leftWaveCenter}px`, transform: 'translateX(-50%)' }}
-                >
-                    <div className="btn-circle">
-                        <IonIcon icon={gridOutline} className="btn-icon" />
-                    </div>
-                    <span className="btn-label">Explorer</span>
-                </button>
 
-                <button
-                    className={`footer-btn ${activeTab === 'map' ? 'active' : ''}`}
-                    onClick={() => handleNavigation('/auth/maps')}
-                    style={{ left: `${centerWaveCenter}px`, transform: 'translateX(-50%)' }}
-                >
-                    <div className="btn-circle">
-                        <IonIcon icon={mapOutline} className="btn-icon" />
-                    </div>
-                    <span className="btn-label">Carte</span>
-                </button>
+                    {/* Bande lumineuse en bas */}
+                    <rect
+                        x="0"
+                        y="60"
+                        width={width}
+                        height="30"
+                        fill="url(#footerBottomShine)"
+                    >
+                        <animate
+                            attributeName="opacity"
+                            values="0.20; 0.3; 0.20"
+                            dur="3s"
+                            repeatCount="indefinite"
+                        />
+                    </rect>
+                </svg>
 
-                <button
-                    className={`footer-btn ${isDarkMode ? 'active' : ''}`}
-                    onClick={handleThemeToggle}
-                    style={{ left: `${rightWaveCenter}px`, transform: 'translateX(-50%)' }}
-                >
-                    <div className="btn-circle">
-                        <IonIcon icon={isDarkMode ? moonOutline : sunnyOutline} className="btn-icon" />
-                    </div>
-                    <span className="btn-label">Mode</span>
-                </button>
-            </div>
-        </footer>
+                <div className="footer-buttons">
+                    <button
+                        className={`footer-btn ${activeTab === 'categories' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('categories')}
+                        style={{ left: `${leftWaveCenter}px`, transform: 'translateX(-50%)' }}
+                    >
+                        <div className="btn-circle">
+                            <IonIcon icon={gridOutline} className="btn-icon" />
+                        </div>
+                        <span className="btn-label">Explorer</span>
+                    </button>
+
+                    <button
+                        className={`footer-btn ${activeTab === 'map' ? 'active' : ''}`}
+                        onClick={() => handleNavigation('/auth/maps')}
+                        style={{ left: `${centerWaveCenter}px`, transform: 'translateX(-50%)' }}
+                    >
+                        <div className="btn-circle">
+                            <IonIcon icon={mapOutline} className="btn-icon" />
+                        </div>
+                        <span className="btn-label">Carte</span>
+                    </button>
+
+                    <button
+                        className={`footer-btn`}
+                        onClick={handleQRClick}
+                        style={{ left: `${rightWaveCenter}px`, transform: 'translateX(-50%)' }}
+                    >
+                        <div className="btn-circle">
+                            <IonIcon icon={qrCodeOutline} className="btn-icon" />
+                        </div>
+                        <span className="btn-label">QR Code</span>
+                    </button>
+                </div>
+            </footer>
+        </>
     );
 };
 

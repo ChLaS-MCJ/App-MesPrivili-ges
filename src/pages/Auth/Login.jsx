@@ -24,7 +24,6 @@ const Login = () => {
     const { login, loginWithGoogle, loginWithApple } = useAuth();
     const navigate = useNavigate();
 
-    // Détecter si on est sur iOS
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
     const handleLogin = async (e) => {
@@ -62,13 +61,12 @@ const Login = () => {
         }
     };
 
-    // 🔥 VRAIE INTÉGRATION GOOGLE OAUTH
     const handleGoogleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             setLoading(true);
 
             try {
-                // Récupérer les infos de l'utilisateur depuis Google
+
                 const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                     headers: {
                         Authorization: `Bearer ${tokenResponse.access_token}`,
@@ -77,9 +75,6 @@ const Login = () => {
 
                 const userInfo = await userInfoResponse.json();
 
-                console.log('Google User Info:', userInfo);
-
-                // Envoyer les données au backend
                 const result = await loginWithGoogle({
                     googleId: userInfo.sub,
                     email: userInfo.email,
@@ -129,8 +124,7 @@ const Login = () => {
         setLoading(true);
 
         try {
-            // TODO: Intégrer Apple Sign In
-            // Pour l'instant, simulation
+
             const appleData = {
                 appleId: `apple-${Date.now()}`,
                 email: 'test.apple@icloud.com'
@@ -221,7 +215,6 @@ const Login = () => {
                             Connexion
                         </IonButton>
 
-                        {/* 🔥 BOUTON GOOGLE AVEC VRAIE INTÉGRATION */}
                         <IonButton
                             expand="block"
                             fill="outline"

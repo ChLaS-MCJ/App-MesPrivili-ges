@@ -10,10 +10,7 @@ export const useAuth = () => {
         throw new Error('useAuth must be used within AuthProvider');
     }
 
-    /**
-     * Obtenir l'URL de l'image de profil
-     * Simple : on retourne client.profileImage (peu importe la source)
-     */
+
     const getProfileImageUrl = () => {
         const profileImage = context.user?.client?.profileImage;
 
@@ -26,9 +23,13 @@ export const useAuth = () => {
 
         // Si c'est un chemin local, construire l'URL complète
         const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8100';
-        // Enlever /api du chemin car baseURL le contient déjà
+
         const cleanPath = profileImage.replace('/api', '');
-        return `${baseURL}${cleanPath}`;
+
+        const timestamp = new Date().getTime();
+        const fullUrl = `${baseURL}${cleanPath}?t=${timestamp}`;
+
+        return fullUrl;
     };
 
     return {
@@ -57,7 +58,19 @@ export const AuthProvider = ({ children }) => {
 
                 if (result.success) {
                     setToken(storedToken);
-                    setUser(result.data);
+
+                    // Fusionner les données du backend avec les données stockées localement
+                    const mergedUser = {
+                        ...storedUser,
+                        ...result.data,
+                        client: {
+                            ...storedUser?.client,
+                            ...result.data.client
+                        }
+                    };
+
+                    setUser(mergedUser);
+                    await AuthService.setUser(mergedUser);
                     setIsAuthenticated(true);
                 } else {
                     await AuthService.clearStorage();
@@ -75,8 +88,20 @@ export const AuthProvider = ({ children }) => {
         try {
             const result = await UserService.getProfile();
             if (result.success) {
-                setUser(result.data);
-                await AuthService.saveUser(result.data);
+                // Fusionner avec l'user existant au lieu d'écraser
+                setUser(prevUser => {
+                    const updatedUser = {
+                        ...prevUser,
+                        ...result.data,
+                        client: {
+                            ...prevUser?.client,
+                            ...result.data.client
+                        }
+                    };
+                    // Sauvegarder dans localStorage
+                    AuthService.setUser(updatedUser);
+                    return updatedUser;
+                });
             }
         } catch (error) {
             console.error('Erreur refresh user:', error);
@@ -121,7 +146,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const result = await AuthService.loginWithGoogle({
                 ...googleData,
-                profileImage: googleData.picture // Image Google
+                profileImage: googleData.picture
             });
 
             if (result.success) {
@@ -141,7 +166,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const result = await AuthService.loginWithApple({
                 ...appleData,
-                profileImage: appleData.picture // Image Apple si disponible
+                profileImage: appleData.picture
             });
 
             if (result.success) {
@@ -173,7 +198,15 @@ export const AuthProvider = ({ children }) => {
             const result = await AuthService.updateProfile(data);
 
             if (result.success) {
-                setUser(result.data);
+                // Fusionner les nouvelles données avec l'user existant
+                setUser(prevUser => ({
+                    ...prevUser,
+                    ...result.data,
+                    client: {
+                        ...prevUser?.client,
+                        ...result.data.client
+                    }
+                }));
             }
 
             return result;

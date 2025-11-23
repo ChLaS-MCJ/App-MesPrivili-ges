@@ -11,14 +11,12 @@ import {
     CheckOutlined,
     DownOutlined,
     QuestionCircleOutlined,
-    GoogleOutlined,
     LoadingOutlined,
     ArrowLeftOutlined,
 } from '@ant-design/icons';
-import { FaApple } from 'react-icons/fa';
 
 const AccountSettings = () => {
-    const { user, updateProfile, changePassword, refreshUserData, getProfileImageUrl } = useAuth();
+    const { user, updateProfile, changePassword, getProfileImageUrl } = useAuth();
     const navigate = useNavigate();
 
     const [profileData, setProfileData] = useState({
@@ -35,13 +33,15 @@ const AccountSettings = () => {
     });
 
     const [imagePreview, setImagePreview] = useState(profilimg);
+    const [imageKey, setImageKey] = useState(Date.now());
+    const [imageInitialized, setImageInitialized] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
     const [openSection, setOpenSection] = useState(null);
 
     const canChangePassword = user?.oauthProvider === 'local' || !user?.oauthProvider;
-    console.log(canChangePassword)
+
     const passwordRequirements = [
         { label: '8 caractères minimum', met: passwordData.newPassword.length >= 8 },
         { label: 'Au moins une majuscule', met: /[A-Z]/.test(passwordData.newPassword) },
@@ -49,6 +49,7 @@ const AccountSettings = () => {
     ];
 
     useEffect(() => {
+
         if (user) {
             setProfileData({
                 prenom: user.client?.prenom || user.prenom || '',
@@ -57,10 +58,16 @@ const AccountSettings = () => {
                 telephone: user.client?.telephone || user.telephone || '',
             });
 
-            const profileImg = getProfileImageUrl();
-            setImagePreview(profileImg || profilimg);
+            if (!imageInitialized) {
+                const profileImg = getProfileImageUrl();
+
+                setImagePreview(profileImg || profilimg);
+                setImageInitialized(true);
+            } else {
+
+            }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [user]);
 
     const showToast = (message, type) => {
@@ -78,6 +85,7 @@ const AccountSettings = () => {
         const file = e.target.files[0];
         if (!file) return;
 
+
         if (file.size > 5 * 1024 * 1024) {
             showToast("L'image ne doit pas dépasser 5MB", 'error');
             return;
@@ -88,33 +96,41 @@ const AccountSettings = () => {
             return;
         }
 
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setImagePreview(reader.result);
-        };
-        reader.readAsDataURL(file);
 
         setUploadingImage(true);
+
         try {
             const result = await UserService.uploadProfileImage(file);
 
             if (result.success) {
+
                 showToast('Photo mise à jour', 'success');
-                await refreshUserData();
-                const newProfileImg = getProfileImageUrl();
-                setImagePreview(newProfileImg || profilimg);
+
+                const newProfileImage = result.data?.client?.profileImage;
+
+
+                if (newProfileImage) {
+                    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8100';
+                    const cleanPath = newProfileImage.replace('/api', '');
+                    const timestamp = Date.now();
+                    const newImageUrl = `${baseURL}${cleanPath}?t=${timestamp}`;
+
+                    setImageKey(timestamp);
+                    setImagePreview(newImageUrl);
+
+                } else {
+
+                }
             } else {
+
                 showToast(result.message || 'Erreur', 'error');
-                const currentProfileImg = getProfileImageUrl();
-                setImagePreview(currentProfileImg || profilimg);
             }
         } catch (error) {
-            console.error('Erreur upload:', error);
+            console.error('💥 Erreur upload:', error);
             showToast('Erreur lors de l\'upload', 'error');
-            const currentProfileImg = getProfileImageUrl();
-            setImagePreview(currentProfileImg || profilimg);
         } finally {
             setUploadingImage(false);
+
         }
     };
 
@@ -183,7 +199,7 @@ const AccountSettings = () => {
     return (
         <div className="account-settings-page">
             <div className="settings-container">
-                {/* Header */}
+
                 <div className="settings-header">
                     <button className="back-button" onClick={() => navigate(-1)}>
                         <ArrowLeftOutlined />
@@ -191,7 +207,6 @@ const AccountSettings = () => {
                     <h1 className="settings-title">Mon Compte</h1>
                 </div>
 
-                {/* Profil Section */}
                 <div className="profile-section">
                     <div className="profile-avatar-wrapper">
                         <div className="progress-ring">
@@ -201,6 +216,7 @@ const AccountSettings = () => {
                             </svg>
                         </div>
                         <img
+                            key={imageKey}
                             src={imagePreview}
                             alt="Profile"
                             className="profile-avatar"

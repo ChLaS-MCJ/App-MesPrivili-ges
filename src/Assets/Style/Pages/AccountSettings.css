@@ -116,7 +116,7 @@
 }
 
 .progress-ring .progress {
-    stroke: #00d9a5;
+    stroke: #ffffff;
     stroke-width: 3;
     stroke-linecap: round;
     stroke-dasharray: 314;
@@ -307,7 +307,7 @@
 }
 
 .settings-input:focus {
-    border-color: #00d9a5;
+    border-color: #ffffff;
     background: #1a1a1a;
 }
 
@@ -362,8 +362,8 @@
 }
 
 .strength-item.valid .strength-icon {
-    background: #00d9a5;
-    border-color: #00d9a5;
+    background: #ffffff;
+    border-color: #ffffff;
     color: #0a0a0a;
 }
 
@@ -373,7 +373,7 @@
 .save-button {
     width: 100%;
     height: 50px;
-    background: #00d9a5;
+    background: #ffffff;
     color: #0a0a0a;
     border: none;
     border-radius: 25px;
@@ -389,9 +389,9 @@
 }
 
 .save-button:hover:not(:disabled) {
-    background: #00f5bd;
+    background: #f5f5f5;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 217, 165, 0.3);
+    box-shadow: 0 4px 12px rgba(22, 22, 22, 0.3);
 }
 
 .save-button:active:not(:disabled) {
@@ -432,7 +432,7 @@
 }
 
 .toast.success {
-    background: #00d9a5;
+    background: #ffffff;
     color: #0a0a0a;
 }
 
@@ -475,7 +475,7 @@
     width: 40px;
     height: 40px;
     border: 3px solid #2a2a2a;
-    border-top-color: #00d9a5;
+    border-top-color: #ffffff;
     border-radius: 50%;
     animation: spin 0.6s linear infinite;
 }

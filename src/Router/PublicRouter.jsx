@@ -10,12 +10,10 @@ import { useAuth } from '../Utils/AuthContext';
 const PublicRouter = () => {
     const { isAuthenticated, loading } = useAuth();
 
-    // Si loading, ne rien afficher (le loader global gère ça)
     if (loading) {
         return null;
     }
 
-    // Si authentifié, rediriger vers la zone privée
     if (isAuthenticated) {
         return <Navigate to="/auth/maps" replace />;
     }

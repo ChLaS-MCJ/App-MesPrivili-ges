@@ -18,7 +18,6 @@ const Header = () => {
     const { user, logout, getProfileImageUrl } = useAuth();
     const navigate = useNavigate();
 
-    // Obtenir l'URL de l'image (Google, Apple ou uploadée)
     const profileImageUrl = getProfileImageUrl() || profilimg;
 
     const toggleDrawer = () => {

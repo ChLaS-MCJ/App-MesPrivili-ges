@@ -24,11 +24,11 @@ const AuthService = {
             const response = await axiosInstance.post('/users/register', data);
 
             if (response.data.success && response.data.data.token) {
-                // Stocker les tokens et infos utilisateur
+
                 await this.setToken(response.data.data.token);
                 await this.setRefreshToken(response.data.data.refreshToken);
                 await this.setUser(response.data.data.user);
-                await this.setRememberMe(true); // Par défaut après inscription
+                await this.setRememberMe(true);
 
                 return {
                     success: true,
@@ -108,7 +108,7 @@ const AuthService = {
                 await this.setToken(response.data.data.token);
                 await this.setRefreshToken(response.data.data.refreshToken);
                 await this.setUser(response.data.data.user);
-                await this.setRememberMe(true); // Toujours remember pour OAuth
+                await this.setRememberMe(true);
 
                 return {
                     success: true,
@@ -144,7 +144,7 @@ const AuthService = {
                 await this.setToken(response.data.data.token);
                 await this.setRefreshToken(response.data.data.refreshToken);
                 await this.setUser(response.data.data.user);
-                await this.setRememberMe(true); // Toujours remember pour OAuth
+                await this.setRememberMe(true);
 
                 return {
                     success: true,
@@ -199,7 +199,6 @@ const AuthService = {
                 throw new Error('Aucun refresh token disponible');
             }
 
-            // ✅ Utiliser l'instance SANS intercepteur
             const response = await axiosWithoutInterceptor.post('/users/refresh-token', {
                 refreshToken
             });
@@ -262,11 +261,25 @@ const AuthService = {
             const response = await axiosInstance.put('/users/me', data);
 
             if (response.data.success) {
-                await this.setUser(response.data.data);
+
+                const currentUser = await this.getUser();
+
+                // Fusionner avec les nouvelles données
+                const updatedUser = {
+                    ...currentUser,
+                    ...response.data.data,
+                    client: {
+                        ...currentUser?.client,
+                        ...response.data.data.client
+                    }
+                };
+
+                await this.setUser(updatedUser);
+
                 return {
                     success: true,
                     message: response.data.message,
-                    data: response.data.data
+                    data: updatedUser
                 };
             }
 

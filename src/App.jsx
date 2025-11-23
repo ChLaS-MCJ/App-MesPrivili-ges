@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { IonApp, setupIonicReact } from '@ionic/react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { GoogleOAuthProvider } from '@react-oauth/google'; // ← IMPORTANT !
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './Utils/AuthContext';
 import PublicRouter from './Router/PublicRouter';
 import PrivateRouter from './Router/PrivateRouter';
@@ -39,7 +39,6 @@ const App = () => {
     <>
       {isLoading && <ModernLoader onFinish={() => setIsLoading(false)} />}
 
-      {/* ← IMPORTANT : Wrapper avec GoogleOAuthProvider */}
       <GoogleOAuthProvider clientId={googleClientId}>
         <IonApp>
           <BrowserRouter>

@@ -6,7 +6,6 @@ import {
     ArrowLeftOutlined,
     ClockCircleOutlined,
     CheckCircleOutlined,
-    CloseCircleOutlined,
     SyncOutlined,
     DeleteOutlined,
     FilterOutlined,
@@ -18,10 +17,9 @@ const History = () => {
 
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('all'); // all, completed, pending
+    const [filter, setFilter] = useState('all');
     const [showFilterMenu, setShowFilterMenu] = useState(false);
 
-    // Charger l'historique depuis l'API
     useEffect(() => {
         const fetchHistory = async () => {
             setLoading(true);
@@ -30,14 +28,14 @@ const History = () => {
                 const result = await UserService.getMyScans(1, 50);
 
                 if (result.success) {
-                    // Transformer les données pour correspondre au format attendu
+
                     const transformedScans = result.data.scans.map(scan => ({
                         id: scan.id,
                         type: 'scan',
                         title: scan.promotion?.titre || 'Scan effectué',
                         description: `${scan.prestataire?.nomCommerce || 'Commerce'} - ${scan.prestataire?.ville || ''}`,
                         date: new Date(scan.dateScan),
-                        status: scan.avis ? 'completed' : 'pending', // completed si avis laissé
+                        status: scan.avis ? 'completed' : 'pending',
                         promotion: scan.promotion,
                         prestataire: scan.prestataire,
                         scanId: scan.id,

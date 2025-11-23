@@ -13,7 +13,6 @@ import TermsOfService from '../pages/Private/TermsOfService';
 const PrivateRouter = () => {
     const { isAuthenticated, loading } = useAuth();
 
-    // Si loading, ne rien afficher
     if (loading) {
         return null;
     }
