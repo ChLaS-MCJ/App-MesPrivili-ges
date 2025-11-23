@@ -1,24 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../Utils/AuthContext';
+import UserService from '../../Services/User.service';
+import profilimg from '../../Assets/Images/profilimg.png';
 import {
-    ArrowLeftOutlined,
     UserOutlined,
-    MailOutlined,
-    PhoneOutlined,
     LockOutlined,
     CameraOutlined,
     SaveOutlined,
-    InfoCircleOutlined,
+    CheckOutlined,
+    DownOutlined,
+    QuestionCircleOutlined,
     GoogleOutlined,
+    LoadingOutlined,
+    ArrowLeftOutlined,
 } from '@ant-design/icons';
 import { FaApple } from 'react-icons/fa';
 
 const AccountSettings = () => {
-    const { user, updateProfile, changePassword, logout } = useAuth();
+    const { user, updateProfile, changePassword, refreshUserData, getProfileImageUrl } = useAuth();
     const navigate = useNavigate();
 
-    // États pour les infos personnelles
     const [profileData, setProfileData] = useState({
         prenom: '',
         nom: '',
@@ -26,42 +28,26 @@ const AccountSettings = () => {
         telephone: '',
     });
 
-    // États pour le changement de mot de passe
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
         newPassword: '',
         confirmPassword: '',
     });
 
-    // États pour l'image de profil
-    const [profileImage, setProfileImage] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null);
-
-    // États UI
+    const [imagePreview, setImagePreview] = useState(profilimg);
+    const [uploadingImage, setUploadingImage] = useState(false);
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
-    const [activeSection, setActiveSection] = useState('profile'); // 'profile' ou 'password'
+    const [openSection, setOpenSection] = useState(null);
 
-    // Déterminer si l'utilisateur peut modifier son mot de passe
-    const canChangePassword = user?.authProvider === 'local' || !user?.authProvider;
+    const canChangePassword = user?.oauthProvider === 'local' || !user?.oauthProvider;
+    console.log(canChangePassword)
+    const passwordRequirements = [
+        { label: '8 caractères minimum', met: passwordData.newPassword.length >= 8 },
+        { label: 'Au moins une majuscule', met: /[A-Z]/.test(passwordData.newPassword) },
+        { label: 'Au moins un chiffre', met: /[0-9]/.test(passwordData.newPassword) },
+    ];
 
-    // Déterminer le type de connexion
-    const getAuthProviderInfo = () => {
-        if (!user?.authProvider || user.authProvider === 'local') {
-            return { name: 'Compte local', icon: <LockOutlined />, color: '#333' };
-        }
-        if (user.authProvider === 'google') {
-            return { name: 'Google', icon: <GoogleOutlined />, color: '#4285F4' };
-        }
-        if (user.authProvider === 'apple') {
-            return { name: 'Apple', icon: <FaApple />, color: '#000' };
-        }
-        return null;
-    };
-
-    const authProvider = getAuthProviderInfo();
-
-    // Charger les données utilisateur au montage
     useEffect(() => {
         if (user) {
             setProfileData({
@@ -71,56 +57,70 @@ const AccountSettings = () => {
                 telephone: user.client?.telephone || user.telephone || '',
             });
 
-            // Si l'utilisateur a déjà une image de profil
-            if (user.profileImage) {
-                setImagePreview(user.profileImage);
-            }
+            const profileImg = getProfileImageUrl();
+            setImagePreview(profileImg || profilimg);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
-    // Gérer le changement d'image
-    const handleImageChange = (e) => {
+    const showToast = (message, type) => {
+        setToast({ show: true, message, type });
+        setTimeout(() => {
+            setToast({ show: false, message: '', type: '' });
+        }, 3000);
+    };
+
+    const toggleSection = (section) => {
+        setOpenSection(openSection === section ? null : section);
+    };
+
+    const handleImageChange = async (e) => {
         const file = e.target.files[0];
-        if (file) {
-            // Vérifier la taille (max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                setToast({
-                    show: true,
-                    message: "L'image ne doit pas dépasser 5MB",
-                    type: 'error',
-                });
-                return;
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            showToast("L'image ne doit pas dépasser 5MB", 'error');
+            return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+            showToast('Le fichier doit être une image', 'error');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+
+        setUploadingImage(true);
+        try {
+            const result = await UserService.uploadProfileImage(file);
+
+            if (result.success) {
+                showToast('Photo mise à jour', 'success');
+                await refreshUserData();
+                const newProfileImg = getProfileImageUrl();
+                setImagePreview(newProfileImg || profilimg);
+            } else {
+                showToast(result.message || 'Erreur', 'error');
+                const currentProfileImg = getProfileImageUrl();
+                setImagePreview(currentProfileImg || profilimg);
             }
-
-            // Vérifier le type
-            if (!file.type.startsWith('image/')) {
-                setToast({
-                    show: true,
-                    message: 'Le fichier doit être une image',
-                    type: 'error',
-                });
-                return;
-            }
-
-            setProfileImage(file);
-
-            // Créer un aperçu
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result);
-            };
-            reader.readAsDataURL(file);
+        } catch (error) {
+            console.error('Erreur upload:', error);
+            showToast('Erreur lors de l\'upload', 'error');
+            const currentProfileImg = getProfileImageUrl();
+            setImagePreview(currentProfileImg || profilimg);
+        } finally {
+            setUploadingImage(false);
         }
     };
 
-    // Mettre à jour le profil
     const handleUpdateProfile = async () => {
         setLoading(true);
-
         try {
-            // TODO: Upload de l'image si elle existe
-            // Pour l'instant, on update juste les infos textuelles
-
             const result = await updateProfile({
                 prenom: profileData.prenom,
                 nom: profileData.nom,
@@ -128,89 +128,35 @@ const AccountSettings = () => {
             });
 
             if (result.success) {
-                setToast({
-                    show: true,
-                    message: 'Profil mis à jour avec succès !',
-                    type: 'success',
-                });
+                showToast('Profil mis à jour', 'success');
             } else {
-                setToast({
-                    show: true,
-                    message: result.message || 'Erreur lors de la mise à jour',
-                    type: 'error',
-                });
+                showToast(result.message || 'Erreur', 'error');
             }
         } catch (error) {
-            setToast({
-                show: true,
-                message: 'Erreur lors de la mise à jour',
-                type: 'error',
-            });
+            showToast('Erreur', 'error');
         } finally {
             setLoading(false);
         }
     };
 
-    // Changer le mot de passe
     const handleChangePassword = async () => {
-        // Validation
         if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-            setToast({
-                show: true,
-                message: 'Veuillez remplir tous les champs',
-                type: 'error',
-            });
+            showToast('Remplissez tous les champs', 'error');
             return;
         }
 
         if (passwordData.newPassword !== passwordData.confirmPassword) {
-            setToast({
-                show: true,
-                message: 'Les mots de passe ne correspondent pas',
-                type: 'error',
-            });
+            showToast('Les mots de passe ne correspondent pas', 'error');
             return;
         }
 
-        if (passwordData.newPassword.length < 8) {
-            setToast({
-                show: true,
-                message: 'Le mot de passe doit contenir au moins 8 caractères',
-                type: 'error',
-            });
-            return;
-        }
-
-        // Validation du format du mot de passe
-        if (!/[A-Z]/.test(passwordData.newPassword)) {
-            setToast({
-                show: true,
-                message: 'Le mot de passe doit contenir au moins une majuscule',
-                type: 'error',
-            });
-            return;
-        }
-
-        if (!/[a-z]/.test(passwordData.newPassword)) {
-            setToast({
-                show: true,
-                message: 'Le mot de passe doit contenir au moins une minuscule',
-                type: 'error',
-            });
-            return;
-        }
-
-        if (!/[0-9]/.test(passwordData.newPassword)) {
-            setToast({
-                show: true,
-                message: 'Le mot de passe doit contenir au moins un chiffre',
-                type: 'error',
-            });
+        const allRequirementsMet = passwordRequirements.every(req => req.met);
+        if (!allRequirementsMet) {
+            showToast('Le mot de passe ne respecte pas les exigences', 'error');
             return;
         }
 
         setLoading(true);
-
         try {
             const result = await changePassword(
                 passwordData.currentPassword,
@@ -218,31 +164,17 @@ const AccountSettings = () => {
             );
 
             if (result.success) {
-                setToast({
-                    show: true,
-                    message: 'Mot de passe modifié avec succès !',
-                    type: 'success',
-                });
-
-                // Réinitialiser les champs
+                showToast('Mot de passe modifié', 'success');
                 setPasswordData({
                     currentPassword: '',
                     newPassword: '',
                     confirmPassword: '',
                 });
             } else {
-                setToast({
-                    show: true,
-                    message: result.message || 'Erreur lors du changement de mot de passe',
-                    type: 'error',
-                });
+                showToast(result.message || 'Erreur', 'error');
             }
         } catch (error) {
-            setToast({
-                show: true,
-                message: 'Erreur lors du changement de mot de passe',
-                type: 'error',
-            });
+            showToast('Erreur', 'error');
         } finally {
             setLoading(false);
         }
@@ -250,260 +182,227 @@ const AccountSettings = () => {
 
     return (
         <div className="account-settings-page">
-            {/* Header */}
-            <div className="settings-header">
-                <button className="back-button" onClick={() => navigate(-1)}>
-                    <ArrowLeftOutlined />
-                </button>
-                <h1>Mon Compte</h1>
-            </div>
+            <div className="settings-container">
+                {/* Header */}
+                <div className="settings-header">
+                    <button className="back-button" onClick={() => navigate(-1)}>
+                        <ArrowLeftOutlined />
+                    </button>
+                    <h1 className="settings-title">Mon Compte</h1>
+                </div>
 
-            <div className="settings-content">
-                {/* Section image de profil */}
-                <div className="profile-image-section">
-                    <div className="profile-avatar">
+                {/* Profil Section */}
+                <div className="profile-section">
+                    <div className="profile-avatar-wrapper">
+                        <div className="progress-ring">
+                            <svg width="132" height="132">
+                                <circle cx="66" cy="66" r="60" />
+                                <circle className="progress" cx="66" cy="66" r="60" />
+                            </svg>
+                        </div>
                         <img
-                            src={imagePreview || 'https://via.placeholder.com/150'}
+                            src={imagePreview}
                             alt="Profile"
+                            className="profile-avatar"
+                            onError={(e) => { e.target.src = profilimg; }}
                         />
                         <button
-                            className="camera-button"
-                            onClick={() => document.getElementById('profile-image-input').click()}
+                            className="avatar-edit-overlay"
+                            onClick={() => document.getElementById('avatar-input').click()}
+                            disabled={uploadingImage}
                         >
-                            <CameraOutlined />
+                            {uploadingImage ? <LoadingOutlined spin /> : <CameraOutlined />}
                         </button>
+                        <input
+                            type="file"
+                            id="avatar-input"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={handleImageChange}
+                        />
                     </div>
 
-                    <input
-                        type="file"
-                        id="profile-image-input"
-                        accept="image/*"
-                        style={{ display: 'none' }}
-                        onChange={handleImageChange}
-                    />
-
-                    {/* Badge du type de connexion */}
-                    {authProvider && (
-                        <div className="auth-provider-badge" style={{ color: authProvider.color }}>
-                            {authProvider.icon}
-                            <span>Connecté via {authProvider.name}</span>
-                        </div>
-                    )}
+                    <h2 className="profile-name">{profileData.prenom} {profileData.nom}</h2>
+                    <p className="profile-email">{profileData.email}</p>
                 </div>
 
-                {/* Onglets */}
-                <div className="section-tabs">
-                    <button
-                        className={`tab-button ${activeSection === 'profile' ? 'active' : ''}`}
-                        onClick={() => setActiveSection('profile')}
-                    >
-                        <UserOutlined />
-                        Informations
-                    </button>
+                {/* Menu Accordéons */}
+                <div className="menu-section">
+                    {/* 1. Informations Personnelles */}
+                    <div className={`menu-item ${openSection === 'account' ? 'active' : ''}`}>
+                        <div className="menu-header" onClick={() => toggleSection('account')}>
+                            <div className="menu-left">
+                                <div className="menu-icon">
+                                    <UserOutlined />
+                                </div>
+                                <span className="menu-label">Informations personnelles</span>
+                            </div>
+                            <div className="menu-right">
+                                <DownOutlined className="menu-arrow" />
+                            </div>
+                        </div>
+                        <div className="menu-content">
+                            <div className="menu-content-inner">
+                                <div className="form-group">
+                                    <label className="form-label">Prénom</label>
+                                    <input
+                                        type="text"
+                                        className="settings-input"
+                                        placeholder="Votre prénom"
+                                        value={profileData.prenom}
+                                        onChange={(e) => setProfileData({ ...profileData, prenom: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Nom</label>
+                                    <input
+                                        type="text"
+                                        className="settings-input"
+                                        placeholder="Votre nom"
+                                        value={profileData.nom}
+                                        onChange={(e) => setProfileData({ ...profileData, nom: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Email</label>
+                                    <input
+                                        type="email"
+                                        className="settings-input"
+                                        value={profileData.email}
+                                        disabled
+                                    />
+                                    <p className="field-hint">L'email ne peut pas être modifié</p>
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Téléphone</label>
+                                    <input
+                                        type="tel"
+                                        className="settings-input"
+                                        placeholder="Votre numéro"
+                                        value={profileData.telephone}
+                                        onChange={(e) => setProfileData({ ...profileData, telephone: e.target.value })}
+                                    />
+                                </div>
+
+                                <button className="save-button" onClick={handleUpdateProfile} disabled={loading}>
+                                    <SaveOutlined />
+                                    <span>Enregistrer</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 2. Mot de passe - Visible SEULEMENT si compte local */}
                     {canChangePassword && (
-                        <button
-                            className={`tab-button ${activeSection === 'password' ? 'active' : ''}`}
-                            onClick={() => setActiveSection('password')}
-                        >
-                            <LockOutlined />
-                            Mot de passe
-                        </button>
+                        <div className={`menu-item ${openSection === 'password' ? 'active' : ''}`}>
+                            <div className="menu-header" onClick={() => toggleSection('password')}>
+                                <div className="menu-left">
+                                    <div className="menu-icon">
+                                        <LockOutlined />
+                                    </div>
+                                    <span className="menu-label">Mot de passe</span>
+                                </div>
+                                <div className="menu-right">
+                                    <DownOutlined className="menu-arrow" />
+                                </div>
+                            </div>
+                            <div className="menu-content">
+                                <div className="menu-content-inner">
+                                    <div className="form-group">
+                                        <label className="form-label">Mot de passe actuel</label>
+                                        <input
+                                            type="password"
+                                            className="settings-input"
+                                            placeholder="Entrez votre mot de passe"
+                                            value={passwordData.currentPassword}
+                                            onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Nouveau mot de passe</label>
+                                        <input
+                                            type="password"
+                                            className="settings-input"
+                                            placeholder="Nouveau mot de passe"
+                                            value={passwordData.newPassword}
+                                            onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Confirmer le mot de passe</label>
+                                        <input
+                                            type="password"
+                                            className="settings-input"
+                                            placeholder="Confirmez le mot de passe"
+                                            value={passwordData.confirmPassword}
+                                            onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="password-strength">
+                                        {passwordRequirements.map((req, index) => (
+                                            <div key={index} className={`strength-item ${req.met ? 'valid' : ''}`}>
+                                                <div className="strength-icon">
+                                                    {req.met && <CheckOutlined />}
+                                                </div>
+                                                <span>{req.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <button className="save-button" onClick={handleChangePassword} disabled={loading}>
+                                        <LockOutlined />
+                                        <span>Changer le mot de passe</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     )}
+
+                    {/* 3. Centre d'aide */}
+                    <div className={`menu-item ${openSection === 'help' ? 'active' : ''}`}>
+                        <div className="menu-header" onClick={() => toggleSection('help')}>
+                            <div className="menu-left">
+                                <div className="menu-icon">
+                                    <QuestionCircleOutlined />
+                                </div>
+                                <span className="menu-label">Centre d'aide</span>
+                            </div>
+                            <div className="menu-right">
+                                <DownOutlined className="menu-arrow" />
+                            </div>
+                        </div>
+                        <div className="menu-content">
+                            <div className="menu-content-inner">
+                                <p style={{ color: '#999', fontSize: '14px', lineHeight: '1.6', marginBottom: '12px' }}>
+                                    Besoin d'aide ? Consultez notre centre d'assistance ou contactez notre équipe support.
+                                </p>
+                                <p style={{ color: '#fff', fontSize: '14px', fontWeight: '500' }}>
+                                    📧 Email : <a href="mailto:contact@mesprivileges.com" style={{ color: '#ffffff', textDecoration: 'none' }}>contact@mesprivileges.com</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                {/* Section Informations personnelles */}
-                {activeSection === 'profile' && (
-                    <div className="settings-card">
-                        <h2>Mes informations</h2>
-
-                        <div className="form-group">
-                            <label>
-                                <UserOutlined />
-                                Prénom
-                            </label>
-                            <input
-                                type="text"
-                                value={profileData.prenom}
-                                onChange={(e) =>
-                                    setProfileData({ ...profileData, prenom: e.target.value })
-                                }
-                                placeholder="Votre prénom"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>
-                                <UserOutlined />
-                                Nom
-                            </label>
-                            <input
-                                type="text"
-                                value={profileData.nom}
-                                onChange={(e) =>
-                                    setProfileData({ ...profileData, nom: e.target.value })
-                                }
-                                placeholder="Votre nom"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>
-                                <MailOutlined />
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                value={profileData.email}
-                                disabled
-                                className="disabled-input"
-                            />
-                            <small className="helper-text">
-                                <InfoCircleOutlined /> L'email ne peut pas être modifié
-                            </small>
-                        </div>
-
-                        <div className="form-group">
-                            <label>
-                                <PhoneOutlined />
-                                Téléphone
-                            </label>
-                            <input
-                                type="tel"
-                                value={profileData.telephone}
-                                onChange={(e) =>
-                                    setProfileData({ ...profileData, telephone: e.target.value })
-                                }
-                                placeholder="Votre numéro de téléphone"
-                            />
-                        </div>
-
-                        <button
-                            className="save-button"
-                            onClick={handleUpdateProfile}
-                            disabled={loading}
-                        >
-                            <SaveOutlined />
-                            Enregistrer les modifications
-                        </button>
-                    </div>
-                )}
-
-                {/* Section Mot de passe */}
-                {activeSection === 'password' && canChangePassword && (
-                    <div className="settings-card">
-                        <h2>Changer le mot de passe</h2>
-
-                        <div className="form-group">
-                            <label>
-                                <LockOutlined />
-                                Mot de passe actuel
-                            </label>
-                            <input
-                                type="password"
-                                value={passwordData.currentPassword}
-                                onChange={(e) =>
-                                    setPasswordData({
-                                        ...passwordData,
-                                        currentPassword: e.target.value,
-                                    })
-                                }
-                                placeholder="Votre mot de passe actuel"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>
-                                <LockOutlined />
-                                Nouveau mot de passe
-                            </label>
-                            <input
-                                type="password"
-                                value={passwordData.newPassword}
-                                onChange={(e) =>
-                                    setPasswordData({
-                                        ...passwordData,
-                                        newPassword: e.target.value,
-                                    })
-                                }
-                                placeholder="Nouveau mot de passe"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>
-                                <LockOutlined />
-                                Confirmer le mot de passe
-                            </label>
-                            <input
-                                type="password"
-                                value={passwordData.confirmPassword}
-                                onChange={(e) =>
-                                    setPasswordData({
-                                        ...passwordData,
-                                        confirmPassword: e.target.value,
-                                    })
-                                }
-                                placeholder="Confirmez le nouveau mot de passe"
-                            />
-                        </div>
-
-                        <div className="password-requirements">
-                            <p><InfoCircleOutlined /> Le mot de passe doit contenir :</p>
-                            <ul>
-                                <li className={passwordData.newPassword.length >= 8 ? 'valid' : ''}>
-                                    Au moins 8 caractères
-                                </li>
-                                <li className={/[A-Z]/.test(passwordData.newPassword) ? 'valid' : ''}>
-                                    Au moins une majuscule
-                                </li>
-                                <li className={/[a-z]/.test(passwordData.newPassword) ? 'valid' : ''}>
-                                    Au moins une minuscule
-                                </li>
-                                <li className={/[0-9]/.test(passwordData.newPassword) ? 'valid' : ''}>
-                                    Au moins un chiffre
-                                </li>
-                            </ul>
-                        </div>
-
-                        <button
-                            className="save-button"
-                            onClick={handleChangePassword}
-                            disabled={loading}
-                        >
-                            <SaveOutlined />
-                            Changer le mot de passe
-                        </button>
-                    </div>
-                )}
-
-                {/* Message si pas de changement de mot de passe disponible */}
-                {!canChangePassword && activeSection === 'password' && (
-                    <div className="settings-card info-card">
-                        <InfoCircleOutlined style={{ fontSize: '48px', color: authProvider?.color }} />
-                        <h3>Connexion via {authProvider?.name}</h3>
-                        <p>
-                            Votre compte est connecté via {authProvider?.name}.
-                            Le changement de mot de passe n'est pas disponible pour ce type de connexion.
-                        </p>
-                        <p>
-                            Pour modifier votre mot de passe, veuillez le faire directement
-                            depuis les paramètres de votre compte {authProvider?.name}.
-                        </p>
-                    </div>
-                )}
             </div>
 
-            {/* Loading overlay */}
-            {loading && (
-                <div className="loading-overlay">
-                    <div className="loading-spinner"></div>
+            {/* Toast */}
+            {toast.show && (
+                <div className={`toast ${toast.type}`}>
+                    <CheckOutlined />
+                    <span>{toast.message}</span>
                 </div>
             )}
 
-            {/* Toast notification */}
-            {toast.show && (
-                <div className={`toast-notification ${toast.type}`}>
-                    {toast.message}
+            {/* Loading */}
+            {loading && (
+                <div className="loading-overlay">
+                    <div className="spinner"></div>
                 </div>
             )}
         </div>

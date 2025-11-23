@@ -19,7 +19,8 @@
     left: 0;
     width: 100%;
     height: 80px;
-    /* Enlever display: flex et justify-content */
+    pointer-events: none;
+    /* Les boutons seront pointer-events: auto */
 }
 
 .footer-btn {
@@ -32,32 +33,11 @@
     cursor: pointer;
     padding: 0;
     margin: 0;
-    gap: 16px;
+    gap: 22px;
+    pointer-events: auto;
 }
 
-/* Position fixe pour chaque bouton - ajuste ces valeurs */
-.footer-btn-left {
-    left: 82px;
-    /* Distance depuis la gauche */
-    transform: translateX(-50%);
-
-}
-
-.footer-btn-center {
-    left: 50%;
-    /* Au centre - MODIFIE CETTE VALEUR si besoin */
-    transform: translateX(-50%);
-    /* Centre le bouton */
-}
-
-.footer-btn-right {
-    right: 82px;
-    /* Distance depuis la droite - MODIFIE CETTE VALEUR */
-    transform: translateX(50%);
-    /* Centre le bouton sur sa position */
-}
-
-/* Cercle extérieur noir avec opacité - taille identique pour tous */
+/* Cercle extérieur noir avec opacité - SANS effet lumineux */
 .btn-circle {
     width: 48px;
     height: 48px;
@@ -68,6 +48,8 @@
     justify-content: center;
     transition: all 0.3s ease;
     position: relative;
+    /* Pas de box-shadow, pas de glow */
+    box-shadow: none;
 }
 
 /* Cercle intérieur blanc qui apparaît quand actif */
@@ -119,14 +101,6 @@
 
 /* Responsive */
 @media (max-width: 375px) {
-    .footer-btn-left {
-        left: 60px;
-    }
-
-    .footer-btn-right {
-        right: 60px;
-    }
-
     .btn-circle {
         width: 44px;
         height: 44px;

@@ -3,8 +3,17 @@
     --background: transparent;
 }
 
+.register-screen::part(scroll) {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Pour un scroll fluide sur iOS */
+}
+
 /* Fond avec gradient + image + blur */
 .register-screen::part(scroll) {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Pour un scroll fluide sur iOS */
     background:
         linear-gradient(135deg, rgba(224, 195, 179, 0.7) 0%, rgba(197, 166, 143, 0.7) 50%, rgba(158, 168, 184, 0.7) 100%),
         url('../../Images/register-bg4.jpeg') center/cover no-repeat;
@@ -266,6 +275,53 @@ ion-input.register-input {
     .register-container {
         max-width: 450px;
         margin: 0 auto;
-        padding-top: 80px;
+        padding-top: 30px;
+    }
+}
+
+/* Pour les petits écrans et mobiles */
+@media (max-height: 800px) {
+    .register-header {
+        margin-bottom: 15px;
+    }
+
+    .register-title {
+        font-size: 32px;
+    }
+
+    .register-form {
+        padding: 30px 20px;
+    }
+
+    .input-group {
+        margin-bottom: 18px;
+    }
+
+    .register-input {
+        height: 45px;
+        font-size: 15px;
+    }
+}
+
+/* Pour les très petits écrans */
+@media (max-height: 700px) {
+    .register-container {
+        padding: 20px 24px 30px 24px;
+    }
+
+    .register-header {
+        margin-bottom: 12px;
+    }
+
+    .register-title {
+        font-size: 28px;
+    }
+
+    .register-form {
+        padding: 25px 18px;
+    }
+
+    .input-group {
+        margin-bottom: 16px;
     }
 }

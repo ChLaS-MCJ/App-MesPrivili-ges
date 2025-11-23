@@ -70,6 +70,34 @@ const UserService = {
     },
 
     /**
+    * Uploader l'image de profil
+    */
+    async uploadProfileImage(file) {
+        try {
+            const formData = new FormData();
+            formData.append('profileImage', file);
+
+            const response = await axiosInstance.post('/users/me/profile-image', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            return {
+                success: true,
+                data: response.data.data,
+                message: response.data.message
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Erreur lors de l\'upload de l\'image',
+                status: error.response?.status
+            };
+        }
+    },
+
+    /**
      * Changer le mot de passe
      * PUT /api/users/me/password
      */

@@ -4,8 +4,8 @@
 @import './Utils/Fonts.css';
 
 /*--------------Template-----------------*/
+@import './Template/ionic-scroll-fix.css';
 @import './Template/Template.css';
-
 /*--------------Layout-----------------*/
 @import './Layout/LayoutPublic.css';
 @import './Layout/Header.css';

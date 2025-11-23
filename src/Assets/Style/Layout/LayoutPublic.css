@@ -8,10 +8,33 @@
 
 .main-content {
     flex: 1;
-    padding: 140px 0 90px 0;
-    /* Espace pour header et footer */
+    /* Espace pour header (140px) et footer (90px) */
+    padding-top: 140px;
+    padding-bottom: 0px;
+    min-height: 100vh;
     overflow-y: auto;
-    min-height: calc(100vh - 230px);
+
+    /* Dégradé gris du haut vers le bas, plus clair en haut, plus foncé en bas */
+
+    background: linear-gradient(180deg,
+            #4b4c4c 0%,
+            /* Gris moyen */
+            #3a3b3b 50%,
+            /* Gris foncé */
+            #242525 100%
+            /* Presque noir */
+        );
+    position: relative;
+}
+
+/* Container pour le contenu de la page avec padding en % */
+.main-content>* {
+    position: relative;
+    z-index: 1;
+    /* Padding intérieur en pourcentage : 8% en haut/bas, 5% gauche/droite */
+    padding: 0% 2%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 /* Style pour le mode sombre */

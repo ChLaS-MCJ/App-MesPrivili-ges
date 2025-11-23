@@ -32,14 +32,49 @@ ion-content {
 /* Cible spécifiquement les petits écrans */
 @media (max-width: 768px) {
     .layout {
-        overflow-y: auto;
-        height: 100vh;
+        overflow-y: visible;
+        min-height: 100vh;
         display: flex;
         flex-direction: column;
     }
+}
 
-    /* Désactiver la barre de défilement */
-    ::-webkit-scrollbar {
-        display: none;
+
+
+/* ========================================
+   FIX SCROLL GLOBAL - CORRECTION
+   ======================================== */
+
+/* Reset pour permettre le scroll */
+html,
+body {
+    min-height: 100%;
+    /* ✅ CHANGÉ DE height À min-height */
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+#root {
+    min-height: 100%;
+    overflow-y: visible !important;
+}
+
+/* Fix pour le layout responsive */
+@media (max-width: 768px) {
+    .layout {
+        overflow-y: visible !important;
+        height: auto !important;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
     }
+}
+
+/* Permettre le scroll sur les pages */
+.login-screen,
+.account-settings-page,
+.register-page {
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100vh !important;
 }

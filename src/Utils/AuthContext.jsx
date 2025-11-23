@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AuthService from '../Services/Auth.services';
+import UserService from '../Services/User.service';
 
 const AuthContext = createContext();
 
@@ -8,7 +9,32 @@ export const useAuth = () => {
     if (!context) {
         throw new Error('useAuth must be used within AuthProvider');
     }
-    return context;
+
+    /**
+     * Obtenir l'URL de l'image de profil
+     * Simple : on retourne client.profileImage (peu importe la source)
+     */
+    const getProfileImageUrl = () => {
+        const profileImage = context.user?.client?.profileImage;
+
+        if (!profileImage) return null;
+
+        // Si c'est une URL complète (Google/Apple), la retourner telle quelle
+        if (profileImage.startsWith('http://') || profileImage.startsWith('https://')) {
+            return profileImage;
+        }
+
+        // Si c'est un chemin local, construire l'URL complète
+        const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8100';
+        // Enlever /api du chemin car baseURL le contient déjà
+        const cleanPath = profileImage.replace('/api', '');
+        return `${baseURL}${cleanPath}`;
+    };
+
+    return {
+        ...context,
+        getProfileImageUrl
+    };
 };
 
 export const AuthProvider = ({ children }) => {
@@ -17,21 +43,16 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    // Vérifier l'authentification au démarrage
     useEffect(() => {
         checkAuth();
     }, []);
 
-    /**
-     * Vérifier si l'utilisateur est connecté
-     */
     const checkAuth = async () => {
         try {
             const storedToken = await AuthService.getToken();
             const storedUser = await AuthService.getUser();
 
             if (storedToken && storedUser) {
-                // Vérifier que le token est toujours valide
                 const result = await AuthService.getProfile();
 
                 if (result.success) {
@@ -39,7 +60,6 @@ export const AuthProvider = ({ children }) => {
                     setUser(result.data);
                     setIsAuthenticated(true);
                 } else {
-                    // Token invalide, nettoyer
                     await AuthService.clearStorage();
                 }
             }
@@ -51,9 +71,18 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    /**
-     * Connexion classique (email/password)
-     */
+    const refreshUserData = async () => {
+        try {
+            const result = await UserService.getProfile();
+            if (result.success) {
+                setUser(result.data);
+                await AuthService.saveUser(result.data);
+            }
+        } catch (error) {
+            console.error('Erreur refresh user:', error);
+        }
+    };
+
     const login = async (email, password, rememberMe = false) => {
         try {
             const result = await AuthService.login(email, password, rememberMe);
@@ -71,9 +100,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    /**
-     * Inscription
-     */
     const register = async (userData) => {
         try {
             const result = await AuthService.register(userData);
@@ -91,12 +117,12 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    /**
-     * Connexion avec Google OAuth
-     */
     const loginWithGoogle = async (googleData) => {
         try {
-            const result = await AuthService.loginWithGoogle(googleData);
+            const result = await AuthService.loginWithGoogle({
+                ...googleData,
+                profileImage: googleData.picture // Image Google
+            });
 
             if (result.success) {
                 setUser(result.data.user);
@@ -111,12 +137,12 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    /**
-     * Connexion avec Apple OAuth
-     */
     const loginWithApple = async (appleData) => {
         try {
-            const result = await AuthService.loginWithApple(appleData);
+            const result = await AuthService.loginWithApple({
+                ...appleData,
+                profileImage: appleData.picture // Image Apple si disponible
+            });
 
             if (result.success) {
                 setUser(result.data.user);
@@ -131,9 +157,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    /**
-     * Déconnexion
-     */
     const logout = async () => {
         try {
             await AuthService.logout();
@@ -145,9 +168,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    /**
-     * Mettre à jour le profil
-     */
     const updateProfile = async (data) => {
         try {
             const result = await AuthService.updateProfile(data);
@@ -163,9 +183,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    /**
-     * Changer le mot de passe
-     */
     const changePassword = async (currentPassword, newPassword) => {
         try {
             return await AuthService.changePassword(currentPassword, newPassword);
@@ -175,9 +192,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    /**
-     * Supprimer le compte
-     */
     const deleteAccount = async () => {
         try {
             const result = await AuthService.deleteAccount();
@@ -195,9 +209,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    /**
-     * Récupérer les statistiques
-     */
     const getStats = async () => {
         try {
             return await AuthService.getStats();
@@ -208,25 +219,21 @@ export const AuthProvider = ({ children }) => {
     };
 
     const value = {
-        // États
         user,
         token,
         loading,
         isAuthenticated,
-
-        // Méthodes d'authentification
         login,
         register,
         loginWithGoogle,
         loginWithApple,
         logout,
         checkAuth,
-
-        // Méthodes de gestion du profil
         updateProfile,
         changePassword,
         deleteAccount,
         getStats,
+        refreshUserData,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

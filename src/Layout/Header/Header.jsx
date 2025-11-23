@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../Utils/AuthContext';
 import losangeIcon from '../../Assets/Images/rhombe.png';
-import profilimg from '../../Assets/Images/profilimg.jpeg';
+import profilimg from '../../Assets/Images/profilimg.png';
 import {
     BellOutlined,
     CloseOutlined,
@@ -15,8 +15,11 @@ import {
 
 const Header = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const { user, logout } = useAuth();
+    const { user, logout, getProfileImageUrl } = useAuth();
     const navigate = useNavigate();
+
+    // Obtenir l'URL de l'image (Google, Apple ou uploadée)
+    const profileImageUrl = getProfileImageUrl() || profilimg;
 
     const toggleDrawer = () => {
         setIsDrawerOpen(!isDrawerOpen);
@@ -26,13 +29,11 @@ const Header = () => {
         setIsDrawerOpen(false);
     };
 
-    // Navigation vers les différentes pages
     const handleNavigation = (path) => {
         closeDrawer();
         navigate(path);
     };
 
-    // Déconnexion
     const handleLogout = async () => {
         try {
             await logout();
@@ -43,20 +44,15 @@ const Header = () => {
         }
     };
 
-    // Déterminer si l'utilisateur peut modifier son mot de passe
-    const canChangePassword = user?.authProvider === 'local' || !user?.authProvider;
-
     return (
         <>
             <header className="app-header">
-                {/* Vague SVG avec dégradé */}
                 <div className="wave-container">
                     <svg
                         className="wave-svg"
                         viewBox="0 0 1200 150"
                         preserveAspectRatio="xMidYMid slice">
                         <defs>
-                            {/* Gradient principal avec animation de couleurs */}
                             <linearGradient id="headerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                                 <stop offset="0%" stopColor="#595554ff">
                                     <animate
@@ -83,20 +79,14 @@ const Header = () => {
                                     />
                                 </stop>
                             </linearGradient>
-
-                            {/* Spot lumineux radial */}
                             <radialGradient id="lightSpot" cx="30%" cy="40%">
                                 <stop offset="0%" stopColor="#ffffff" stopOpacity="0.4" />
                                 <stop offset="50%" stopColor="#ffffff" stopOpacity="0.15" />
                                 <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
                             </radialGradient>
-
-                            {/* Ombre portée */}
                             <filter id="headerShadow">
                                 <feDropShadow dx="0" dy="8" stdDeviation="18" floodColor="#000000" floodOpacity="0.25" />
                             </filter>
-
-                            {/* Effet glow */}
                             <filter id="glow">
                                 <feGaussianBlur stdDeviation="3" result="coloredBlur" />
                                 <feMerge>
@@ -104,8 +94,6 @@ const Header = () => {
                                     <feMergeNode in="SourceGraphic" />
                                 </feMerge>
                             </filter>
-
-                            {/* Masque pour limiter les effets au path */}
                             <clipPath id="pathClip">
                                 <path
                                     d="M0,0 L0,100 L545,100 
@@ -116,16 +104,12 @@ const Header = () => {
                                        L1200,100 L1200,0 Z"
                                 />
                             </clipPath>
-
                             <linearGradient id="topShine" x1="0%" y1="0%" x2="0%" y2="100%">
                                 <stop offset="0%" stopColor="#ffffff" stopOpacity="0.5" />
                                 <stop offset="100%" stopColor="transparent" />
                             </linearGradient>
                         </defs>
-
-                        {/* Groupe avec clip-path pour contenir tous les effets dans le path */}
                         <g clipPath="url(#pathClip)">
-                            {/* Forme principale */}
                             <path
                                 d="M0,0 L0,100 L545,100 
                                    Q568,100 572,92
@@ -136,8 +120,6 @@ const Header = () => {
                                 fill="url(#headerGradient)"
                                 filter="url(#headerShadow)"
                             />
-
-                            {/* Overlay sombre */}
                             <path
                                 d="M0,0 L0,100 L545,100 
                                    Q568,100 572,92
@@ -148,8 +130,6 @@ const Header = () => {
                                 fill="#424040ff"
                                 opacity="0.40"
                             />
-
-                            {/* Spot lumineux animé */}
                             <ellipse
                                 cx="280"
                                 cy="50"
@@ -171,8 +151,6 @@ const Header = () => {
                                     repeatCount="indefinite"
                                 />
                             </ellipse>
-
-                            {/* Bande lumineuse en haut */}
                             <rect
                                 x="0"
                                 y="0"
@@ -191,25 +169,22 @@ const Header = () => {
                     </svg>
                 </div>
 
-                {/* Icône cloche notification */}
                 <div className="notification-bell">
                     <BellOutlined style={{ fontSize: '20px', color: 'white' }} />
                     <div className="bell-dot"></div>
                 </div>
 
-                {/* Cercle de profil - CLIQUABLE */}
                 <div className="profile-container" onClick={toggleDrawer}>
                     <div className="profile-circle">
                         <img
-                            src={user?.profileImage || profilimg}
+                            src={profileImageUrl}
                             alt="Profile"
                             className="profile-image"
+                            onError={(e) => {
+                                e.target.src = profilimg;
+                            }}
                         />
-
-                        {/* Point de notification */}
                         <div className="notification-dot"></div>
-
-                        {/* Badge losange */}
                         <div className="badge-container">
                             <img src={losangeIcon} alt="Losange" className="losange-icon" />
                         </div>
@@ -217,25 +192,24 @@ const Header = () => {
                 </div>
             </header>
 
-            {/* Overlay (fond sombre) */}
             {isDrawerOpen && (
                 <div className="drawer-overlay" onClick={toggleDrawer}></div>
             )}
 
-            {/* Drawer du profil */}
             <div className={`profile-drawer ${isDrawerOpen ? 'open' : ''}`}>
-                {/* Bouton de fermeture */}
                 <button className="drawer-close-btn" onClick={toggleDrawer}>
                     <CloseOutlined />
                 </button>
 
                 <div className="drawer-content">
-                    {/* Informations utilisateur */}
                     <div className="profile-info">
                         <img
-                            src={user?.profileImage || profilimg}
+                            src={profileImageUrl}
                             alt="Profile"
                             className="drawer-profile-image"
+                            onError={(e) => {
+                                e.target.src = profilimg;
+                            }}
                         />
                         <h3>
                             {user?.prenom && user?.nom
@@ -246,17 +220,8 @@ const Header = () => {
                         </h3>
                         <p>{user?.email || 'email@example.com'}</p>
 
-                        {/* Badge du type de connexion */}
-                        {user?.authProvider && (
-                            <div className="auth-provider-badge">
-                                {user.authProvider === 'google' && '🔵 Google'}
-                                {user.authProvider === 'apple' && '🍎 Apple'}
-                                {user.authProvider === 'local' && '🔐 Compte local'}
-                            </div>
-                        )}
                     </div>
 
-                    {/* Menu principal */}
                     <div className="drawer-menu">
                         <button
                             className="drawer-menu-item"
@@ -276,7 +241,6 @@ const Header = () => {
 
                         <div className="drawer-divider"></div>
 
-                        {/* Mentions légales & CGU */}
                         <button
                             className="drawer-menu-item secondary"
                             onClick={() => handleNavigation('/auth/legal-mentions')}
@@ -295,7 +259,6 @@ const Header = () => {
 
                         <div className="drawer-divider"></div>
 
-                        {/* Déconnexion */}
                         <button
                             className="drawer-menu-item logout"
                             onClick={handleLogout}
@@ -305,7 +268,6 @@ const Header = () => {
                         </button>
                     </div>
 
-                    {/* Footer avec version */}
                     <div className="drawer-footer">
                         <p>Version 1.0.0</p>
                     </div>
