@@ -1,64 +1,102 @@
 /* ========================================
-   HISTORY PAGE
+   HISTORY PAGE - DARK THEME
+   Style cohérent avec AccountSettings
    ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Page principale */
 .history-page {
+    position: relative;
+    width: 100%;
     min-height: 100vh;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    padding-bottom: 20px;
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* ========================================
    HEADER
    ======================================== */
 .history-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px;
-    background: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 0;
+    background: rgba(44, 44, 44, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    /* IMPORTANT */
 }
 
 .history-header h1 {
     margin: 0;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 600;
-    color: #333;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+}
+
+.back-button {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.filter-button {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .back-button,
 .filter-button {
-    background: none;
+    background: rgba(255, 255, 255, 0.1);
     border: none;
-    font-size: 20px;
-    color: #666;
-    cursor: pointer;
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 40px;
     height: 40px;
     border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #ffffff;
+    font-size: 18px;
     transition: all 0.3s ease;
 }
 
 .back-button:hover,
 .filter-button:hover {
-    background: #f0f0f0;
-    color: #333;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.back-button:hover {
+    transform: translateY(-50%) translateX(-2px);
+}
+
+.back-button:active,
+.filter-button:active {
+    transform: translateY(-50%) scale(0.95);
 }
 
 /* ========================================
    FILTER MENU
    ======================================== */
 .filter-menu {
-    background: white;
-    padding: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     gap: 10px;
     overflow-x: auto;
@@ -77,25 +115,41 @@
     }
 }
 
+.filter-menu::-webkit-scrollbar {
+    height: 4px;
+}
+
+.filter-menu::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.filter-menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
 .filter-option {
-    padding: 8px 16px;
-    border: 1px solid #ddd;
-    background: white;
+    padding: 10px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 20px;
     font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
 }
 
 .filter-option:hover {
-    background: #f5f5f5;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .filter-option.active {
-    background: #333;
-    color: white;
-    border-color: #333;
+    background: #ffffff;
+    color: #1a1a1a;
+    border-color: #ffffff;
 }
 
 /* ========================================
@@ -103,6 +157,8 @@
    ======================================== */
 .history-content {
     padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 .loading-container {
@@ -115,7 +171,7 @@
 }
 
 .loading-container p {
-    color: #666;
+    color: #999;
     font-size: 16px;
 }
 
@@ -130,14 +186,16 @@
 
 .empty-state h3 {
     margin: 20px 0 10px;
-    color: #666;
+    color: #ffffff;
     font-size: 20px;
+    font-weight: 600;
 }
 
 .empty-state p {
     color: #999;
     font-size: 14px;
     max-width: 300px;
+    line-height: 1.5;
 }
 
 /* ========================================
@@ -150,20 +208,34 @@
 }
 
 .history-item {
-    background: white;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
     padding: 16px;
     display: flex;
     align-items: center;
     gap: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
     position: relative;
+    animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .history-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .item-icon {
@@ -194,13 +266,14 @@
     margin: 0 0 5px 0;
     font-size: 16px;
     font-weight: 600;
-    color: #333;
+    color: #ffffff;
 }
 
 .item-content p {
     margin: 0 0 8px 0;
     font-size: 14px;
-    color: #666;
+    color: #cccccc;
+    line-height: 1.4;
 }
 
 .item-date {
@@ -209,7 +282,7 @@
 }
 
 .delete-button {
-    background: none;
+    background: rgba(255, 77, 79, 0.1);
     border: none;
     color: #ff4d4f;
     font-size: 18px;
@@ -222,12 +295,13 @@
     height: 36px;
     border-radius: 50%;
     transition: all 0.3s ease;
-    opacity: 0.6;
+    opacity: 0.8;
 }
 
 .delete-button:hover {
-    background: rgba(255, 77, 79, 0.1);
+    background: rgba(255, 77, 79, 0.2);
     opacity: 1;
+    transform: scale(1.1);
 }
 
 /* ========================================
@@ -235,12 +309,12 @@
    ======================================== */
 .clear-all-button {
     width: 100%;
-    padding: 14px;
-    margin-top: 20px;
-    background: #ff4d4f;
-    color: white;
-    border: none;
-    border-radius: 12px;
+    padding: 16px;
+    margin-top: 24px;
+    background: rgba(255, 77, 79, 0.2);
+    color: #ff4d4f;
+    border: 1px solid rgba(255, 77, 79, 0.3);
+    border-radius: 16px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
@@ -248,9 +322,34 @@
 }
 
 .clear-all-button:hover {
-    background: #ff7875;
+    background: rgba(255, 77, 79, 0.3);
+    border-color: #ff4d4f;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3);
+}
+
+.clear-all-button:active {
+    transform: translateY(0);
+}
+
+/* ========================================
+   SCROLLBAR
+   ======================================== */
+.history-page::-webkit-scrollbar {
+    width: 8px;
+}
+
+.history-page::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.history-page::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.history-page::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 /* ========================================
@@ -258,11 +357,15 @@
    ======================================== */
 @media (max-width: 768px) {
     .history-header h1 {
-        font-size: 20px;
+        font-size: 24px;
+    }
+
+    .history-content {
+        padding: 16px;
     }
 
     .history-item {
-        padding: 12px;
+        padding: 14px;
     }
 
     .item-content h3 {
@@ -275,11 +378,78 @@
 }
 
 @media (max-width: 480px) {
+    .history-header {
+        padding: 16px;
+    }
+
+    .history-header h1 {
+        font-size: 20px;
+    }
+
     .history-content {
-        padding: 15px;
+        padding: 12px;
     }
 
     .filter-menu {
-        padding: 10px 15px;
+        padding: 12px 16px;
     }
+
+    .history-item {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .item-icon {
+        font-size: 24px;
+        min-width: 24px;
+    }
+
+    .delete-button {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+}
+
+/* ========================================
+   ANIMATIONS DÉLAYÉES
+   ======================================== */
+.history-item:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.history-item:nth-child(2) {
+    animation-delay: 0.05s;
+}
+
+.history-item:nth-child(3) {
+    animation-delay: 0.1s;
+}
+
+.history-item:nth-child(4) {
+    animation-delay: 0.15s;
+}
+
+.history-item:nth-child(5) {
+    animation-delay: 0.2s;
+}
+
+.history-item:nth-child(6) {
+    animation-delay: 0.25s;
+}
+
+.history-item:nth-child(7) {
+    animation-delay: 0.3s;
+}
+
+.history-item:nth-child(8) {
+    animation-delay: 0.35s;
+}
+
+.history-item:nth-child(9) {
+    animation-delay: 0.4s;
+}
+
+.history-item:nth-child(10) {
+    animation-delay: 0.45s;
 }
