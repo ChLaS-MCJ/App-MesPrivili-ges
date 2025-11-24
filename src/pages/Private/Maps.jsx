@@ -139,7 +139,6 @@ const Maps = () => {
             gradient = 'linear-gradient(135deg, #f6c1c3ff 0%, #fac4c7ff 100%)';
             glowColor = 'rgba(255, 154, 158, 0.6)';
         } else if (count <= 5) {
-
             gradient = 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)';
             glowColor = 'rgba(252, 182, 159, 0.6)';
         } else if (count <= 15) {
@@ -209,7 +208,9 @@ const Maps = () => {
 
             marker.on('click', () => {
                 if (cluster.isSingleVille) {
+                    // Navigation directe, l'animation sera sur Categories
                     navigate(`/auth/categories?ville=${encodeURIComponent(cluster.villes[0])}`);
+
                 } else {
                     // Effet d'ouverture puis zoom
                     setIsZooming(true);
@@ -245,12 +246,6 @@ const Maps = () => {
             attributionControl: false
         });
 
-        //pal
-        //  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        //     maxZoom: 19
-        // }).addTo(map);
-
-        //verte
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19
         }).addTo(map);
@@ -324,13 +319,14 @@ const Maps = () => {
         <div className="maps-fullscreen">
             <div ref={mapRef} className="map-container" />
 
-            {/* Effet d'ouverture */}
+            {/* Effet zoom cluster */}
             {isZooming && (
                 <div className="zoom-overlay">
                     <div className="zoom-door zoom-door-left" />
                     <div className="zoom-door zoom-door-right" />
                 </div>
             )}
+
 
             {loading && (
                 <div className="map-loader">

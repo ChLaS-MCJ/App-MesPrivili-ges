@@ -1,61 +1,61 @@
 .layout-public {
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
     position: relative;
+    overflow: hidden;
 }
 
 .main-content {
     flex: 1;
-    /* Espace pour header (140px) et footer (90px) */
     padding-top: 140px;
-    padding-bottom: 0px;
-    min-height: 100vh;
-    overflow-y: auto;
-
-    /* Dégradé gris du haut vers le bas, plus clair en haut, plus foncé en bas */
-
+    padding-bottom: 0;
+    overflow: hidden;
     background: linear-gradient(180deg,
             #4b4c4c 0%,
-            /* Gris moyen */
             #3a3b3b 50%,
-            /* Gris foncé */
-            #242525 100%
-            /* Presque noir */
-        );
+            #242525 100%);
     position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Container pour le contenu de la page avec padding en % */
 .main-content>* {
     position: relative;
     z-index: 1;
-    /* Padding intérieur en pourcentage : 8% en haut/bas, 5% gauche/droite */
     padding: 0% 2%;
     max-width: 100%;
     box-sizing: border-box;
-}
-
-/* Style pour le mode sombre */
-.dark-theme {
-    background: linear-gradient(180deg, #000000 0%, #0d0d0d 100%);
-}
-
-.dark-theme .main-content {
-    color: #ffffff;
-}
-
-/* Empêcher le défilement du body */
-body {
+    flex: 1;
     overflow: hidden;
 }
 
-/* Style pour le contenu Ionic */
+body {
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+}
+
+html {
+    overflow: hidden;
+    height: 100vh;
+}
+
 ion-content {
     --background: transparent;
 }
 
 ion-page {
     background: transparent;
+}
+
+.dark-theme {
+    background: linear-gradient(180deg, #000000 0%, #0d0d0d 100%);
+}
+
+.dark-theme .main-content {
+    color: #ffffff;
 }

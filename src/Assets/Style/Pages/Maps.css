@@ -278,8 +278,22 @@
     }
 }
 
+@media (max-width: 379px) {
+    .recenter-button {
+        bottom: 180px;
+        right: 8px;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+    }
+
+    .leaflet-bottom {
+        bottom: 50px;
+    }
+}
+
 /* ============================================
-   ZOOM DOOR OPENING EFFECT
+   ZOOM DOOR OPENING EFFECT (pour clusters)
    ============================================ */
 
 .zoom-overlay {
@@ -288,7 +302,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 998;
+    z-index: 9998;
     pointer-events: none;
     overflow: hidden;
 }
@@ -304,13 +318,13 @@
 .zoom-door-left {
     left: 0;
     transform-origin: left center;
-    animation: door-open-left 1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+    animation: door-open-left 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
 }
 
 .zoom-door-right {
     right: 0;
     transform-origin: right center;
-    animation: door-open-right 1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+    animation: door-open-right 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
 }
 
 @keyframes door-open-left {
@@ -333,18 +347,29 @@
     }
 }
 
+/* ============================================
+   SLIDE NAVIGATION EFFECT
+   ============================================ */
 
-@media (max-width: 379px) {
+.slide-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    pointer-events: none;
+    background: #0a0a0a;
+    transform: translateX(100%);
+    animation: slide-in-right 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
 
-    .recenter-button {
-        bottom: 180px;
-        right: 8px;
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
+@keyframes slide-in-right {
+    0% {
+        transform: translateX(100%);
     }
 
-    .leaflet-bottom {
-        bottom: 50px;
+    100% {
+        transform: translateX(0);
     }
 }
