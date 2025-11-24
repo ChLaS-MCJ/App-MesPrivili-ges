@@ -1,15 +1,52 @@
 import { useState, useEffect } from 'react';
 import { IonIcon } from '@ionic/react';
 import { gridOutline, mapOutline, qrCodeOutline } from 'ionicons/icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import QRCodeModal from '../../components/QRCodeModal';
+import LocationModal from '../../components/LocationModal';
 
 const Footer = () => {
-    const [activeTab, setActiveTab] = useState('map');
     const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+    const [savedVille, setSavedVille] = useState(null);
 
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Déterminer l'onglet actif basé sur la route ET l'état des modals
+    const getActiveTab = () => {
+        if (isQRModalOpen) return 'qrcode';
+        
+        const path = location.pathname;
+        if (path.includes('/categories') || path.includes('/prestataires')) {
+            return 'categories';
+        }
+        if (path.includes('/maps')) {
+            return 'map';
+        }
+        return 'map'; // Par défaut
+    };
+
+    const activeTab = getActiveTab();
+
+    // Récupérer la ville sauvegardée au montage
+    useEffect(() => {
+        const ville = localStorage.getItem('selectedVille');
+        if (ville) {
+            setSavedVille(ville);
+        }
+    }, []);
+
+    // Écouter les changements de route pour mettre à jour la ville
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const villeFromUrl = params.get('ville');
+        if (villeFromUrl) {
+            setSavedVille(villeFromUrl);
+            localStorage.setItem('selectedVille', villeFromUrl);
+        }
+    }, [location]);
 
     useEffect(() => {
         const updateWidth = () => {
@@ -24,6 +61,26 @@ const Footer = () => {
 
     const handleQRClick = () => {
         setIsQRModalOpen(true);
+    };
+
+    const handleQRClose = () => {
+        setIsQRModalOpen(false);
+    };
+
+    const handleCategoriesClick = () => {
+        // Si on a déjà une ville sauvegardée, y aller directement
+        if (savedVille) {
+            navigate(`/auth/categories?ville=${encodeURIComponent(savedVille)}`);
+        } else {
+            // Sinon, ouvrir la modal de sélection de localisation
+            setIsLocationModalOpen(true);
+        }
+    };
+
+    const handleSelectVille = (ville) => {
+        setSavedVille(ville);
+        localStorage.setItem('selectedVille', ville);
+        navigate(`/auth/categories?ville=${encodeURIComponent(ville)}`);
     };
 
     const handleNavigation = (path) => {
@@ -79,7 +136,12 @@ const Footer = () => {
 
     return (
         <>
-            <QRCodeModal isOpen={isQRModalOpen} onClose={() => setIsQRModalOpen(false)} />
+            <QRCodeModal isOpen={isQRModalOpen} onClose={handleQRClose} />
+            <LocationModal 
+                isOpen={isLocationModalOpen} 
+                onClose={() => setIsLocationModalOpen(false)}
+                onSelectVille={handleSelectVille}
+            />
 
             <footer className="app-footer">
                 <svg className="footer-wave" viewBox={`0 0 ${width} 90`} preserveAspectRatio="none">
@@ -156,9 +218,10 @@ const Footer = () => {
                 </svg>
 
                 <div className="footer-buttons">
+                    {/* Bouton Explorer (gauche) - actif sur /categories */}
                     <button
                         className={`footer-btn ${activeTab === 'categories' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('categories')}
+                        onClick={handleCategoriesClick}
                         style={{ left: `${leftWaveCenter}px`, transform: 'translateX(-50%)' }}
                     >
                         <div className="btn-circle">
@@ -167,6 +230,7 @@ const Footer = () => {
                         <span className="btn-label">Explorer</span>
                     </button>
 
+                    {/* Bouton Carte (centre) - actif sur /maps */}
                     <button
                         className={`footer-btn ${activeTab === 'map' ? 'active' : ''}`}
                         onClick={() => handleNavigation('/auth/maps')}
@@ -178,8 +242,9 @@ const Footer = () => {
                         <span className="btn-label">Carte</span>
                     </button>
 
+                    {/* Bouton QR Code (droite) - actif quand modal ouverte */}
                     <button
-                        className={`footer-btn`}
+                        className={`footer-btn ${activeTab === 'qrcode' ? 'active' : ''}`}
                         onClick={handleQRClick}
                         style={{ left: `${rightWaveCenter}px`, transform: 'translateX(-50%)' }}
                     >

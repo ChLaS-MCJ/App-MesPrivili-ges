@@ -4,13 +4,13 @@ import { ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons';
 import PrestataireService from '../../Services/Prestataire.services';
 
 // Import des images
-import modeImg from '../../Assets/Images/Categories/mode.png';
-import restaurantsImg from '../../Assets/Images/Categories/restaurants.png';
+import modeImg from '../../Assets/Images/Categories/mode.jpeg';
+import restaurantsImg from '../../Assets/Images/Categories/restaurants.jpeg';
 import hotelsImg from '../../Assets/Images/Categories/hotels.png';
 import beauteImg from '../../Assets/Images/Categories/beaute.png';
-import voyageImg from '../../Assets/Images/Categories/voyage.png';
-import sportImg from '../../Assets/Images/Categories/sport.png';
-import techImg from '../../Assets/Images/Categories/tech.png';
+import voyageImg from '../../Assets/Images/Categories/voyage.jpg';
+import sportImg from '../../Assets/Images/Categories/sport.jpeg';
+import techImg from '../../Assets/Images/Categories/tech.jpg';
 import enfantsImg from '../../Assets/Images/Categories/enfants.png';
 import maisonImg from '../../Assets/Images/Categories/maison.png';
 import loisirImg from '../../Assets/Images/Categories/loisir.png';
