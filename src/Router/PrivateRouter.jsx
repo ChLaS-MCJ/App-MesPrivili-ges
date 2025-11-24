@@ -3,6 +3,7 @@ import { useAuth } from '../Utils/AuthContext';
 import LayoutPublic from '../Layout/LayoutPublic';
 import LayoutAuth from './../Layout/LayoutAuth';
 import Maps from '../pages/Private/Maps';
+import Categories from '../pages/Private/Categories';
 import AccountSettings from '../pages/Private/AccountSettings';
 import History from '../pages/Private/History';
 import LegalMentions from '../pages/Private/LegalMentions';
@@ -27,6 +28,7 @@ const PrivateRouter = () => {
         <Routes>
             <Route path="/" element={<LayoutPublic />}>
                 <Route path="maps" element={<Maps />} />
+                <Route path="categories" element={<Categories />} />
                 <Route index element={<Navigate to="maps" replace />} />
             </Route>
             <Route path="/" element={<LayoutAuth />}>

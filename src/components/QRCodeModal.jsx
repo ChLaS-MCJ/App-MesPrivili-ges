@@ -51,7 +51,6 @@ const QRCodeModal = ({ isOpen, onClose }) => {
                                 <img src={qrCodeUrl} alt="QR Code" className="qrcode-image" />
                             </div>
                             <div className="qrcode-info">
-                                <p className="qrcode-id">ID: {user?.client?.qrCode}</p>
                                 <p className="qrcode-name">{user?.client?.prenom} {user?.client?.nom}</p>
                             </div>
                         </>
