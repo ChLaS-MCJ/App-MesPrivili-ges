@@ -4,6 +4,7 @@ import LayoutPublic from '../Layout/LayoutPublic';
 import LayoutAuth from './../Layout/LayoutAuth';
 import Maps from '../pages/Private/Maps';
 import Categories from '../pages/Private/Categories';
+import Prestataires from '../pages/Private/Prestataires';
 import AccountSettings from '../pages/Private/AccountSettings';
 import History from '../pages/Private/History';
 import LegalMentions from '../pages/Private/LegalMentions';
@@ -29,6 +30,7 @@ const PrivateRouter = () => {
             <Route path="/" element={<LayoutPublic />}>
                 <Route path="maps" element={<Maps />} />
                 <Route path="categories" element={<Categories />} />
+                <Route path="prestataires" element={<Prestataires />} />
                 <Route index element={<Navigate to="maps" replace />} />
             </Route>
             <Route path="/" element={<LayoutAuth />}>

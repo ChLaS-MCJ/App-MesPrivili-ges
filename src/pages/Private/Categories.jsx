@@ -181,7 +181,7 @@ const Categories = () => {
                                     <div
                                         className="category-image"
                                         style={{
-                                            backgroundImage: `url(${category.image || getDefaultImage(category.nom)})`
+                                            backgroundImage: `url(${getDefaultImage(category.nom)})`
                                         }}
                                     />
                                     <div className="category-overlay" />
@@ -202,7 +202,7 @@ const Categories = () => {
                                     <div
                                         className="category-image"
                                         style={{
-                                            backgroundImage: `url(${category.image || getDefaultImage(category.nom)})`
+                                            backgroundImage: `url(${getDefaultImage(category.nom)})`
                                         }}
                                     />
                                     <div className="category-overlay" />
