@@ -85,7 +85,7 @@ const Prestataires = () => {
             const result = await PrestataireService.getByVille(ville, categoryId, filtreIds);
 
             if (result.success) {
-                const prests = result.data.prestataires || [];
+                const prests = Array.isArray(result.data) ? result.data : (result.data.prestataires || []);
                 const shuffled = [...prests].sort(() => Math.random() - 0.5);
                 setPrestataires(shuffled);
                 setFilteredPrestataires(shuffled);

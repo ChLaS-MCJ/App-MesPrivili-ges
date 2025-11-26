@@ -1,0 +1,48 @@
+/* ====== PROMOTION FORM MODAL ====== */
+.promo-form-modal {
+    background: #1a1a1a;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 24px;
+}
+
+.promo-form-modal h2 {
+    color: #fff;
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 20px 0;
+    text-align: center;
+}
+
+/* Checkbox group */
+.checkbox-group {
+    margin-top: 8px;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    flex-direction: row;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #FFD700;
+}
+
+.checkbox-group span {
+    color: #fff;
+    font-size: 14px;
+}
+
+.checkbox-group .help-text {
+    margin-top: 8px;
+    margin-left: 30px;
+}

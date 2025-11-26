@@ -33,7 +33,7 @@ const Categories = () => {
                 const result = await PrestataireService.getByVille(ville);
 
                 if (result.success) {
-                    const prestataires = result.data.prestataires || [];
+                    const prestataires = Array.isArray(result.data) ? result.data : (result.data.prestataires || []);
                     const categoriesMap = {};
 
                     prestataires.forEach(p => {
