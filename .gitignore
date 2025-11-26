@@ -8,7 +8,7 @@
 .env
 # testing
 /coverage
-
+.vite_cache
 # production
 /dist
 

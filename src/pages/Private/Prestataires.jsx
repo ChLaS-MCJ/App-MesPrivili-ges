@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ArrowLeftOutlined, ArrowRightOutlined, CloseOutlined } from '@ant-design/icons';
 import { IoFilterSharp } from 'react-icons/io5';
 import PrestataireService from '../../Services/Prestataire.services';
-import FiltreService from '../../Services/Filtre.services'; // NOUVEAU
+import FiltreService from '../../Services/Filtre.services';
 
 import modeIcon from '../../Assets/Images/iconeCategories/mode.png';
 import restaurantsIcon from '../../Assets/Images/iconeCategories/restaurants.png';
@@ -46,6 +46,10 @@ const Prestataires = () => {
     const [categoryName, setCategoryName] = useState('');
     const sliderRef = useRef(null);
     const lastWheelTime = useRef(0);
+
+    // Pour différencier clic et drag
+    const dragStartPos = useRef({ x: 0, y: 0 });
+    const hasDragged = useRef(false);
 
     // États pour les filtres
     const [showFilters, setShowFilters] = useState(false);
@@ -129,16 +133,32 @@ const Prestataires = () => {
 
     const handleTouchStart = (e) => {
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+
         setTouchStart(clientY);
         setIsDragging(true);
         setDragOffset(0);
+
+        // Sauvegarder la position de départ pour détecter si c'est un clic ou un drag
+        dragStartPos.current = { x: clientX, y: clientY };
+        hasDragged.current = false;
     };
 
     const handleTouchMove = (e) => {
         if (!isDragging) return;
 
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const diff = clientY - touchStart;
+
+        // Détecter si on a bougé suffisamment pour considérer que c'est un drag
+        const moveDistance = Math.sqrt(
+            Math.pow(clientX - dragStartPos.current.x, 2) +
+            Math.pow(clientY - dragStartPos.current.y, 2)
+        );
+        if (moveDistance > 10) {
+            hasDragged.current = true;
+        }
 
         const maxDrag = 300;
         let limitedDiff = Math.max(-maxDrag, Math.min(maxDrag, diff));
@@ -217,7 +237,12 @@ const Prestataires = () => {
         }
     };
 
+    // Navigation vers la fiche prestataire
     const handlePrestataireClick = (id) => {
+        // Ne pas naviguer si on a fait un drag
+        if (hasDragged.current) {
+            return;
+        }
         navigate(`/auth/prestataire/${id}`);
     };
 
@@ -282,7 +307,8 @@ const Prestataires = () => {
             transform: `translateX(${translateX}px) translateY(${translateY}px) scale(${scale}) rotate(${rotateZ}deg)`,
             opacity: opacity,
             zIndex: offset === 0 ? 100 : (offset === -1 ? 99 : 98),
-            pointerEvents: offset === 0 && !isDragging ? 'auto' : 'none',
+            pointerEvents: offset === 0 ? 'auto' : 'none',
+            cursor: offset === 0 ? 'pointer' : 'default',
             transition: isDragging && offset === 0 ? 'none' : 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)'
         };
     };
@@ -388,6 +414,7 @@ const Prestataires = () => {
             {/* Conteneur des cards */}
             <div
                 className="cards-stack-container"
+                ref={sliderRef}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -399,6 +426,11 @@ const Prestataires = () => {
                         key={prestataire.id}
                         className="prestataire-card"
                         style={getCardStyle(index)}
+                        onClick={() => {
+                            if (index === currentIndex && !hasDragged.current) {
+                                handlePrestataireClick(prestataire.id);
+                            }
+                        }}
                     >
                         <div className="category-icon">
                             <img
@@ -409,7 +441,12 @@ const Prestataires = () => {
 
                         <button
                             className="go-to-prestataire"
-                            onClick={() => handlePrestataireClick(prestataire.id)}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onTouchStart={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/prestataire/${prestataire.id}`);
+                            }}
                         >
                             <ArrowRightOutlined />
                         </button>

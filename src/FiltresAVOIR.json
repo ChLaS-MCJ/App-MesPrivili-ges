@@ -1,0 +1,1081 @@
+{
+    "filtres": {
+        "1_mode": {
+            "categoryId": 1,
+            "categoryName": "Mode",
+            "description": "Boutiques de vêtements, chaussures, accessoires (pas de mode enfant ici, voir catégorie Enfants)",
+            "filtres": [
+                {
+                    "ordre": 1,
+                    "nom": "Homme",
+                    "slug": "homme"
+                },
+                {
+                    "ordre": 2,
+                    "nom": "Femme",
+                    "slug": "femme"
+                },
+                {
+                    "ordre": 3,
+                    "nom": "Grande taille",
+                    "slug": "grande-taille"
+                },
+                {
+                    "ordre": 4,
+                    "nom": "Petite taille",
+                    "slug": "petite-taille"
+                },
+                {
+                    "ordre": 5,
+                    "nom": "Sur mesure",
+                    "slug": "sur-mesure"
+                },
+                {
+                    "ordre": 6,
+                    "nom": "Luxe",
+                    "slug": "luxe"
+                },
+                {
+                    "ordre": 7,
+                    "nom": "Casual",
+                    "slug": "casual"
+                },
+                {
+                    "ordre": 8,
+                    "nom": "Vintage",
+                    "slug": "vintage"
+                },
+                {
+                    "ordre": 9,
+                    "nom": "Streetwear",
+                    "slug": "streetwear"
+                },
+                {
+                    "ordre": 10,
+                    "nom": "Sportswear",
+                    "slug": "sportswear"
+                },
+                {
+                    "ordre": 11,
+                    "nom": "Chaussures",
+                    "slug": "chaussures"
+                },
+                {
+                    "ordre": 12,
+                    "nom": "Accessoires",
+                    "slug": "accessoires"
+                },
+                {
+                    "ordre": 13,
+                    "nom": "Sacs",
+                    "slug": "sacs"
+                },
+                {
+                    "ordre": 14,
+                    "nom": "Bijoux",
+                    "slug": "bijoux"
+                },
+                {
+                    "ordre": 15,
+                    "nom": "Montres",
+                    "slug": "montres"
+                },
+                {
+                    "ordre": 16,
+                    "nom": "Lingerie",
+                    "slug": "lingerie"
+                },
+                {
+                    "ordre": 17,
+                    "nom": "Maillots de bain",
+                    "slug": "maillots-de-bain"
+                },
+                {
+                    "ordre": 18,
+                    "nom": "Mariage",
+                    "slug": "mariage"
+                },
+                {
+                    "ordre": 19,
+                    "nom": "Éco-responsable",
+                    "slug": "eco-responsable"
+                },
+                {
+                    "ordre": 20,
+                    "nom": "Seconde main",
+                    "slug": "seconde-main"
+                }
+            ]
+        },
+        "2_restaurants": {
+            "categoryId": 2,
+            "categoryName": "Restaurants",
+            "description": "Restaurants, brasseries, pizzerias, fast-food, etc.",
+            "filtres": [
+                {
+                    "ordre": 1,
+                    "nom": "Terrasse",
+                    "slug": "terrasse"
+                },
+                {
+                    "ordre": 2,
+                    "nom": "Livraison",
+                    "slug": "livraison"
+                },
+                {
+                    "ordre": 3,
+                    "nom": "À emporter",
+                    "slug": "a-emporter"
+                },
+                {
+                    "ordre": 4,
+                    "nom": "Réservation",
+                    "slug": "reservation"
+                },
+                {
+                    "ordre": 5,
+                    "nom": "WiFi gratuit",
+                    "slug": "wifi-gratuit"
+                },
+                {
+                    "ordre": 6,
+                    "nom": "Parking",
+                    "slug": "parking"
+                },
+                {
+                    "ordre": 7,
+                    "nom": "Climatisation",
+                    "slug": "climatisation"
+                },
+                {
+                    "ordre": 8,
+                    "nom": "Végétarien",
+                    "slug": "vegetarien"
+                },
+                {
+                    "ordre": 9,
+                    "nom": "Vegan",
+                    "slug": "vegan"
+                },
+                {
+                    "ordre": 10,
+                    "nom": "Halal",
+                    "slug": "halal"
+                },
+                {
+                    "ordre": 11,
+                    "nom": "Casher",
+                    "slug": "casher"
+                },
+                {
+                    "ordre": 12,
+                    "nom": "Sans gluten",
+                    "slug": "sans-gluten"
+                },
+                {
+                    "ordre": 13,
+                    "nom": "Brunch",
+                    "slug": "brunch"
+                },
+                {
+                    "ordre": 14,
+                    "nom": "Petit-déjeuner",
+                    "slug": "petit-dejeuner"
+                },
+                {
+                    "ordre": 15,
+                    "nom": "Groupe",
+                    "slug": "groupe"
+                },
+                {
+                    "ordre": 16,
+                    "nom": "Romantique",
+                    "slug": "romantique"
+                },
+                {
+                    "ordre": 17,
+                    "nom": "Familial",
+                    "slug": "familial"
+                },
+                {
+                    "ordre": 18,
+                    "nom": "Vue mer",
+                    "slug": "vue-mer"
+                },
+                {
+                    "ordre": 19,
+                    "nom": "Rooftop",
+                    "slug": "rooftop"
+                },
+                {
+                    "ordre": 20,
+                    "nom": "Bar",
+                    "slug": "bar"
+                }
+            ]
+        },
+        "3_hotels": {
+            "categoryId": 3,
+            "categoryName": "Hôtels",
+            "description": "Hôtels, auberges, chambres d'hôtes, résidences",
+            "filtres": [
+                {
+                    "ordre": 1,
+                    "nom": "WiFi gratuit",
+                    "slug": "wifi-gratuit"
+                },
+                {
+                    "ordre": 2,
+                    "nom": "Piscine",
+                    "slug": "piscine"
+                },
+                {
+                    "ordre": 3,
+                    "nom": "Spa",
+                    "slug": "spa"
+                },
+                {
+                    "ordre": 4,
+                    "nom": "Parking",
+                    "slug": "parking"
+                },
+                {
+                    "ordre": 5,
+                    "nom": "Petit-déj inclus",
+                    "slug": "petit-dej-inclus"
+                },
+                {
+                    "ordre": 6,
+                    "nom": "Restaurant",
+                    "slug": "restaurant"
+                },
+                {
+                    "ordre": 7,
+                    "nom": "Salle de sport",
+                    "slug": "salle-de-sport"
+                },
+                {
+                    "ordre": 8,
+                    "nom": "Animaux acceptés",
+                    "slug": "animaux-acceptes"
+                },
+                {
+                    "ordre": 9,
+                    "nom": "Climatisation",
+                    "slug": "climatisation"
+                },
+                {
+                    "ordre": 10,
+                    "nom": "Room service",
+                    "slug": "room-service"
+                },
+                {
+                    "ordre": 11,
+                    "nom": "Vue mer",
+                    "slug": "vue-mer"
+                },
+                {
+                    "ordre": 12,
+                    "nom": "Balcon/Terrasse",
+                    "slug": "balcon-terrasse"
+                },
+                {
+                    "ordre": 13,
+                    "nom": "Suite disponible",
+                    "slug": "suite-disponible"
+                },
+                {
+                    "ordre": 14,
+                    "nom": "Accessible PMR",
+                    "slug": "accessible-pmr"
+                },
+                {
+                    "ordre": 15,
+                    "nom": "Navette aéroport",
+                    "slug": "navette-aeroport"
+                },
+                {
+                    "ordre": 16,
+                    "nom": "Coffre-fort",
+                    "slug": "coffre-fort"
+                },
+                {
+                    "ordre": 17,
+                    "nom": "Conciergerie",
+                    "slug": "conciergerie"
+                },
+                {
+                    "ordre": 18,
+                    "nom": "Business center",
+                    "slug": "business-center"
+                },
+                {
+                    "ordre": 19,
+                    "nom": "Enfants bienvenus",
+                    "slug": "enfants-bienvenus"
+                },
+                {
+                    "ordre": 20,
+                    "nom": "All inclusive",
+                    "slug": "all-inclusive"
+                }
+            ]
+        },
+        "4_beaute_spa": {
+            "categoryId": 4,
+            "categoryName": "Beauté & Spa",
+            "description": "Instituts de beauté, salons de coiffure, spas, barbiers",
+            "filtres": [
+                {
+                    "ordre": 1,
+                    "nom": "Sur rendez-vous",
+                    "slug": "sur-rendez-vous"
+                },
+                {
+                    "ordre": 2,
+                    "nom": "Sans rendez-vous",
+                    "slug": "sans-rendez-vous"
+                },
+                {
+                    "ordre": 3,
+                    "nom": "À domicile",
+                    "slug": "a-domicile"
+                },
+                {
+                    "ordre": 4,
+                    "nom": "Hommes",
+                    "slug": "hommes"
+                },
+                {
+                    "ordre": 5,
+                    "nom": "Femmes",
+                    "slug": "femmes"
+                },
+                {
+                    "ordre": 6,
+                    "nom": "Mixte",
+                    "slug": "mixte"
+                },
+                {
+                    "ordre": 7,
+                    "nom": "Produits bio",
+                    "slug": "produits-bio"
+                },
+                {
+                    "ordre": 8,
+                    "nom": "Massage",
+                    "slug": "massage"
+                },
+                {
+                    "ordre": 9,
+                    "nom": "Épilation",
+                    "slug": "epilation"
+                },
+                {
+                    "ordre": 10,
+                    "nom": "Manucure",
+                    "slug": "manucure"
+                },
+                {
+                    "ordre": 11,
+                    "nom": "Pédicure",
+                    "slug": "pedicure"
+                },
+                {
+                    "ordre": 12,
+                    "nom": "Soins visage",
+                    "slug": "soins-visage"
+                },
+                {
+                    "ordre": 13,
+                    "nom": "Soins corps",
+                    "slug": "soins-corps"
+                },
+                {
+                    "ordre": 14,
+                    "nom": "Coiffure",
+                    "slug": "coiffure"
+                },
+                {
+                    "ordre": 15,
+                    "nom": "Barbier",
+                    "slug": "barbier"
+                },
+                {
+                    "ordre": 16,
+                    "nom": "Maquillage",
+                    "slug": "maquillage"
+                },
+                {
+                    "ordre": 17,
+                    "nom": "Extension cils",
+                    "slug": "extension-cils"
+                },
+                {
+                    "ordre": 18,
+                    "nom": "Onglerie",
+                    "slug": "onglerie"
+                },
+                {
+                    "ordre": 19,
+                    "nom": "Bronzage",
+                    "slug": "bronzage"
+                },
+                {
+                    "ordre": 20,
+                    "nom": "Spa privatif",
+                    "slug": "spa-privatif"
+                }
+            ]
+        },
+        "5_voyage": {
+            "categoryId": 5,
+            "categoryName": "Voyage",
+            "description": "Agences de voyage, tour-opérateurs, billetterie",
+            "filtres": [
+                {
+                    "ordre": 1,
+                    "nom": "Vol inclus",
+                    "slug": "vol-inclus"
+                },
+                {
+                    "ordre": 2,
+                    "nom": "Hôtel inclus",
+                    "slug": "hotel-inclus"
+                },
+                {
+                    "ordre": 3,
+                    "nom": "All inclusive",
+                    "slug": "all-inclusive"
+                },
+                {
+                    "ordre": 4,
+                    "nom": "Circuit",
+                    "slug": "circuit"
+                },
+                {
+                    "ordre": 5,
+                    "nom": "Croisière",
+                    "slug": "croisiere"
+                },
+                {
+                    "ordre": 6,
+                    "nom": "Aventure",
+                    "slug": "aventure"
+                },
+                {
+                    "ordre": 7,
+                    "nom": "Famille",
+                    "slug": "famille"
+                },
+                {
+                    "ordre": 8,
+                    "nom": "Romantique",
+                    "slug": "romantique"
+                },
+                {
+                    "ordre": 9,
+                    "nom": "Solo",
+                    "slug": "solo"
+                },
+                {
+                    "ordre": 10,
+                    "nom": "Groupe",
+                    "slug": "groupe"
+                },
+                {
+                    "ordre": 11,
+                    "nom": "Luxe",
+                    "slug": "luxe"
+                },
+                {
+                    "ordre": 12,
+                    "nom": "Budget",
+                    "slug": "budget"
+                },
+                {
+                    "ordre": 13,
+                    "nom": "Dernière minute",
+                    "slug": "derniere-minute"
+                },
+                {
+                    "ordre": 14,
+                    "nom": "Long séjour",
+                    "slug": "long-sejour"
+                },
+                {
+                    "ordre": 15,
+                    "nom": "Week-end",
+                    "slug": "week-end"
+                },
+                {
+                    "ordre": 16,
+                    "nom": "Plage",
+                    "slug": "plage"
+                },
+                {
+                    "ordre": 17,
+                    "nom": "Montagne",
+                    "slug": "montagne"
+                },
+                {
+                    "ordre": 18,
+                    "nom": "City trip",
+                    "slug": "city-trip"
+                },
+                {
+                    "ordre": 19,
+                    "nom": "Safari",
+                    "slug": "safari"
+                },
+                {
+                    "ordre": 20,
+                    "nom": "Road trip",
+                    "slug": "road-trip"
+                }
+            ]
+        },
+        "6_sport_fitness": {
+            "categoryId": 6,
+            "categoryName": "Sport & Fitness",
+            "description": "Magasins de sport type Decathlon, Intersport, Go Sport (pas les salles de muscu)",
+            "filtres": [
+                {
+                    "ordre": 1,
+                    "nom": "Running",
+                    "slug": "running"
+                },
+                {
+                    "ordre": 2,
+                    "nom": "Football",
+                    "slug": "football"
+                },
+                {
+                    "ordre": 3,
+                    "nom": "Basketball",
+                    "slug": "basketball"
+                },
+                {
+                    "ordre": 4,
+                    "nom": "Tennis",
+                    "slug": "tennis"
+                },
+                {
+                    "ordre": 5,
+                    "nom": "Natation",
+                    "slug": "natation"
+                },
+                {
+                    "ordre": 6,
+                    "nom": "Cyclisme",
+                    "slug": "cyclisme"
+                },
+                {
+                    "ordre": 7,
+                    "nom": "Fitness",
+                    "slug": "fitness"
+                },
+                {
+                    "ordre": 8,
+                    "nom": "Randonnée",
+                    "slug": "randonnee"
+                },
+                {
+                    "ordre": 9,
+                    "nom": "Ski",
+                    "slug": "ski"
+                },
+                {
+                    "ordre": 10,
+                    "nom": "Sports nautiques",
+                    "slug": "sports-nautiques"
+                },
+                {
+                    "ordre": 11,
+                    "nom": "Golf",
+                    "slug": "golf"
+                },
+                {
+                    "ordre": 12,
+                    "nom": "Rugby",
+                    "slug": "rugby"
+                },
+                {
+                    "ordre": 13,
+                    "nom": "Équitation",
+                    "slug": "equitation"
+                },
+                {
+                    "ordre": 14,
+                    "nom": "Combat",
+                    "slug": "combat"
+                },
+                {
+                    "ordre": 15,
+                    "nom": "Musculation",
+                    "slug": "musculation"
+                },
+                {
+                    "ordre": 16,
+                    "nom": "Yoga",
+                    "slug": "yoga"
+                },
+                {
+                    "ordre": 17,
+                    "nom": "Chaussures",
+                    "slug": "chaussures"
+                },
+                {
+                    "ordre": 18,
+                    "nom": "Vêtements",
+                    "slug": "vetements"
+                },
+                {
+                    "ordre": 19,
+                    "nom": "Accessoires",
+                    "slug": "accessoires"
+                },
+                {
+                    "ordre": 20,
+                    "nom": "Nutrition sportive",
+                    "slug": "nutrition-sportive"
+                }
+            ]
+        },
+        "7_high_tech": {
+            "categoryId": 7,
+            "categoryName": "High-Tech",
+            "description": "Magasins d'électronique, téléphonie, informatique, réparation",
+            "filtres": [
+                {
+                    "ordre": 1,
+                    "nom": "Réparation",
+                    "slug": "reparation"
+                },
+                {
+                    "ordre": 2,
+                    "nom": "Occasion",
+                    "slug": "occasion"
+                },
+                {
+                    "ordre": 3,
+                    "nom": "Neuf",
+                    "slug": "neuf"
+                },
+                {
+                    "ordre": 4,
+                    "nom": "Reconditionné",
+                    "slug": "reconditionne"
+                },
+                {
+                    "ordre": 5,
+                    "nom": "Garantie",
+                    "slug": "garantie"
+                },
+                {
+                    "ordre": 6,
+                    "nom": "Livraison",
+                    "slug": "livraison"
+                },
+                {
+                    "ordre": 7,
+                    "nom": "SAV",
+                    "slug": "sav"
+                },
+                {
+                    "ordre": 8,
+                    "nom": "Reprise",
+                    "slug": "reprise"
+                },
+                {
+                    "ordre": 9,
+                    "nom": "Financement",
+                    "slug": "financement"
+                },
+                {
+                    "ordre": 10,
+                    "nom": "Click & Collect",
+                    "slug": "click-collect"
+                },
+                {
+                    "ordre": 11,
+                    "nom": "Smartphones",
+                    "slug": "smartphones"
+                },
+                {
+                    "ordre": 12,
+                    "nom": "Ordinateurs",
+                    "slug": "ordinateurs"
+                },
+                {
+                    "ordre": 13,
+                    "nom": "Tablettes",
+                    "slug": "tablettes"
+                },
+                {
+                    "ordre": 14,
+                    "nom": "TV & Audio",
+                    "slug": "tv-audio"
+                },
+                {
+                    "ordre": 15,
+                    "nom": "Gaming",
+                    "slug": "gaming"
+                },
+                {
+                    "ordre": 16,
+                    "nom": "Accessoires",
+                    "slug": "accessoires"
+                },
+                {
+                    "ordre": 17,
+                    "nom": "Objets connectés",
+                    "slug": "objets-connectes"
+                },
+                {
+                    "ordre": 18,
+                    "nom": "Électroménager",
+                    "slug": "electromenager"
+                },
+                {
+                    "ordre": 19,
+                    "nom": "Photo & Vidéo",
+                    "slug": "photo-video"
+                },
+                {
+                    "ordre": 20,
+                    "nom": "Drones",
+                    "slug": "drones"
+                }
+            ]
+        },
+        "9_enfants": {
+            "categoryId": 9,
+            "categoryName": "Enfants",
+            "description": "Tout pour les enfants : vêtements, jouets, puériculture, loisirs (inclut la mode enfant)",
+            "filtres": [
+                {
+                    "ordre": 1,
+                    "nom": "0-3 ans",
+                    "slug": "0-3-ans"
+                },
+                {
+                    "ordre": 2,
+                    "nom": "3-6 ans",
+                    "slug": "3-6-ans"
+                },
+                {
+                    "ordre": 3,
+                    "nom": "6-12 ans",
+                    "slug": "6-12-ans"
+                },
+                {
+                    "ordre": 4,
+                    "nom": "Ados",
+                    "slug": "ados"
+                },
+                {
+                    "ordre": 5,
+                    "nom": "Jouets",
+                    "slug": "jouets"
+                },
+                {
+                    "ordre": 6,
+                    "nom": "Vêtements",
+                    "slug": "vetements"
+                },
+                {
+                    "ordre": 7,
+                    "nom": "Chaussures",
+                    "slug": "chaussures"
+                },
+                {
+                    "ordre": 8,
+                    "nom": "Éducatif",
+                    "slug": "educatif"
+                },
+                {
+                    "ordre": 9,
+                    "nom": "Anniversaires",
+                    "slug": "anniversaires"
+                },
+                {
+                    "ordre": 10,
+                    "nom": "Puériculture",
+                    "slug": "puericulture"
+                },
+                {
+                    "ordre": 11,
+                    "nom": "Mobilier",
+                    "slug": "mobilier"
+                },
+                {
+                    "ordre": 12,
+                    "nom": "Livres",
+                    "slug": "livres"
+                },
+                {
+                    "ordre": 13,
+                    "nom": "Jeux vidéo",
+                    "slug": "jeux-video"
+                },
+                {
+                    "ordre": 14,
+                    "nom": "Sport",
+                    "slug": "sport"
+                },
+                {
+                    "ordre": 15,
+                    "nom": "Loisirs créatifs",
+                    "slug": "loisirs-creatifs"
+                },
+                {
+                    "ordre": 16,
+                    "nom": "Plein air",
+                    "slug": "plein-air"
+                },
+                {
+                    "ordre": 17,
+                    "nom": "Déguisements",
+                    "slug": "deguisements"
+                },
+                {
+                    "ordre": 18,
+                    "nom": "École",
+                    "slug": "ecole"
+                },
+                {
+                    "ordre": 19,
+                    "nom": "Bébé",
+                    "slug": "bebe"
+                },
+                {
+                    "ordre": 20,
+                    "nom": "Cadeaux",
+                    "slug": "cadeaux"
+                }
+            ]
+        },
+        "10_maison": {
+            "categoryId": 10,
+            "categoryName": "Maison",
+            "description": "Décoration, bricolage, mobilier, jardin, électroménager",
+            "filtres": [
+                {
+                    "ordre": 1,
+                    "nom": "Livraison",
+                    "slug": "livraison"
+                },
+                {
+                    "ordre": 2,
+                    "nom": "Montage",
+                    "slug": "montage"
+                },
+                {
+                    "ordre": 3,
+                    "nom": "Sur mesure",
+                    "slug": "sur-mesure"
+                },
+                {
+                    "ordre": 4,
+                    "nom": "Devis gratuit",
+                    "slug": "devis-gratuit"
+                },
+                {
+                    "ordre": 5,
+                    "nom": "Décoration",
+                    "slug": "decoration"
+                },
+                {
+                    "ordre": 6,
+                    "nom": "Rénovation",
+                    "slug": "renovation"
+                },
+                {
+                    "ordre": 7,
+                    "nom": "Jardin",
+                    "slug": "jardin"
+                },
+                {
+                    "ordre": 8,
+                    "nom": "Électroménager",
+                    "slug": "electromenager"
+                },
+                {
+                    "ordre": 9,
+                    "nom": "Mobilier",
+                    "slug": "mobilier"
+                },
+                {
+                    "ordre": 10,
+                    "nom": "Cuisine",
+                    "slug": "cuisine"
+                },
+                {
+                    "ordre": 11,
+                    "nom": "Salle de bain",
+                    "slug": "salle-de-bain"
+                },
+                {
+                    "ordre": 12,
+                    "nom": "Chambre",
+                    "slug": "chambre"
+                },
+                {
+                    "ordre": 13,
+                    "nom": "Salon",
+                    "slug": "salon"
+                },
+                {
+                    "ordre": 14,
+                    "nom": "Bureau",
+                    "slug": "bureau"
+                },
+                {
+                    "ordre": 15,
+                    "nom": "Rangement",
+                    "slug": "rangement"
+                },
+                {
+                    "ordre": 16,
+                    "nom": "Luminaires",
+                    "slug": "luminaires"
+                },
+                {
+                    "ordre": 17,
+                    "nom": "Textile",
+                    "slug": "textile"
+                },
+                {
+                    "ordre": 18,
+                    "nom": "Extérieur",
+                    "slug": "exterieur"
+                },
+                {
+                    "ordre": 19,
+                    "nom": "Bricolage",
+                    "slug": "bricolage"
+                },
+                {
+                    "ordre": 20,
+                    "nom": "Domotique",
+                    "slug": "domotique"
+                }
+            ]
+        },
+        "12_loisir": {
+            "categoryId": 12,
+            "categoryName": "Loisir",
+            "description": "Activités de loisirs : cinéma, bowling, escape game, parcs, musées, spectacles",
+            "filtres": [
+                {
+                    "ordre": 1,
+                    "nom": "En famille",
+                    "slug": "en-famille"
+                },
+                {
+                    "ordre": 2,
+                    "nom": "Entre amis",
+                    "slug": "entre-amis"
+                },
+                {
+                    "ordre": 3,
+                    "nom": "Solo",
+                    "slug": "solo"
+                },
+                {
+                    "ordre": 4,
+                    "nom": "En couple",
+                    "slug": "en-couple"
+                },
+                {
+                    "ordre": 5,
+                    "nom": "Intérieur",
+                    "slug": "interieur"
+                },
+                {
+                    "ordre": 6,
+                    "nom": "Extérieur",
+                    "slug": "exterieur"
+                },
+                {
+                    "ordre": 7,
+                    "nom": "Réservation",
+                    "slug": "reservation"
+                },
+                {
+                    "ordre": 8,
+                    "nom": "Carte fidélité",
+                    "slug": "carte-fidelite"
+                },
+                {
+                    "ordre": 9,
+                    "nom": "Groupe",
+                    "slug": "groupe"
+                },
+                {
+                    "ordre": 10,
+                    "nom": "Escape game",
+                    "slug": "escape-game"
+                },
+                {
+                    "ordre": 11,
+                    "nom": "Bowling",
+                    "slug": "bowling"
+                },
+                {
+                    "ordre": 12,
+                    "nom": "Cinéma",
+                    "slug": "cinema"
+                },
+                {
+                    "ordre": 13,
+                    "nom": "Karaoké",
+                    "slug": "karaoke"
+                },
+                {
+                    "ordre": 14,
+                    "nom": "Billard",
+                    "slug": "billard"
+                },
+                {
+                    "ordre": 15,
+                    "nom": "Laser game",
+                    "slug": "laser-game"
+                },
+                {
+                    "ordre": 16,
+                    "nom": "Parc d'attractions",
+                    "slug": "parc-attractions"
+                },
+                {
+                    "ordre": 17,
+                    "nom": "Musée",
+                    "slug": "musee"
+                },
+                {
+                    "ordre": 18,
+                    "nom": "Concert",
+                    "slug": "concert"
+                },
+                {
+                    "ordre": 19,
+                    "nom": "Spectacle",
+                    "slug": "spectacle"
+                },
+                {
+                    "ordre": 20,
+                    "nom": "Atelier créatif",
+                    "slug": "atelier-creatif"
+                }
+            ]
+        }
+    },
+    "_instructions": {
+        "comment_modifier": "Pour modifier un filtre, changez simplement le 'nom'. Le 'slug' sera régénéré automatiquement.",
+        "comment_ajouter": "Ajoutez un nouvel objet dans le tableau 'filtres' avec ordre, nom et slug.",
+        "comment_supprimer": "Supprimez simplement la ligne du filtre à retirer.",
+        "slug_generation": "Le slug est généré à partir du nom : minuscules, accents supprimés, espaces remplacés par des tirets.",
+        "limite": "Pas de limite stricte, mais 12-20 filtres par catégorie est idéal pour l'UX."
+    }
+}

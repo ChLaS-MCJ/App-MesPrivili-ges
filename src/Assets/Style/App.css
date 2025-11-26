@@ -22,7 +22,7 @@
 @import './Pages/TermsOfService.css';
 @import './Pages/AccountSettings.css';
 @import './Pages/Prestataires.css';
-
+@import './Pages/FichePrestataires.css';
 
 /*--------------Components-----------------*/
 @import './Components/Loader.css';
