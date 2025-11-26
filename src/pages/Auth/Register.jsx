@@ -8,7 +8,7 @@ import {
     IonLoading,
     IonIcon,
 } from '@ionic/react';
-import { arrowBack, logoGoogle, logoApple } from 'ionicons/icons';
+import { arrowBack, logoGoogle, logoApple, eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../Utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -22,6 +22,8 @@ const Register = () => {
         nom: '',
         telephone: '',
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', color: '' });
 
@@ -103,7 +105,6 @@ const Register = () => {
             setLoading(true);
 
             try {
-
                 const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                     headers: {
                         Authorization: `Bearer ${tokenResponse.access_token}`,
@@ -161,7 +162,6 @@ const Register = () => {
         setLoading(true);
 
         try {
-
             const appleData = {
                 appleId: `apple-${Date.now()}`,
                 email: 'test.apple@icloud.com'
@@ -259,28 +259,42 @@ const Register = () => {
                             />
                         </div>
 
-                        <div className="input-group">
+                        <div className="input-group input-password-group">
                             <IonInput
                                 className="register-input"
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 placeholder="Mot de passe *"
                                 value={formData.password}
                                 onIonChange={(e) => handleChange('password', e.detail.value)}
                                 autocomplete="new-password"
                                 name="password"
                             />
+                            <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                <IonIcon icon={showPassword ? eyeOffOutline : eyeOutline} />
+                            </button>
                         </div>
 
-                        <div className="input-group">
+                        <div className="input-group input-password-group">
                             <IonInput
                                 className="register-input"
-                                type="password"
+                                type={showConfirmPassword ? 'text' : 'password'}
                                 placeholder="Confirmer le mot de passe *"
                                 value={formData.confirmPassword}
                                 onIonChange={(e) => handleChange('confirmPassword', e.detail.value)}
                                 autocomplete="new-password"
                                 name="confirmPassword"
                             />
+                            <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                                <IonIcon icon={showConfirmPassword ? eyeOffOutline : eyeOutline} />
+                            </button>
                         </div>
 
                         <p className="required-text">* Champs obligatoires</p>

@@ -362,7 +362,26 @@ const PrestataireService = {
                 message: error.response?.data?.message || 'Erreur lors de la récupération'
             };
         }
-    }
+    },
+    /**
+     * Récupérer les derniers visiteurs d'un prestataire
+     * @param {number} id - ID du prestataire
+     * @param {number} limit - Nombre de visiteurs (défaut: 5)
+     * @returns {Promise}
+     */
+    getRecentVisitors: async (id, limit = 5) => {
+        try {
+            const response = await Caller.get(`/prestataires/${id}/visitors?limit=${limit}`);
+            return response.data;
+        } catch (error) {
+            console.error('Erreur getRecentVisitors:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Erreur lors de la récupération',
+                data: []
+            };
+        }
+    },
 };
 
 export default PrestataireService;

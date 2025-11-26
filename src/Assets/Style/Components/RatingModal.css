@@ -1,0 +1,260 @@
+/* =============================================
+   RATING MODAL - POST SCAN
+   ============================================= */
+
+.rating-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.rating-modal {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 380px;
+    padding: 32px 24px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.rating-modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.rating-emoji {
+    font-size: 56px;
+    margin-bottom: 16px;
+    transition: transform 0.2s ease;
+}
+
+.rating-modal-content h2 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 25px 0 8px 0;
+}
+
+.rating-subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+    margin: 0 0 28px 0;
+}
+
+.rating-success-icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+}
+
+/* =============================================
+   ÉTOILES
+   ============================================= */
+
+.rating-stars {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.rating-star-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.rating-star-btn:hover {
+    transform: scale(1.2);
+}
+
+.rating-star-btn:active {
+    transform: scale(0.95);
+}
+
+.rating-star {
+    font-size: 40px;
+    color: rgba(255, 255, 255, 0.25);
+    transition: all 0.2s ease;
+}
+
+.rating-star.active {
+    color: #ffc107;
+    filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.5));
+}
+
+/* Étoiles affichées après soumission */
+.rating-stars-display {
+    display: flex;
+    gap: 4px;
+    margin: 16px 0 24px;
+}
+
+.rating-star-small {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.rating-star-small.active {
+    color: #ffc107;
+}
+
+.rating-labels {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 240px;
+    margin-bottom: 28px;
+}
+
+.rating-labels span {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.8rem;
+}
+
+/* =============================================
+   BOUTONS
+   ============================================= */
+
+.rating-submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+    border: none;
+    border-radius: 14px;
+    padding: 16px 24px;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 12px;
+}
+
+.rating-submit-btn:hover:not(.disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(254, 126, 79, 0.4);
+}
+
+.rating-submit-btn:active:not(.disabled) {
+    transform: scale(0.98);
+}
+
+.rating-submit-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.rating-skip-btn,
+.rating-close-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 8px 16px;
+    transition: color 0.2s ease;
+}
+
+.rating-skip-btn:hover,
+.rating-close-btn:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* =============================================
+   SECTION GOOGLE
+   ============================================= */
+
+.rating-google-text {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0 0 20px 0;
+    padding: 0 8px;
+}
+
+.rating-google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    background: #ffffff;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 24px;
+    color: #1a1a1a;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 12px;
+}
+
+.rating-google-btn ion-icon {
+    font-size: 20px;
+    color: #4285f4;
+}
+
+.rating-google-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
+}
+
+.rating-google-btn:active {
+    transform: scale(0.98);
+}
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+
+@media (max-width: 480px) {
+    .rating-modal {
+        padding: 24px 20px;
+        margin: 0 10px;
+    }
+
+    .rating-emoji,
+    .rating-success-icon {
+        font-size: 48px;
+    }
+
+    .rating-modal-content h2 {
+        font-size: 1.3rem;
+    }
+
+    .rating-star {
+        font-size: 36px;
+    }
+
+    .rating-star-btn {
+        padding: 6px;
+    }
+}

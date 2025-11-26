@@ -9,7 +9,7 @@ import {
     IonLoading,
     IonIcon,
 } from '@ionic/react';
-import { logoGoogle, logoApple } from 'ionicons/icons';
+import { logoGoogle, logoApple, eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../Utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', color: '' });
@@ -66,7 +67,6 @@ const Login = () => {
             setLoading(true);
 
             try {
-
                 const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                     headers: {
                         Authorization: `Bearer ${tokenResponse.access_token}`,
@@ -124,7 +124,6 @@ const Login = () => {
         setLoading(true);
 
         try {
-
             const appleData = {
                 appleId: `apple-${Date.now()}`,
                 email: 'test.apple@icloud.com'
@@ -180,14 +179,21 @@ const Login = () => {
                             />
                         </div>
 
-                        <div className="input-group">
+                        <div className="input-group input-password-group">
                             <IonInput
                                 className="login-input"
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 placeholder="Mot de passe"
                                 value={password}
                                 onIonChange={(e) => setPassword(e.detail.value)}
                             />
+                            <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                <IonIcon icon={showPassword ? eyeOffOutline : eyeOutline} />
+                            </button>
                             <button
                                 type="button"
                                 className="forgot-link"

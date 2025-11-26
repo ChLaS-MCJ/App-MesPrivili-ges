@@ -28,6 +28,7 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    transition: background-image 0.3s ease-in-out;
 }
 
 .fiche-hero-image::after {
@@ -100,6 +101,73 @@
     color: #ff6b6b;
 }
 
+.fiche-header-btn.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.fiche-header-btn.loading ion-icon {
+    animation: pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.9);
+    }
+}
+
+/* =============================================
+   FLÈCHES DE NAVIGATION IMAGES
+   ============================================= */
+
+.fiche-nav-arrow {
+    position: absolute;
+    top: 40%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+    opacity: 0.7;
+}
+
+.fiche-nav-arrow:hover {
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.fiche-nav-arrow:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.fiche-nav-prev {
+    left: 16px;
+}
+
+.fiche-nav-next {
+    right: 16px;
+}
+
 /* =============================================
    INDICATEURS D'IMAGES
    ============================================= */
@@ -164,8 +232,9 @@
 .fiche-title-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: 16px;
+    flex-direction: row;
 }
 
 .fiche-title {
@@ -200,18 +269,18 @@
 }
 
 /* =============================================
-   META (LOCALISATION, HORAIRES)
+   META (LOCALISATION, HORAIRES, DISTANCE)
    ============================================= */
 
 .fiche-meta-row {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
 .fiche-meta-item {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
     color: rgba(255, 255, 255, 0.7);
@@ -221,6 +290,25 @@
 .fiche-meta-item ion-icon {
     font-size: 16px;
     color: #fe7e4f;
+    flex-shrink: 0;
+    position: relative;
+    top: -3px;
+}
+
+/* Statut ouvert/fermé */
+.fiche-meta-item .status-open {
+    color: #4ade80;
+    font-weight: 500;
+}
+
+.fiche-meta-item .status-closed {
+    color: #f87171;
+    font-weight: 500;
+}
+
+.fiche-meta-item .status-closing-soon {
+    color: #fbbf24;
+    font-weight: 500;
 }
 
 /* =============================================
@@ -257,8 +345,17 @@
 }
 
 /* =============================================
-   DESCRIPTION
+   DESCRIPTION AVEC EXPAND
    ============================================= */
+
+.fiche-description-wrapper {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.fiche-description-wrapper:hover {
+    opacity: 0.9;
+}
 
 .fiche-description {
     margin: 0;
@@ -268,9 +365,27 @@
     text-align: left;
 }
 
+.expand-indicator {
+    display: block;
+    color: #fe7e4f;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: 6px;
+    text-decoration: underline;
+}
+
 /* =============================================
-   TAGS / FILTRES
+   TAGS / FILTRES AVEC EXPAND
    ============================================= */
+
+.fiche-tags-wrapper {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.fiche-tags-wrapper:hover {
+    opacity: 0.9;
+}
 
 .fiche-tags {
     display: flex;
@@ -288,44 +403,14 @@
     font-weight: 500;
 }
 
-/* =============================================
-   BOUTON PRINCIPAL
-   ============================================= */
-
-.fiche-main-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    background: #ffffff;
-    border: none;
-    border-radius: 16px;
-    padding: 16px 24px;
-    color: #1a1a2e;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 8px;
-}
-
-.fiche-main-btn ion-icon {
-    font-size: 20px;
-}
-
-.fiche-main-btn:hover {
-    background: #f0f0f0;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-.fiche-main-btn:active {
-    transform: scale(0.98);
+.fiche-tag-more {
+    background: rgba(254, 126, 79, 0.2);
+    border-color: rgba(254, 126, 79, 0.3);
+    color: #fe7e4f;
 }
 
 /* =============================================
-   BOUTONS D'ACTION SECONDAIRES
+   BOUTONS D'ACTION
    ============================================= */
 
 .fiche-action-buttons {
@@ -340,12 +425,12 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 14px;
     padding: 14px 16px;
-    color: #ffffff;
-    font-size: 0.9rem;
+    color: #252525;
+    font-size: 18px !important;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -357,12 +442,166 @@
 }
 
 .fiche-action-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .fiche-action-btn:active {
     transform: scale(0.98);
+}
+
+/* Petit bouton calendrier */
+.fiche-action-btn-small {
+    flex: 0;
+    width: 52px;
+    min-width: 52px;
+    padding: 14px;
+}
+
+.fiche-action-btn-small span {
+    display: none;
+}
+
+/* =============================================
+   MODAL HORAIRES
+   ============================================= */
+
+.horaires-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.horaires-modal {
+    background: linear-gradient(180deg, rgb(50 50 55 / 98%) 0%, rgb(30 30 35 / 99%) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.horaires-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.horaires-modal-header h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.horaires-modal-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.horaires-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.horaires-modal-content {
+    padding: 16px 24px 24px;
+    overflow-y: auto;
+    max-height: calc(80vh - 80px);
+}
+
+.horaire-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+.horaire-row:last-child {
+    margin-bottom: 0;
+}
+
+.horaire-row.horaire-today {
+    background: rgba(254, 126, 79, 0.15);
+    border: 1px solid rgba(254, 126, 79, 0.3);
+}
+
+.horaire-row.horaire-closed .horaire-heures {
+    color: #f87171;
+}
+
+.horaire-jour {
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.horaire-today .horaire-jour {
+    color: #fe7e4f;
+}
+
+.horaire-heures {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+.no-horaires {
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
 }
 
 /* =============================================
@@ -442,13 +681,33 @@
         font-size: 1.4rem;
     }
 
-    .fiche-main-btn {
-        padding: 14px 20px;
-    }
-
     .fiche-action-btn {
         padding: 12px 14px;
-        font-size: 0.85rem;
+        font-size: 0.85rem !important;
+    }
+
+    .fiche-action-btn-small {
+        width: 48px;
+        min-width: 48px;
+        padding: 12px;
+    }
+
+    .horaires-modal {
+        margin: 10px;
+    }
+
+    .fiche-nav-arrow {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .fiche-nav-prev {
+        left: 12px;
+    }
+
+    .fiche-nav-next {
+        right: 12px;
     }
 }
 

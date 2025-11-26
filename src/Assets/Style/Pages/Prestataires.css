@@ -355,6 +355,7 @@
     transform-style: preserve-3d;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    overflow: hidden;
 }
 
 /* Icône catégorie en haut à gauche */
@@ -415,6 +416,7 @@
     align-items: center;
     justify-content: center;
     padding: 0 20px;
+    overflow: hidden;
 }
 
 .card-name h2 {
@@ -427,6 +429,14 @@
     text-transform: uppercase;
     letter-spacing: 1.5px;
     font-family: "Nimbus Sans Novus W01 Regular";
+
+    /* Limiter à 3 lignes max avec ... */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
 }
 
 /* Image EN BAS - 70% de la hauteur disponible (après padding) */
