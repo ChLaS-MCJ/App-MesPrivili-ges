@@ -1,12 +1,17 @@
+// components/Footer/Footer.jsx
 import { useState, useEffect } from 'react';
 import { IonIcon } from '@ionic/react';
-import { gridOutline, mapOutline, qrCodeOutline } from 'ionicons/icons';
+import { gridOutline, mapOutline, qrCodeOutline, scanOutline } from 'ionicons/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../Utils/AuthContext';
 import QRCodeModal from '../../components/QRCodeModal';
+import ScanModal from '../../components/ScanModal';
 import LocationModal from '../../components/LocationModal';
 
 const Footer = () => {
+    const { user } = useAuth();
     const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+    const [isScanModalOpen, setIsScanModalOpen] = useState(false);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
     const [savedVille, setSavedVille] = useState(null);
@@ -14,10 +19,13 @@ const Footer = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Vérifier si l'utilisateur est un prestataire
+    const isPrestataire = user?.role?.name === 'prestataire';
+
     // Déterminer l'onglet actif basé sur la route ET l'état des modals
     const getActiveTab = () => {
-        if (isQRModalOpen) return 'qrcode';
-        
+        if (isQRModalOpen || isScanModalOpen) return 'action'; // qrcode ou scan
+
         const path = location.pathname;
         if (path.includes('/categories') || path.includes('/prestataires')) {
             return 'categories';
@@ -25,7 +33,7 @@ const Footer = () => {
         if (path.includes('/maps')) {
             return 'map';
         }
-        return 'map'; // Par défaut
+        return 'map';
     };
 
     const activeTab = getActiveTab();
@@ -59,20 +67,26 @@ const Footer = () => {
         return () => window.removeEventListener('resize', updateWidth);
     }, []);
 
-    const handleQRClick = () => {
-        setIsQRModalOpen(true);
+    const handleActionClick = () => {
+        if (isPrestataire) {
+            setIsScanModalOpen(true);
+        } else {
+            setIsQRModalOpen(true);
+        }
     };
 
     const handleQRClose = () => {
         setIsQRModalOpen(false);
     };
 
+    const handleScanClose = () => {
+        setIsScanModalOpen(false);
+    };
+
     const handleCategoriesClick = () => {
-        // Si on a déjà une ville sauvegardée, y aller directement
         if (savedVille) {
             navigate(`/auth/categories?ville=${encodeURIComponent(savedVille)}`);
         } else {
-            // Sinon, ouvrir la modal de sélection de localisation
             setIsLocationModalOpen(true);
         }
     };
@@ -136,15 +150,21 @@ const Footer = () => {
 
     return (
         <>
+            {/* Modal QR Code pour les clients */}
             <QRCodeModal isOpen={isQRModalOpen} onClose={handleQRClose} />
-            <LocationModal 
-                isOpen={isLocationModalOpen} 
+
+            {/* Modal Scan pour les prestataires */}
+            <ScanModal isOpen={isScanModalOpen} onClose={handleScanClose} />
+
+            <LocationModal
+                isOpen={isLocationModalOpen}
                 onClose={() => setIsLocationModalOpen(false)}
                 onSelectVille={handleSelectVille}
             />
 
             <footer className="app-footer">
                 <svg className="footer-wave" viewBox={`0 0 ${width} 90`} preserveAspectRatio="none">
+                    {/* ... SVG defs inchangés ... */}
                     <defs>
                         <linearGradient id="footerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                             <stop offset="0%" style={{ stopColor: '#1f1f1f', stopOpacity: 1 }} />
@@ -176,7 +196,6 @@ const Footer = () => {
                         </filter>
                     </defs>
 
-                    {/* Vague principale avec effets lumineux */}
                     <path
                         d={`M0,90 L0,32 
                        L${leftWave.start},32
@@ -199,8 +218,6 @@ const Footer = () => {
                         filter="url(#footerShadow)"
                     />
 
-
-                    {/* Bande lumineuse en bas */}
                     <rect
                         x="0"
                         y="60"
@@ -218,7 +235,7 @@ const Footer = () => {
                 </svg>
 
                 <div className="footer-buttons">
-                    {/* Bouton Explorer (gauche) - actif sur /categories */}
+                    {/* Bouton Explorer (gauche) */}
                     <button
                         className={`footer-btn ${activeTab === 'categories' ? 'active' : ''}`}
                         onClick={handleCategoriesClick}
@@ -230,7 +247,7 @@ const Footer = () => {
                         <span className="btn-label">Explorer</span>
                     </button>
 
-                    {/* Bouton Carte (centre) - actif sur /maps */}
+                    {/* Bouton Carte (centre) */}
                     <button
                         className={`footer-btn ${activeTab === 'map' ? 'active' : ''}`}
                         onClick={() => handleNavigation('/auth/maps')}
@@ -242,16 +259,21 @@ const Footer = () => {
                         <span className="btn-label">Carte</span>
                     </button>
 
-                    {/* Bouton QR Code (droite) - actif quand modal ouverte */}
+                    {/* Bouton QR Code / Scan (droite) - selon le rôle */}
                     <button
-                        className={`footer-btn ${activeTab === 'qrcode' ? 'active' : ''}`}
-                        onClick={handleQRClick}
+                        className={`footer-btn ${activeTab === 'action' ? 'active' : ''}`}
+                        onClick={handleActionClick}
                         style={{ left: `${rightWaveCenter}px`, transform: 'translateX(-50%)' }}
                     >
                         <div className="btn-circle">
-                            <IonIcon icon={qrCodeOutline} className="btn-icon" />
+                            <IonIcon
+                                icon={isPrestataire ? scanOutline : qrCodeOutline}
+                                className="btn-icon"
+                            />
                         </div>
-                        <span className="btn-label">QR Code</span>
+                        <span className="btn-label">
+                            {isPrestataire ? 'Scan' : 'QR Code'}
+                        </span>
                     </button>
                 </div>
             </footer>
