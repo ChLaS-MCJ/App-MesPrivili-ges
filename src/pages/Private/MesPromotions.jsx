@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { IonIcon } from '@ionic/react';
 import {
     arrowBackOutline,
@@ -20,6 +20,9 @@ import PromotionFormModal from '../../components/Forms/PromotionFormModal';
 
 const MesPromotions = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const previousPath = location.state?.previousPath || '/auth/maps';
+
     const [fiches, setFiches] = useState([]);
     const [selectedFicheId, setSelectedFicheId] = useState(null);
     const [promotions, setPromotions] = useState([]);
@@ -159,7 +162,7 @@ const MesPromotions = () => {
     return (
         <div className="prestataire-page">
             <div className="page-header">
-                <button className="back-btn" onClick={() => navigate(-1)}>
+                <button className="back-btn" onClick={() => navigate(previousPath, { state: { openDrawer: true } })}>
                     <IonIcon icon={arrowBackOutline} />
                 </button>
                 <h1>Mes Promotions</h1>

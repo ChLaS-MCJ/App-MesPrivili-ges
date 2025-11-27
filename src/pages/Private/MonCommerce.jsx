@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { IonIcon } from '@ionic/react';
 import {
     arrowBackOutline,
@@ -19,6 +19,9 @@ import FicheFormModal from '../../components/Forms/FicheFormModal';
 
 const MonCommerce = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const previousPath = location.state?.previousPath || '/auth/maps';
+
     const [fiches, setFiches] = useState([]);
     const [maxFiches, setMaxFiches] = useState(1);
     const [peutCreer, setPeutCreer] = useState(false);
@@ -138,7 +141,7 @@ const MonCommerce = () => {
     return (
         <div className="prestataire-page">
             <div className="page-header">
-                <button className="back-btn" onClick={() => navigate(-1)}>
+                <button className="back-btn" onClick={() => navigate(previousPath, { state: { openDrawer: true } })}>
                     <IonIcon icon={arrowBackOutline} />
                 </button>
                 <h1>Mes Commerces</h1>
@@ -227,7 +230,7 @@ const MonCommerce = () => {
 
                                 {fiche.noteGlobale && (
                                     <div className="fiche-stats">
-                                        <span>⭐ {fiche.noteGlobale.toFixed(1)}</span>
+                                        <span>⭐ {parseFloat(fiche.noteGlobale).toFixed(1)}</span>
                                         <span>{fiche.nombreAvis || 0} avis</span>
                                     </div>
                                 )}

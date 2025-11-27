@@ -1,14 +1,16 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 
 const TermsOfService = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const previousPath = location.state?.previousPath || '/auth/maps';
 
     return (
         <div className="legal-page">
             {/* Header */}
             <div className="legal-header">
-                <button className="back-button" onClick={() => navigate(-1)}>
+                <button className="back-button" onClick={() => navigate(previousPath, { state: { openDrawer: true } })}>
                     <ArrowLeftOutlined />
                 </button>
                 <h1>Conditions d'Utilisation</h1>

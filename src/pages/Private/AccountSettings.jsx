@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../Utils/AuthContext';
 import UserService from '../../Services/User.service';
 import profilimg from '../../Assets/Images/profilimg.png';
@@ -18,6 +18,8 @@ import {
 const AccountSettings = () => {
     const { user, updateProfile, changePassword, getProfileImageUrl } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+    const previousPath = location.state?.previousPath || '/auth/maps';
 
     const [profileData, setProfileData] = useState({
         prenom: '',
@@ -201,7 +203,7 @@ const AccountSettings = () => {
             <div className="settings-container">
 
                 <div className="settings-header">
-                    <button className="back-button" onClick={() => navigate(-1)}>
+                    <button className="back-button" onClick={() => navigate(previousPath, { state: { openDrawer: true } })}>
                         <ArrowLeftOutlined />
                     </button>
                     <h1 className="settings-title">Mon Compte</h1>

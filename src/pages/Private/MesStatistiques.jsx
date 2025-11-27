@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { IonIcon } from '@ionic/react';
 import {
     arrowBackOutline,
@@ -15,6 +15,9 @@ import PrestataireService from '../../Services/Prestataire.services';
 
 const MesStatistiques = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const previousPath = location.state?.previousPath || '/auth/maps';
+
     const [fiches, setFiches] = useState([]);
     const [selectedFicheId, setSelectedFicheId] = useState(null);
     const [selectedFiche, setSelectedFiche] = useState(null);
@@ -105,7 +108,7 @@ const MesStatistiques = () => {
         return (
             <div className="prestataire-page">
                 <div className="page-header">
-                    <button className="back-btn" onClick={() => navigate(-1)}>
+                    <button className="back-btn" onClick={() => navigate(previousPath, { state: { openDrawer: true } })}>
                         <IonIcon icon={arrowBackOutline} />
                     </button>
                     <h1>Mes Statistiques</h1>
@@ -123,7 +126,7 @@ const MesStatistiques = () => {
     return (
         <div className="prestataire-page">
             <div className="page-header">
-                <button className="back-btn" onClick={() => navigate(-1)}>
+                <button className="back-btn" onClick={() => navigate(previousPath, { state: { openDrawer: true } })}>
                     <IonIcon icon={arrowBackOutline} />
                 </button>
                 <h1>Mes Statistiques</h1>

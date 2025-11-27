@@ -129,7 +129,7 @@
 }
 
 /* ========================================
-   DRAWER OVERLAY (NOUVEAU)
+   DRAWER OVERLAY
    ======================================== */
 .drawer-overlay {
     position: fixed;
@@ -139,8 +139,17 @@
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 1998;
-    animation: fadeIn 0.3s ease;
     backdrop-filter: blur(2px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.drawer-overlay.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 @keyframes fadeIn {

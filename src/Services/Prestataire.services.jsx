@@ -129,7 +129,124 @@ const PrestataireService = {
     },
 
     // ==========================================
-    // ROUTES PRESTATAIRE (authentifié)
+    // CATEGORIES
+    // ==========================================
+
+    /**
+     * Récupérer toutes les catégories
+     * @returns {Promise}
+     */
+    getCategories: async () => {
+        try {
+            const response = await Caller.get('/categories');
+            return response.data;
+        } catch (error) {
+            console.error('Erreur getCategories:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Erreur lors de la récupération',
+                data: []
+            };
+        }
+    },
+
+    // ==========================================
+    // GESTION DES FICHES (Mon Commerce)
+    // ==========================================
+
+    /**
+     * Récupérer mes fiches commerce
+     * @returns {Promise}
+     */
+    getMyFiches: async () => {
+        try {
+            const response = await Caller.get('/prestataires/me/fiches');
+            return response.data;
+        } catch (error) {
+            console.error('Erreur getMyFiches:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Erreur lors de la récupération',
+                data: { fiches: [], maxFiches: 1, peutCreer: false }
+            };
+        }
+    },
+
+    /**
+     * Créer une nouvelle fiche commerce
+     * @param {object} data - Données de la fiche
+     * @returns {Promise}
+     */
+    createFiche: async (data) => {
+        try {
+            const response = await Caller.post('/prestataires/me/fiches', data);
+            return response.data;
+        } catch (error) {
+            console.error('Erreur createFiche:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Erreur lors de la création'
+            };
+        }
+    },
+
+    /**
+     * Modifier une fiche commerce
+     * @param {number} ficheId - ID de la fiche
+     * @param {object} data - Données à mettre à jour
+     * @returns {Promise}
+     */
+    updateFiche: async (ficheId, data) => {
+        try {
+            const response = await Caller.put(`/prestataires/me/fiches/${ficheId}`, data);
+            return response.data;
+        } catch (error) {
+            console.error('Erreur updateFiche:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Erreur lors de la mise à jour'
+            };
+        }
+    },
+
+    /**
+     * Supprimer une fiche commerce
+     * @param {number} ficheId - ID de la fiche
+     * @returns {Promise}
+     */
+    deleteFiche: async (ficheId) => {
+        try {
+            const response = await Caller.delete(`/prestataires/me/fiches/${ficheId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Erreur deleteFiche:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Erreur lors de la suppression'
+            };
+        }
+    },
+
+    /**
+     * Réactiver une fiche commerce
+     * @param {number} ficheId - ID de la fiche
+     * @returns {Promise}
+     */
+    reactivateFiche: async (ficheId) => {
+        try {
+            const response = await Caller.post(`/prestataires/me/fiches/${ficheId}/reactivate`);
+            return response.data;
+        } catch (error) {
+            console.error('Erreur reactivateFiche:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Erreur lors de la réactivation'
+            };
+        }
+    },
+
+    // ==========================================
+    // ROUTES PRESTATAIRE (authentifié) - LEGACY
     // ==========================================
 
     /**
@@ -363,6 +480,7 @@ const PrestataireService = {
             };
         }
     },
+
     /**
      * Récupérer les derniers visiteurs d'un prestataire
      * @param {number} id - ID du prestataire

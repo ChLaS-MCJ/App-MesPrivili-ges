@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../Utils/AuthContext';
 import losangeIcon from '../../Assets/Images/rhombe.png';
 import profilimg from '../../Assets/Images/profilimg.png';
@@ -20,11 +20,57 @@ const Header = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const { user, logout, getProfileImageUrl } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const profileImageUrl = getProfileImageUrl() || profilimg;
-    console.log(user)
+
     // Vérifier si l'utilisateur est prestataire
-    const isPrestataire = user?.role.name === 'prestataire' || user?.role.name === 'admin';
+    const isPrestataire = user?.role?.name === 'prestataire' || user?.role?.name === 'admin';
+
+    // =============================================
+    // FERMER LE DRAWER QUAND LA ROUTE CHANGE
+    // =============================================
+    useEffect(() => {
+        // Si on revient avec openDrawer: true, ouvrir le drawer
+        if (location.state?.openDrawer) {
+            setIsDrawerOpen(true);
+            // Nettoyer le state pour éviter de rouvrir au refresh
+            window.history.replaceState({}, document.title);
+        } else {
+            // Sinon fermer le drawer
+            setIsDrawerOpen(false);
+        }
+    }, [location.pathname, location.state]);
+
+    // =============================================
+    // BLOQUER LE SCROLL DU BODY QUAND DRAWER OUVERT
+    // =============================================
+    useEffect(() => {
+        if (isDrawerOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+
+        // Cleanup
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isDrawerOpen]);
+
+    // =============================================
+    // FERMER AVEC LA TOUCHE ESCAPE
+    // =============================================
+    useEffect(() => {
+        const handleEscape = (e) => {
+            if (e.key === 'Escape' && isDrawerOpen) {
+                setIsDrawerOpen(false);
+            }
+        };
+
+        document.addEventListener('keydown', handleEscape);
+        return () => document.removeEventListener('keydown', handleEscape);
+    }, [isDrawerOpen]);
 
     const toggleDrawer = () => {
         setIsDrawerOpen(!isDrawerOpen);
@@ -35,8 +81,13 @@ const Header = () => {
     };
 
     const handleNavigation = (path) => {
-        closeDrawer();
-        navigate(path);
+        // Sauvegarder la page actuelle pour le retour
+        navigate(path, {
+            state: {
+                fromDrawer: true,
+                previousPath: location.pathname + location.search
+            }
+        });
     };
 
     const handleLogout = async () => {
@@ -197,12 +248,15 @@ const Header = () => {
                 </div>
             </header>
 
-            {isDrawerOpen && (
-                <div className="drawer-overlay" onClick={toggleDrawer}></div>
-            )}
+            {/* Overlay - ferme le drawer quand on clique dessus */}
+            <div
+                className={`drawer-overlay ${isDrawerOpen ? 'open' : ''}`}
+                onClick={closeDrawer}
+            />
 
+            {/* Drawer */}
             <div className={`profile-drawer ${isDrawerOpen ? 'open' : ''}`}>
-                <button className="drawer-close-btn" onClick={toggleDrawer}>
+                <button className="drawer-close-btn" onClick={closeDrawer}>
                     <CloseOutlined />
                 </button>
 

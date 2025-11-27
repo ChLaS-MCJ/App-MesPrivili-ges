@@ -23,6 +23,10 @@
 @import './Pages/Prestataires.css';
 @import './Pages/FichePrestataires.css';
 
+@import './Pages/Mespromotions.css';
+@import './Pages/Messtatistiques.css';
+@import './Pages/Moncommerce.css';
+
 /*--------------Components-----------------*/
 @import './Components/Loader.css';
 @import './Components/Toast-custom.css';
@@ -30,3 +34,5 @@
 @import './Components/LocationModal.css';
 @import './Components/RatingModal.css';
 @import './Components/ScanModal.css';
+@import './Components/FicheFormModal.css';
+@import './Components/PromotionFormModal.css';

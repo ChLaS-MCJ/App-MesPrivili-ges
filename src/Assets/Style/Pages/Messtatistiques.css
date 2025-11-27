@@ -1,0 +1,558 @@
+/* ============================================
+   MES STATISTIQUES - CSS
+   Page des statistiques prestataire
+   ============================================ */
+
+/* ===== BASE (hérite de prestataire-page) ===== */
+/* Note: .prestataire-page défini dans MonCommerce.css */
+
+/* ===== FICHE STATUS CARD ===== */
+.fiche-status-card {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1f1f1f 100%);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fiche-status-card h3 {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 10px;
+}
+
+.status-info .status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.status-info .status.active {
+    background: rgba(100, 255, 150, 0.15);
+    color: #64ff96;
+}
+
+.status-info .status.expired {
+    background: rgba(255, 100, 100, 0.15);
+    color: #ff6b6b;
+}
+
+.status-info .status.inactive {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* ===== STATS GRID ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+/* ===== STAT CARD ===== */
+.stat-card {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1f1f1f 100%);
+    border-radius: 16px;
+    padding: 18px 12px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    border-color: rgba(254, 126, 79, 0.3);
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.2) 0%, rgba(243, 162, 133, 0.1) 100%);
+    border-radius: 12px;
+}
+
+.stat-icon ion-icon {
+    font-size: 22px;
+    color: #fe7e4f;
+}
+
+.stat-value {
+    color: #fff;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.stat-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.stat-detail {
+    color: #f3a285;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* ===== CHART SECTION ===== */
+.chart-section {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1f1f1f 100%);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chart-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 20px;
+}
+
+.chart-section h3 ion-icon {
+    font-size: 20px;
+    color: #fe7e4f;
+}
+
+/* Simple Chart */
+.simple-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 150px;
+    gap: 8px;
+    padding: 10px 0;
+}
+
+.chart-bar-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.chart-bar {
+    width: 100%;
+    max-width: 35px;
+    background: linear-gradient(180deg, #fe7e4f 0%, #f3a285 100%);
+    border-radius: 6px 6px 0 0;
+    position: relative;
+    transition: height 0.5s ease;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 8px;
+}
+
+.bar-value {
+    position: absolute;
+    top: -22px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.bar-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    margin-top: 8px;
+    text-transform: uppercase;
+}
+
+/* ===== RECENT REVIEWS SECTION ===== */
+.recent-reviews-section {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1f1f1f 100%);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.recent-reviews-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 18px;
+}
+
+.recent-reviews-section h3 ion-icon {
+    font-size: 20px;
+    color: #fe7e4f;
+}
+
+/* Reviews List */
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.review-item {
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border-left: 3px solid #fe7e4f;
+}
+
+/* Stars */
+.review-stars {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 8px;
+}
+
+.star {
+    font-size: 16px;
+}
+
+.star.filled {
+    color: #fe7e4f;
+}
+
+.star.half {
+    color: #f3a285;
+}
+
+.star.empty {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.review-comment {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 10px;
+    font-style: italic;
+}
+
+.review-date {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+}
+
+.no-reviews {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+    margin: 0;
+}
+
+/* ===== PERIOD SELECTOR ===== */
+.period-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding: 2px;
+}
+
+.period-btn {
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.period-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.period-btn.active {
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.2) 0%, rgba(243, 162, 133, 0.1) 100%);
+    border-color: rgba(254, 126, 79, 0.4);
+    color: #fe7e4f;
+}
+
+/* ===== TREND INDICATOR ===== */
+.trend-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.trend-indicator.up {
+    background: rgba(100, 255, 150, 0.15);
+    color: #64ff96;
+}
+
+.trend-indicator.down {
+    background: rgba(255, 100, 100, 0.15);
+    color: #ff6b6b;
+}
+
+.trend-indicator.neutral {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.trend-indicator ion-icon {
+    font-size: 14px;
+}
+
+/* ===== COMPARISON STATS ===== */
+.comparison-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.comparison-row:last-child {
+    border-bottom: none;
+}
+
+.comparison-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+}
+
+.comparison-values {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.comparison-current {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.comparison-previous {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 13px;
+}
+
+/* ===== QUICK STATS ROW ===== */
+.quick-stats-row {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.quick-stat {
+    flex: 1;
+    text-align: center;
+}
+
+.quick-stat-value {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.quick-stat-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+/* ===== RATING BREAKDOWN ===== */
+.rating-breakdown {
+    margin-top: 15px;
+}
+
+.rating-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.rating-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    min-width: 50px;
+}
+
+.rating-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.rating-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #fe7e4f 0%, #f3a285 100%);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.rating-count {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    min-width: 25px;
+    text-align: right;
+}
+
+/* ===== ANIMATIONS ===== */
+.stat-card {
+    animation: fadeInUp 0.4s ease forwards;
+    opacity: 0;
+}
+
+.stat-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.stat-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.stat-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.chart-section {
+    animation: fadeInUp 0.4s ease forwards;
+    animation-delay: 0.4s;
+    opacity: 0;
+}
+
+.recent-reviews-section {
+    animation: fadeInUp 0.4s ease forwards;
+    animation-delay: 0.5s;
+    opacity: 0;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Chart bar animation */
+.chart-bar {
+    animation: growUp 0.6s ease forwards;
+    transform-origin: bottom;
+}
+
+@keyframes growUp {
+    from {
+        transform: scaleY(0);
+    }
+
+    to {
+        transform: scaleY(1);
+    }
+}
+
+.chart-bar-container:nth-child(1) .chart-bar {
+    animation-delay: 0.5s;
+}
+
+.chart-bar-container:nth-child(2) .chart-bar {
+    animation-delay: 0.55s;
+}
+
+.chart-bar-container:nth-child(3) .chart-bar {
+    animation-delay: 0.6s;
+}
+
+.chart-bar-container:nth-child(4) .chart-bar {
+    animation-delay: 0.65s;
+}
+
+.chart-bar-container:nth-child(5) .chart-bar {
+    animation-delay: 0.7s;
+}
+
+.chart-bar-container:nth-child(6) .chart-bar {
+    animation-delay: 0.75s;
+}
+
+.chart-bar-container:nth-child(7) .chart-bar {
+    animation-delay: 0.8s;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 360px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .stat-icon {
+        margin: 0;
+        flex-shrink: 0;
+    }
+
+    .stat-card>div:last-child {
+        flex: 1;
+    }
+}
+
+@media (min-width: 768px) {
+    .stats-grid {
+        gap: 20px;
+    }
+
+    .stat-card {
+        padding: 25px 20px;
+    }
+
+    .stat-value {
+        font-size: 32px;
+    }
+
+    .simple-chart {
+        height: 180px;
+    }
+
+    .chart-bar {
+        max-width: 50px;
+    }
+}

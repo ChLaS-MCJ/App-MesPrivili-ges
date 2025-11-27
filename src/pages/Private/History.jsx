@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../Utils/AuthContext';
 import UserService from '../../Services/User.service';
 import {
@@ -13,6 +13,8 @@ import {
 
 const History = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const previousPath = location.state?.previousPath || '/auth/maps';
     const { user } = useAuth();
 
     const [history, setHistory] = useState([]);
@@ -133,7 +135,7 @@ const History = () => {
         <div className="history-page">
             {/* Header */}
             <div className="history-header">
-                <button className="back-button" onClick={() => navigate(-1)}>
+                <button className="back-button" onClick={() => navigate(previousPath, { state: { openDrawer: true } })}>
                     <ArrowLeftOutlined />
                 </button>
                 <h1>Historique</h1>
