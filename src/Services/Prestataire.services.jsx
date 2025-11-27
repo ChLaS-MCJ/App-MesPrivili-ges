@@ -480,6 +480,13 @@ const PrestataireService = {
             };
         }
     },
+    trackVisit: async (id) => {
+        try {
+            await Caller.post(`/prestataires/${id}/visit`);
+        } catch (error) {
+            // Silencieux - pas grave si ça échoue
+        }
+    },
 
     /**
      * Récupérer les derniers visiteurs d'un prestataire

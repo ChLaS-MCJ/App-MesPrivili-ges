@@ -86,7 +86,6 @@ const ScanModal = ({ isOpen, onClose }) => {
             navigator.vibrate(200);
         }
 
-        console.log('✅ QR Code détecté:', decodedText);
         setScannedQrCode(decodedText);
 
         await stopScanner();

@@ -57,22 +57,53 @@ const Maps = () => {
         }
     }, []);
 
-    // Grouper les prestataires par ville
+    // Grouper les prestataires par ville (nom normalisé)
+    // Utilise la MOYENNE des coordonnées pour chaque ville
     const groupByVille = useCallback((prestataires) => {
         const groups = {};
+
         prestataires.forEach(p => {
-            const key = p.ville;
-            if (!groups[key]) {
-                groups[key] = {
-                    ville: p.ville,
-                    lat: parseFloat(p.latitude),
-                    lng: parseFloat(p.longitude),
+            // Normaliser le nom de ville (minuscule, sans accents, trim)
+            const villeNormalisee = p.ville
+                .toLowerCase()
+                .trim()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
+
+            if (!groups[villeNormalisee]) {
+                groups[villeNormalisee] = {
+                    ville: p.ville, // Garder le nom original pour l'affichage
+                    villeNormalisee: villeNormalisee,
+                    latitudes: [],
+                    longitudes: [],
                     prestataires: []
                 };
             }
-            groups[key].prestataires.push(p);
+
+            // Ajouter les coordonnées pour calculer la moyenne
+            if (p.latitude && p.longitude) {
+                groups[villeNormalisee].latitudes.push(parseFloat(p.latitude));
+                groups[villeNormalisee].longitudes.push(parseFloat(p.longitude));
+            }
+            groups[villeNormalisee].prestataires.push(p);
         });
-        return Object.values(groups);
+
+        // Calculer les coordonnées moyennes pour chaque ville
+        return Object.values(groups).map(group => {
+            const lat = group.latitudes.length > 0
+                ? group.latitudes.reduce((a, b) => a + b, 0) / group.latitudes.length
+                : 0;
+            const lng = group.longitudes.length > 0
+                ? group.longitudes.reduce((a, b) => a + b, 0) / group.longitudes.length
+                : 0;
+
+            return {
+                ville: group.ville,
+                lat: lat,
+                lng: lng,
+                prestataires: group.prestataires
+            };
+        }).filter(g => g.lat !== 0 && g.lng !== 0); // Exclure les villes sans coordonnées
     }, []);
 
     // Calculer les clusters visuels basés sur le zoom

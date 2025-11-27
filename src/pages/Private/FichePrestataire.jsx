@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { IonIcon } from '@ionic/react';
 import {
@@ -23,6 +23,9 @@ const FichePrestataire = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
+    // Ref pour éviter le double appel de trackVisit (React StrictMode)
+    const visitTracked = useRef(false);
+
     const [prestataire, setPrestataire] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isFavorite, setIsFavorite] = useState(false);
@@ -45,6 +48,16 @@ const FichePrestataire = () => {
     // Statut d'ouverture en temps réel
     const [openStatus, setOpenStatus] = useState({ status: null, closesIn: null });
 
+    // ============================================
+    // ENREGISTRER LA VISITE UNE SEULE FOIS
+    // ============================================
+    useEffect(() => {
+        if (id && !visitTracked.current) {
+            visitTracked.current = true;
+            PrestataireService.trackVisit(id);
+        }
+    }, [id]);
+
     // Récupérer la géolocalisation de l'utilisateur
     useEffect(() => {
         if (navigator.geolocation) {
@@ -57,7 +70,7 @@ const FichePrestataire = () => {
                     setGeolocEnabled(true);
                 },
                 (error) => {
-                    console.log('Géolocalisation non disponible:', error);
+
                     setGeolocEnabled(false);
                 },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
@@ -206,6 +219,7 @@ const FichePrestataire = () => {
             setLoading(true);
             try {
                 const result = await PrestataireService.getById(id);
+
                 if (result.success) {
                     setPrestataire(result.data);
 
@@ -233,13 +247,21 @@ const FichePrestataire = () => {
     const getDisplayAvatars = () => {
         const avatars = [];
         const maxAvatars = 3;
+        const baseUrl = 'https://cacao.mesprivileges.fr'; // URL de votre API
 
         // D'abord les vrais visiteurs
         visitors.forEach((visitor) => {
             if (avatars.length < maxAvatars) {
+                let image = visitor.profileImage;
+
+                // Ajouter l'URL de base si l'image est relative
+                if (image && !image.startsWith('http')) {
+                    image = `${baseUrl}${image}`;
+                }
+
                 avatars.push({
                     id: visitor.id,
-                    image: visitor.profileImage || `https://i.pravatar.cc/100?u=real-${visitor.id}`,
+                    image: image || `https://i.pravatar.cc/100?u=real-${visitor.id}`,
                     isReal: true
                 });
             }
@@ -293,7 +315,7 @@ const FichePrestataire = () => {
                     url: window.location.href,
                 });
             } catch (error) {
-                console.log('Erreur partage:', error);
+
             }
         }
     };
@@ -391,9 +413,6 @@ const FichePrestataire = () => {
         if (allImages.length === 0) {
             allImages.push('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80');
         }
-
-        // Debug - à retirer en production
-        console.log('Images chargées:', allImages);
 
         return allImages;
     };

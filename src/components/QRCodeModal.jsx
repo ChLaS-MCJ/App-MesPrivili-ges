@@ -39,7 +39,6 @@ const QRCodeModal = ({ isOpen, onClose }) => {
     };
 
     const startPolling = () => {
-        console.log('🔄 Polling démarré');
         checkForNewScan();
         pollingRef.current = setInterval(checkForNewScan, 3000);
     };
@@ -48,7 +47,6 @@ const QRCodeModal = ({ isOpen, onClose }) => {
         if (pollingRef.current) {
             clearInterval(pollingRef.current);
             pollingRef.current = null;
-            console.log('🔄 Polling arrêté');
         }
     };
 
@@ -58,7 +56,6 @@ const QRCodeModal = ({ isOpen, onClose }) => {
 
             if (response.data.success && response.data.data) {
                 const scan = response.data.data;
-                console.log('✅ Scan récent détecté!', scan);
 
                 stopPolling();
 

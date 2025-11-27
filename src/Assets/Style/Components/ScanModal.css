@@ -69,7 +69,7 @@
     position: absolute;
     width: 30px;
     height: 30px;
-    border-color: #FFD700;
+    border-color: #f3a285;
     border-style: solid;
     border-width: 0;
 }
@@ -125,14 +125,14 @@
 }
 
 .no-promo-warning {
-    background: rgba(255, 193, 7, 0.1);
-    border: 1px solid rgba(255, 193, 7, 0.3);
+    background: rgba(255, 119, 7, 0.1);
+    border: 1px solid rgba(255, 139, 7, 0.3);
     border-radius: 12px;
     padding: 16px;
     display: flex;
     align-items: center;
     gap: 12px;
-    color: #ffc107;
+    color: #f3a285;
 }
 
 .no-promo-warning ion-icon {
@@ -162,8 +162,8 @@
 }
 
 .promo-item:hover {
-    background: rgba(255, 215, 0, 0.1);
-    border-color: rgba(255, 215, 0, 0.3);
+    background: rgba(255, 128, 0, 0.1);
+    border-color: rgba(255, 119, 0, 0.3);
 }
 
 .promo-item:disabled {
@@ -189,7 +189,7 @@
 }
 
 .promo-uses {
-    color: #FFD700;
+    color: #f3a285;
     font-size: 12px;
 }
 
@@ -233,7 +233,7 @@
 }
 
 .promo-applied {
-    color: #FFD700;
+    color: #f3a285;
     font-size: 14px;
 }
 
@@ -250,7 +250,7 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #FFD700, #FFA500);
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
     color: #000;
     border: none;
     border-radius: 12px;
