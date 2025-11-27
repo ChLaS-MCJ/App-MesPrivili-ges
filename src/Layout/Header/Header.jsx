@@ -10,7 +10,10 @@ import {
     HistoryOutlined,
     LogoutOutlined,
     FileTextOutlined,
-    SafetyOutlined
+    SafetyOutlined,
+    ShopOutlined,
+    GiftOutlined,
+    BarChartOutlined
 } from '@ant-design/icons';
 
 const Header = () => {
@@ -19,6 +22,9 @@ const Header = () => {
     const navigate = useNavigate();
 
     const profileImageUrl = getProfileImageUrl() || profilimg;
+    console.log(user)
+    // Vérifier si l'utilisateur est prestataire
+    const isPrestataire = user?.role.name === 'prestataire' || user?.role.name === 'admin';
 
     const toggleDrawer = () => {
         setIsDrawerOpen(!isDrawerOpen);
@@ -218,7 +224,9 @@ const Header = () => {
                                     : 'Utilisateur'}
                         </h3>
                         <p>{user?.email || 'email@example.com'}</p>
-
+                        {isPrestataire && (
+                            <span className="role-badge">Prestataire</span>
+                        )}
                     </div>
 
                     <div className="drawer-menu">
@@ -237,6 +245,38 @@ const Header = () => {
                             <HistoryOutlined className="menu-icon" />
                             <span>Historique</span>
                         </button>
+
+                        {/* Section Prestataire */}
+                        {isPrestataire && (
+                            <>
+                                <div className="drawer-divider"></div>
+                                <div className="drawer-section-title">Espace Prestataire</div>
+
+                                <button
+                                    className="drawer-menu-item prestataire"
+                                    onClick={() => handleNavigation('/auth/mon-commerce')}
+                                >
+                                    <ShopOutlined className="menu-icon" />
+                                    <span>Mon Commerce</span>
+                                </button>
+
+                                <button
+                                    className="drawer-menu-item prestataire"
+                                    onClick={() => handleNavigation('/auth/mes-promotions')}
+                                >
+                                    <GiftOutlined className="menu-icon" />
+                                    <span>Mes Promotions</span>
+                                </button>
+
+                                <button
+                                    className="drawer-menu-item prestataire"
+                                    onClick={() => handleNavigation('/auth/mes-statistiques')}
+                                >
+                                    <BarChartOutlined className="menu-icon" />
+                                    <span>Mes Statistiques</span>
+                                </button>
+                            </>
+                        )}
 
                         <div className="drawer-divider"></div>
 
