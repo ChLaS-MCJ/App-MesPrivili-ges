@@ -14,10 +14,13 @@ import {
     closeOutline,
     walkOutline,
     chevronBackOutline,
-    chevronForwardOutline
+    chevronForwardOutline,
+    giftOutline,
+    ticketOutline
 } from 'ionicons/icons';
 import PrestataireService from '../../Services/Prestataire.services';
 import FavorisService from '../../Services/Favoris.services';
+import PromotionService from '../../Services/Promotion.services';
 
 const FichePrestataire = () => {
     const { id } = useParams();
@@ -32,6 +35,11 @@ const FichePrestataire = () => {
     const [favoriteLoading, setFavoriteLoading] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [visitors, setVisitors] = useState([]);
+
+    // Promotions
+    const [promotions, setPromotions] = useState([]);
+    const [showPromoModal, setShowPromoModal] = useState(false);
+    const [selectedPromo, setSelectedPromo] = useState(null);
 
     // Géolocalisation et distance
     const [userLocation, setUserLocation] = useState(null);
@@ -58,6 +66,20 @@ const FichePrestataire = () => {
         }
     }, [id]);
 
+    // Charger les promotions
+    useEffect(() => {
+        const fetchPromotions = async () => {
+            if (!id) return;
+
+            const result = await PromotionService.getByPrestataireId(id);
+            if (result.success) {
+                setPromotions(result.data || []);
+            }
+        };
+
+        fetchPromotions();
+    }, [id]);
+
     // Récupérer la géolocalisation de l'utilisateur
     useEffect(() => {
         if (navigator.geolocation) {
@@ -70,7 +92,6 @@ const FichePrestataire = () => {
                     setGeolocEnabled(true);
                 },
                 (error) => {
-
                     setGeolocEnabled(false);
                 },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
@@ -107,7 +128,7 @@ const FichePrestataire = () => {
 
     // Formule de Haversine pour calculer la distance
     const calculerDistance = (lat1, lon1, lat2, lon2) => {
-        const R = 6371; // Rayon de la Terre en km
+        const R = 6371;
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
 
@@ -134,7 +155,6 @@ const FichePrestataire = () => {
     const checkOpenStatus = () => {
         if (!prestataire?.horaires) return { status: null, closesIn: null };
 
-        // Si c'est une string JSON, on parse
         let horairesData = prestataire.horaires;
         if (typeof prestataire.horaires === 'string') {
             try {
@@ -161,17 +181,14 @@ const FichePrestataire = () => {
         const debutMinutes = debutH * 60 + debutM;
         const finMinutes = finH * 60 + finM;
 
-        // Pas encore ouvert
         if (heureActuelle < debutMinutes) {
             return { status: 'closed', closesIn: null, opensAt: horairesJour.debut };
         }
 
-        // Déjà fermé
         if (heureActuelle > finMinutes) {
             return { status: 'closed', closesIn: null };
         }
 
-        // Ouvert - calcul du temps restant avant fermeture
         const minutesRestantes = finMinutes - heureActuelle;
 
         if (minutesRestantes <= 45) {
@@ -185,13 +202,11 @@ const FichePrestataire = () => {
     useEffect(() => {
         if (!prestataire) return;
 
-        // Vérifier immédiatement
         setOpenStatus(checkOpenStatus());
 
-        // Mettre à jour toutes les minutes
         const interval = setInterval(() => {
             setOpenStatus(checkOpenStatus());
-        }, 60000); // 60 secondes
+        }, 60000);
 
         return () => clearInterval(interval);
     }, [prestataire]);
@@ -223,7 +238,6 @@ const FichePrestataire = () => {
                 if (result.success) {
                     setPrestataire(result.data);
 
-                    // Vérifier si c'est un favori
                     const favResult = await FavorisService.checkFavori(id);
                     if (favResult.success) {
                         setIsFavorite(favResult.data.isFavori);
@@ -247,14 +261,12 @@ const FichePrestataire = () => {
     const getDisplayAvatars = () => {
         const avatars = [];
         const maxAvatars = 3;
-        const baseUrl = 'https://cacao.mesprivileges.fr'; // URL de votre API
+        const baseUrl = 'https://cacao.mesprivileges.fr';
 
-        // D'abord les vrais visiteurs
         visitors.forEach((visitor) => {
             if (avatars.length < maxAvatars) {
                 let image = visitor.profileImage;
 
-                // Ajouter l'URL de base si l'image est relative
                 if (image && !image.startsWith('http')) {
                     image = `${baseUrl}${image}`;
                 }
@@ -267,7 +279,6 @@ const FichePrestataire = () => {
             }
         });
 
-        // Compléter avec des avatars générés si besoin
         const fakeSeeds = ['alpha', 'beta', 'gamma', 'delta', 'epsilon'];
         let fakeIndex = 0;
 
@@ -315,7 +326,7 @@ const FichePrestataire = () => {
                     url: window.location.href,
                 });
             } catch (error) {
-
+                // Erreur silencieuse
             }
         }
     };
@@ -327,28 +338,23 @@ const FichePrestataire = () => {
         }
     };
 
-    // Vérifier si le texte dépasse une certaine longueur
     const shouldTruncate = (text, maxLength = 100) => {
         return text && text.length > maxLength;
     };
 
-    // Tronquer le texte
     const truncateText = (text, maxLength = 100) => {
         if (!text) return '';
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength) + '...';
     };
 
-    // Vérifier si les filtres devraient être tronqués (plus de 3 filtres)
     const shouldTruncateFiltres = () => {
         return prestataire?.filtres && prestataire.filtres.length > 3;
     };
 
-    // Formater les horaires pour l'affichage
     const formatHoraires = (horaires) => {
         if (!horaires) return null;
 
-        // Si c'est une string JSON, on parse
         let horairesData = horaires;
         if (typeof horaires === 'string') {
             try {
@@ -378,20 +384,20 @@ const FichePrestataire = () => {
         }));
     };
 
-    // Images du prestataire (imagePrincipale en premier, puis les secondaires)
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    };
+
     const getImages = () => {
         const allImages = [];
 
-        // Toujours mettre l'image principale en premier
         if (prestataire?.imagePrincipale) {
             allImages.push(prestataire.imagePrincipale);
         }
 
-        // Ajouter les images secondaires (en évitant les doublons)
-        // Vérifier plusieurs formats possibles : images, imagesSecondaires, galerie
         let secondaryImages = prestataire?.images || prestataire?.imagesSecondaires || prestataire?.galerie || [];
 
-        // Si c'est une string JSON, on parse
         if (typeof secondaryImages === 'string') {
             try {
                 secondaryImages = JSON.parse(secondaryImages);
@@ -409,7 +415,6 @@ const FichePrestataire = () => {
             });
         }
 
-        // Si aucune image, mettre une image par défaut
         if (allImages.length === 0) {
             allImages.push('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80');
         }
@@ -417,7 +422,6 @@ const FichePrestataire = () => {
         return allImages;
     };
 
-    // Navigation des images
     const nextImage = (e) => {
         e.stopPropagation();
         const images = getImages();
@@ -461,6 +465,12 @@ const FichePrestataire = () => {
                 setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
             }
         }
+    };
+
+    // Ouvrir le modal de détail promo
+    const openPromoDetail = (promo) => {
+        setSelectedPromo(promo);
+        setShowPromoModal(true);
     };
 
     if (loading) {
@@ -531,6 +541,18 @@ const FichePrestataire = () => {
                     </div>
                 )}
 
+                {/* Tab latéral promo discret */}
+                {promotions.length > 0 && (
+                    <div
+                        className="fiche-promo-side-tab"
+                        onClick={() => openPromoDetail(promotions[0])}
+                    >
+                        <span className="fiche-promo-side-dot"></span>
+                        <IonIcon icon={giftOutline} className="fiche-promo-side-tab-icon" />
+                        <span className="fiche-promo-side-tab-text">{promotions[0].etiquette || 'PROMO'}</span>
+                    </div>
+                )}
+
             </div>
 
             {/* Contenu en bas - Card glassmorphism */}
@@ -538,7 +560,7 @@ const FichePrestataire = () => {
                 <div className="fiche-content-inner">
                     {/* Titre et note */}
                     <div className="fiche-title-row">
-                        <h1 className="fiche-title">{prestataire.nomCommerce} </h1>
+                        <h1 className="fiche-title">{prestataire.nomCommerce}</h1>
                         <div className="fiche-meta-item">
                             <IonIcon icon={timeOutline} />
                             {renderOpenStatus()}
@@ -555,7 +577,6 @@ const FichePrestataire = () => {
                             <IonIcon icon={locationOutline} />
                             <span>{prestataire.adresse}, {prestataire.ville}{prestataire.codePostal ? ` ${prestataire.codePostal}` : ''}</span>
                         </div>
-
 
                         {/* Distance - affiché seulement si géoloc activée */}
                         {geolocEnabled && distance !== null && (
@@ -662,6 +683,53 @@ const FichePrestataire = () => {
                             ) : (
                                 <p className="no-horaires">Horaires non renseignés</p>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Détail Promotion */}
+            {showPromoModal && selectedPromo && (
+                <div className="fiche-promo-modal-overlay" onClick={() => setShowPromoModal(false)}>
+                    <div className="fiche-promo-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="fiche-promo-modal-header">
+                            <div className="fiche-promo-modal-badge">
+                                <IonIcon icon={ticketOutline} />
+                                <span>{selectedPromo.etiquette || 'PROMO'}</span>
+                            </div>
+                            <button className="fiche-promo-modal-close" onClick={() => setShowPromoModal(false)}>
+                                <IonIcon icon={closeOutline} />
+                            </button>
+                        </div>
+
+                        <div className="fiche-promo-modal-content">
+                            <h2 className="fiche-promo-modal-title">{selectedPromo.titre}</h2>
+
+                            {selectedPromo.description && (
+                                <p className="fiche-promo-modal-description">{selectedPromo.description}</p>
+                            )}
+
+                            <div className="fiche-promo-modal-details">
+                                <div className="fiche-promo-detail-item">
+                                    <span className="fiche-promo-detail-label">Valable jusqu'au</span>
+                                    <span className="fiche-promo-detail-value">{formatDate(selectedPromo.dateFin)}</span>
+                                </div>
+
+                                {selectedPromo.limiteUtilisations && (
+                                    <div className="fiche-promo-detail-item">
+                                        <span className="fiche-promo-detail-label">Utilisations restantes</span>
+                                        <span className="fiche-promo-detail-value">
+                                            {selectedPromo.limiteUtilisations - selectedPromo.nombreUtilisations} / {selectedPromo.limiteUtilisations}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="fiche-promo-modal-footer">
+                                <p className="fiche-promo-modal-info">
+                                    Scannez votre QR code en caisse pour bénéficier de l'offre
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

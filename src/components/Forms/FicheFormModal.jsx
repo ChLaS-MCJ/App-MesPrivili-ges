@@ -9,7 +9,8 @@ import {
     checkmarkCircleOutline,
     alertCircleOutline,
     locationOutline,
-    reorderThreeOutline
+    reorderThreeOutline,
+    refreshOutline
 } from 'ionicons/icons';
 import PrestataireService from '../../Services/Prestataire.services';
 
@@ -115,6 +116,7 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
     // Pour la géolocalisation automatique
     const [geoLoading, setGeoLoading] = useState(false);
     const [geoStatus, setGeoStatus] = useState(null); // 'success', 'error', null
+    const [manualGeoEdit, setManualGeoEdit] = useState(false); // Pour savoir si l'utilisateur a modifié manuellement
 
     // Pour l'upload d'images
     const [uploadingMain, setUploadingMain] = useState(false);
@@ -225,6 +227,11 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                     images: parsedImages,
                     horaires: parsedHoraires
                 });
+
+                // Si la fiche a déjà des coordonnées, on considère que c'est une édition manuelle
+                if (fiche.latitude && fiche.longitude) {
+                    setManualGeoEdit(true);
+                }
             } else {
                 // Reset pour nouvelle fiche
                 setFormData({
@@ -250,6 +257,7 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                         dimanche: { ouvert: false, debut: '09:00', fin: '18:00' }
                     }
                 });
+                setManualGeoEdit(false);
             }
             setActiveTab('infos');
             setError(null);
@@ -271,6 +279,11 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Si l'utilisateur modifie manuellement lat/lng, on le note
+        if (name === 'latitude' || name === 'longitude') {
+            setManualGeoEdit(true);
+        }
     };
 
     // Géolocalisation automatique via API adresse.data.gouv.fr
@@ -302,23 +315,25 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                     longitude: lng.toFixed(6)
                 }));
                 setGeoStatus('success');
+                setManualGeoEdit(false); // Reset car c'est une géoloc auto
             } else {
                 setGeoStatus('error');
-                setError('Adresse non trouvée. Vérifiez les informations.');
+                setError('Adresse non trouvée. Vérifiez les informations ou saisissez les coordonnées manuellement.');
             }
         } catch (error) {
             console.error('Erreur géocodage:', error);
             setGeoStatus('error');
-            setError('Erreur lors de la géolocalisation');
+            setError('Erreur lors de la géolocalisation. Vous pouvez saisir les coordonnées manuellement.');
         } finally {
             setGeoLoading(false);
         }
     };
 
     // Déclencher la géolocalisation quand adresse + code postal + ville sont remplis
+    // Seulement si l'utilisateur n'a pas déjà modifié manuellement les coordonnées
     useEffect(() => {
-        const { adresse, codePostal, ville } = formData;
-        if (adresse && codePostal && codePostal.length === 5 && ville && !formData.latitude) {
+        const { adresse, codePostal, ville, latitude } = formData;
+        if (adresse && codePostal && codePostal.length === 5 && ville && !latitude && !manualGeoEdit) {
             const timer = setTimeout(() => {
                 geocodeAddress();
             }, 1000); // Debounce de 1 seconde
@@ -597,6 +612,13 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         return categoryImages[categoryName] || modeImg;
     };
 
+    // Ouvrir Google Maps pour trouver les coordonnées
+    const openGoogleMapsForCoords = () => {
+        const { adresse, codePostal, ville } = formData;
+        const query = encodeURIComponent(`${adresse} ${codePostal} ${ville}`);
+        window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+    };
+
     if (!isOpen) return null;
 
     const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
@@ -765,38 +787,87 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                 </div>
                             </div>
 
-                            {/* Indicateur de géolocalisation */}
+                            {/* Section Géolocalisation */}
+                            <div className="form-section-title">
+                                <IonIcon icon={locationOutline} />
+                                Géolocalisation
+                            </div>
+
+                            {/* Indicateur de géolocalisation automatique */}
                             <div className="geo-status">
                                 {geoLoading && (
                                     <div className="geo-loading">
                                         <div className="spinner-small"></div>
-                                        <span>Géolocalisation en cours...</span>
+                                        <span>Géolocalisation automatique en cours...</span>
                                     </div>
                                 )}
-                                {geoStatus === 'success' && formData.latitude && (
+                                {geoStatus === 'success' && !manualGeoEdit && (
                                     <div className="geo-success">
                                         <IonIcon icon={checkmarkCircleOutline} />
-                                        <span>Coordonnées trouvées : {formData.latitude}, {formData.longitude}</span>
+                                        <span>Coordonnées trouvées automatiquement</span>
                                     </div>
                                 )}
                                 {geoStatus === 'error' && (
                                     <div className="geo-error">
                                         <IonIcon icon={alertCircleOutline} />
-                                        <span>Géolocalisation échouée</span>
-                                        <button type="button" className="btn-retry" onClick={geocodeAddress}>
-                                            Réessayer
-                                        </button>
-                                    </div>
-                                )}
-                                {!geoLoading && !geoStatus && formData.latitude && formData.longitude && (
-                                    <div className="geo-success">
-                                        <IonIcon icon={locationOutline} />
-                                        <span>Position : {formData.latitude}, {formData.longitude}</span>
+                                        <span>Géolocalisation automatique échouée</span>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="form-group">
+                            {/* Champs Latitude / Longitude */}
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Latitude</label>
+                                    <input
+                                        type="text"
+                                        name="latitude"
+                                        value={formData.latitude}
+                                        onChange={handleChange}
+                                        placeholder="Ex: 48.856614"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Longitude</label>
+                                    <input
+                                        type="text"
+                                        name="longitude"
+                                        value={formData.longitude}
+                                        onChange={handleChange}
+                                        placeholder="Ex: 2.352222"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Boutons d'aide géolocalisation */}
+                            <div className="geo-actions">
+                                <button
+                                    type="button"
+                                    className="btn-geo"
+                                    onClick={geocodeAddress}
+                                    disabled={geoLoading || !formData.adresse || !formData.ville}
+                                >
+                                    <IonIcon icon={refreshOutline} />
+                                    Recalculer automatiquement
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn-geo secondary"
+                                    onClick={openGoogleMapsForCoords}
+                                    disabled={!formData.adresse || !formData.ville}
+                                >
+                                    <IonIcon icon={locationOutline} />
+                                    Trouver sur Google Maps
+                                </button>
+                            </div>
+
+                            <small className="help-text geo-help">
+                                💡 Les coordonnées sont calculées automatiquement à partir de l'adresse.
+                                Si le résultat n'est pas précis, vous pouvez les modifier manuellement
+                                ou utiliser Google Maps pour trouver les coordonnées exactes.
+                            </small>
+
+                            <div className="form-group" style={{ marginTop: '15px' }}>
                                 <label>Google Place ID</label>
                                 <input
                                     type="text"

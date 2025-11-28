@@ -1,14 +1,23 @@
 // components/ScanModal.jsx
 import { useState, useEffect, useRef } from 'react';
 import { IonIcon } from '@ionic/react';
-import { closeOutline, flashOutline, flashOffOutline, checkmarkCircle, alertCircle } from 'ionicons/icons';
+import {
+    closeOutline,
+    flashOutline,
+    flashOffOutline,
+    checkmarkCircle,
+    alertCircle,
+    storefrontOutline,
+    locationOutline,
+    pricetagOutline
+} from 'ionicons/icons';
 import { Html5Qrcode } from 'html5-qrcode';
 import ScanService from '../Services/Scan.services';
 
 const ScanModal = ({ isOpen, onClose }) => {
-    const [step, setStep] = useState('scan'); // scan, select-promo, success, error
-    const [promotions, setPromotions] = useState([]);
-    const [selectedPromo, setSelectedPromo] = useState(null);
+    const [step, setStep] = useState('loading'); // loading, select-fiche, scan, success, error
+    const [fiches, setFiches] = useState([]);
+    const [selectedFiche, setSelectedFiche] = useState(null);
     const [scannedQrCode, setScannedQrCode] = useState(null);
     const [scanResult, setScanResult] = useState(null);
     const [error, setError] = useState(null);
@@ -17,11 +26,17 @@ const ScanModal = ({ isOpen, onClose }) => {
 
     const scannerRef = useRef(null);
     const html5QrCodeRef = useRef(null);
+    const selectedFicheRef = useRef(null); // Ref pour accéder à selectedFiche dans les callbacks
+    const isScannerRunning = useRef(false); // Track si le scanner tourne
+
+    // Sync selectedFiche avec la ref
+    useEffect(() => {
+        selectedFicheRef.current = selectedFiche;
+    }, [selectedFiche]);
 
     useEffect(() => {
         if (isOpen) {
-            loadPromotions();
-            startScanner();
+            loadFiches();
         }
 
         return () => {
@@ -29,27 +44,71 @@ const ScanModal = ({ isOpen, onClose }) => {
         };
     }, [isOpen]);
 
-    const loadPromotions = async () => {
+    const loadFiches = async () => {
+        setStep('loading');
         try {
-            const result = await ScanService.getMyPromotions();
+            const result = await ScanService.getMyFichesWithPromos();
+
             if (result.success) {
-                // Filtrer les promotions actives
-                const activePromos = result.data.filter(p => {
+                // result.data contient { fiches: [...], maxFiches: ..., ... }
+                const allFiches = result.data.fiches || [];
+
+                // Filtrer les fiches qui ont une promotion active
+                const fichesWithActivePromo = allFiches.filter(fiche => {
+                    if (!fiche.promotions || fiche.promotions.length === 0) return false;
+
                     const now = new Date();
-                    return p.estActive &&
+                    const activePromo = fiche.promotions.find(p =>
+                        p.estActive &&
                         new Date(p.dateDebut) <= now &&
-                        new Date(p.dateFin) >= now;
+                        new Date(p.dateFin) >= now
+                    );
+
+                    // Stocker la promo active directement sur la fiche pour faciliter l'accès
+                    if (activePromo) {
+                        fiche.activePromo = activePromo;
+                        return true;
+                    }
+                    return false;
                 });
-                setPromotions(activePromos);
+
+                setFiches(fichesWithActivePromo);
+
+                // Si une seule fiche avec promo active, aller directement au scan
+                if (fichesWithActivePromo.length === 1) {
+                    const ficheToSelect = fichesWithActivePromo[0];
+                    setSelectedFiche(ficheToSelect);
+                    selectedFicheRef.current = ficheToSelect; // Set ref immédiatement
+                    setStep('scan');
+                    setTimeout(() => startScanner(), 100);
+                } else if (fichesWithActivePromo.length > 1) {
+                    setStep('select-fiche');
+                } else {
+                    setError('Aucune fiche avec une promotion active. Créez une promotion sur l\'une de vos fiches.');
+                    setStep('error');
+                }
+            } else {
+                setError(result.message || 'Erreur lors du chargement des fiches');
+                setStep('error');
             }
         } catch (err) {
-            console.error('Erreur chargement promos:', err);
+            console.error('Erreur chargement fiches:', err);
+            setError('Erreur lors du chargement des fiches');
+            setStep('error');
         }
+    };
+
+    const handleSelectFiche = (fiche) => {
+        setSelectedFiche(fiche);
+        selectedFicheRef.current = fiche; // Set ref immédiatement
+        setStep('scan');
+        setTimeout(() => startScanner(), 100);
     };
 
     const startScanner = async () => {
         try {
             if (!scannerRef.current) return;
+            if (isScannerRunning.current) return; // Éviter double démarrage
 
             html5QrCodeRef.current = new Html5Qrcode("qr-scanner");
 
@@ -63,19 +122,24 @@ const ScanModal = ({ isOpen, onClose }) => {
                 onScanSuccess,
                 onScanFailure
             );
+
+            isScannerRunning.current = true;
         } catch (err) {
             console.error('Erreur démarrage scanner:', err);
             setError('Impossible d\'accéder à la caméra. Vérifiez les permissions.');
+            setStep('error');
         }
     };
 
     const stopScanner = async () => {
-        if (html5QrCodeRef.current) {
+        if (html5QrCodeRef.current && isScannerRunning.current) {
             try {
                 await html5QrCodeRef.current.stop();
                 html5QrCodeRef.current = null;
+                isScannerRunning.current = false;
             } catch (err) {
-                console.error('Erreur arrêt scanner:', err);
+                // Silencieux si le scanner n'est pas en cours
+                isScannerRunning.current = false;
             }
         }
     };
@@ -87,16 +151,19 @@ const ScanModal = ({ isOpen, onClose }) => {
         }
 
         setScannedQrCode(decodedText);
-
         await stopScanner();
 
-        // Si une seule promo active, scanner directement
-        if (promotions.length === 1) {
-            handleScan(decodedText, promotions[0].id);
-        } else if (promotions.length > 1) {
-            setStep('select-promo');
+        // Utiliser la ref pour accéder à la fiche sélectionnée
+        const currentFiche = selectedFicheRef.current;
+
+        console.log('Scan success - Fiche:', currentFiche);
+        console.log('Scan success - ActivePromo:', currentFiche?.activePromo);
+
+        // Scanner avec la promo active de la fiche sélectionnée
+        if (currentFiche && currentFiche.activePromo) {
+            handleScan(decodedText, currentFiche.activePromo.id, currentFiche.id);
         } else {
-            setError('Aucune promotion active. Créez une promotion d\'abord.');
+            setError('Aucune promotion active sur cette fiche.');
             setStep('error');
         }
     };
@@ -105,12 +172,12 @@ const ScanModal = ({ isOpen, onClose }) => {
         // Silencieux - le scan continue
     };
 
-    const handleScan = async (qrCode, promoId) => {
+    const handleScan = async (qrCode, promoId, prestataireId) => {
         setIsLoading(true);
         setError(null);
 
         try {
-            const result = await ScanService.scan(qrCode, promoId);
+            const result = await ScanService.scan(qrCode, promoId, prestataireId);
 
             if (result.success) {
                 setScanResult(result.data);
@@ -127,22 +194,33 @@ const ScanModal = ({ isOpen, onClose }) => {
         }
     };
 
-    const handleSelectPromo = (promo) => {
-        setSelectedPromo(promo);
-        handleScan(scannedQrCode, promo.id);
-    };
-
     const handleRetry = () => {
-        setStep('scan');
         setScannedQrCode(null);
         setError(null);
         setScanResult(null);
-        setSelectedPromo(null);
-        startScanner();
+
+        // Si plusieurs fiches, retourner à la sélection
+        if (fiches.length > 1) {
+            setSelectedFiche(null);
+            selectedFicheRef.current = null;
+            setStep('select-fiche');
+        } else {
+            setStep('scan');
+            setTimeout(() => startScanner(), 100);
+        }
+    };
+
+    const handleBackToFiches = async () => {
+        await stopScanner();
+        setSelectedFiche(null);
+        selectedFicheRef.current = null;
+        setScannedQrCode(null);
+        setError(null);
+        setStep('select-fiche');
     };
 
     const toggleFlash = async () => {
-        if (html5QrCodeRef.current) {
+        if (html5QrCodeRef.current && isScannerRunning.current) {
             try {
                 const track = html5QrCodeRef.current.getRunningTrackCameraCapabilities();
                 if (track.torchFeature().isSupported()) {
@@ -157,11 +235,14 @@ const ScanModal = ({ isOpen, onClose }) => {
 
     const handleClose = () => {
         stopScanner();
-        setStep('scan');
+        setStep('loading');
+        setFiches([]);
+        setSelectedFiche(null);
+        selectedFicheRef.current = null;
         setScannedQrCode(null);
         setError(null);
         setScanResult(null);
-        setSelectedPromo(null);
+        setIsFlashOn(false);
         onClose();
     };
 
@@ -174,13 +255,81 @@ const ScanModal = ({ isOpen, onClose }) => {
                     <IonIcon icon={closeOutline} />
                 </button>
 
-                {/* ÉTAPE 1: Scanner */}
+                {/* ÉTAPE: Loading */}
+                {step === 'loading' && (
+                    <div className="scan-loading">
+                        <div className="spinner"></div>
+                        <p>Chargement...</p>
+                    </div>
+                )}
+
+                {/* ÉTAPE: Sélection de la fiche */}
+                {step === 'select-fiche' && (
+                    <>
+                        <div className="modal-header">
+                            <h2 className="modal-title">Choisir le commerce</h2>
+                            <p className="modal-subtitle">Sur quel commerce voulez-vous scanner ?</p>
+                        </div>
+
+                        <div className="fiche-list">
+                            {fiches.map((fiche) => (
+                                <button
+                                    key={fiche.id}
+                                    className="fiche-select-item"
+                                    onClick={() => handleSelectFiche(fiche)}
+                                >
+                                    <div className="fiche-select-image">
+                                        {fiche.imagePrincipale ? (
+                                            <img src={fiche.imagePrincipale} alt={fiche.nomCommerce} />
+                                        ) : (
+                                            <div className="fiche-select-no-image">
+                                                <IonIcon icon={storefrontOutline} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="fiche-select-info">
+                                        <h3>{fiche.nomCommerce}</h3>
+                                        <p className="fiche-select-location">
+                                            <IonIcon icon={locationOutline} />
+                                            {fiche.ville}
+                                        </p>
+                                        {fiche.activePromo && (
+                                            <p className="fiche-select-promo">
+                                                <IonIcon icon={pricetagOutline} />
+                                                {fiche.activePromo.titre}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className="fiche-select-arrow">
+                                        ›
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                )}
+
+                {/* ÉTAPE: Scanner */}
                 {step === 'scan' && (
                     <>
                         <div className="modal-header">
                             <h2 className="modal-title">Scanner un client</h2>
-                            <p className="modal-subtitle">Pointez la caméra vers le QR code du client</p>
+                            {selectedFiche && (
+                                <p className="modal-subtitle">
+                                    {selectedFiche.nomCommerce}
+                                    {selectedFiche.activePromo && (
+                                        <span className="current-promo"> • {selectedFiche.activePromo.titre}</span>
+                                    )}
+                                </p>
+                            )}
                         </div>
+
+                        {/* Bouton retour si plusieurs fiches */}
+                        {fiches.length > 1 && (
+                            <button className="btn-back-fiches" onClick={handleBackToFiches}>
+                                ← Changer de commerce
+                            </button>
+                        )}
 
                         <div className="scanner-container">
                             <div id="qr-scanner" ref={scannerRef} className="scanner-view"></div>
@@ -199,51 +348,13 @@ const ScanModal = ({ isOpen, onClose }) => {
                             </button>
                         </div>
 
-                        {promotions.length === 0 && (
-                            <div className="no-promo-warning">
-                                <IonIcon icon={alertCircle} />
-                                <p>Aucune promotion active</p>
-                            </div>
-                        )}
+                        <p className="scan-instruction">
+                            Pointez la caméra vers le QR code du client
+                        </p>
                     </>
                 )}
 
-                {/* ÉTAPE 2: Sélection de la promotion */}
-                {step === 'select-promo' && (
-                    <>
-                        <div className="modal-header">
-                            <h2 className="modal-title">Choisir la promotion</h2>
-                            <p className="modal-subtitle">Quelle promotion appliquer ?</p>
-                        </div>
-
-                        <div className="promo-list">
-                            {promotions.map((promo) => (
-                                <button
-                                    key={promo.id}
-                                    className="promo-item"
-                                    onClick={() => handleSelectPromo(promo)}
-                                    disabled={isLoading}
-                                >
-                                    <div className="promo-info">
-                                        <h3>{promo.titre}</h3>
-                                        <p>{promo.description}</p>
-                                    </div>
-                                    <div className="promo-meta">
-                                        <span className="promo-uses">
-                                            {promo.nombreUtilisations} utilisations
-                                        </span>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-
-                        <button className="btn-secondary" onClick={handleRetry}>
-                            Annuler
-                        </button>
-                    </>
-                )}
-
-                {/* ÉTAPE 3: Succès */}
+                {/* ÉTAPE: Succès */}
                 {step === 'success' && (
                     <div className="result-container success">
                         <div className="result-icon">
@@ -255,8 +366,13 @@ const ScanModal = ({ isOpen, onClose }) => {
                                 <p className="client-name">
                                     {scanResult.client?.prenom} {scanResult.client?.nom}
                                 </p>
+                                {selectedFiche && (
+                                    <p className="commerce-name">
+                                        {selectedFiche.nomCommerce}
+                                    </p>
+                                )}
                                 <p className="promo-applied">
-                                    Promotion: {scanResult.promotion?.titre}
+                                    Promotion: {scanResult.promotion?.titre || selectedFiche?.activePromo?.titre}
                                 </p>
                             </div>
                         )}
@@ -271,7 +387,7 @@ const ScanModal = ({ isOpen, onClose }) => {
                     </div>
                 )}
 
-                {/* ÉTAPE 4: Erreur */}
+                {/* ÉTAPE: Erreur */}
                 {step === 'error' && (
                     <div className="result-container error">
                         <div className="result-icon">

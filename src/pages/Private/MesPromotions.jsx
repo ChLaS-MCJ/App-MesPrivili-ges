@@ -12,11 +12,17 @@ import {
     peopleOutline,
     barcodeOutline,
     warningOutline,
-    closeOutline
+    closeOutline,
+    storefrontOutline,
+    locationOutline,
+    starOutline,
+    chevronDownOutline,
+    checkmarkCircle
 } from 'ionicons/icons';
 import PrestataireService from '../../Services/Prestataire.services';
 import PromotionService from '../../Services/Promotion.services';
 import PromotionFormModal from '../../components/Forms/PromotionFormModal';
+
 
 const MesPromotions = () => {
     const navigate = useNavigate();
@@ -25,7 +31,8 @@ const MesPromotions = () => {
 
     const [fiches, setFiches] = useState([]);
     const [selectedFicheId, setSelectedFicheId] = useState(null);
-    const [promotions, setPromotions] = useState([]);
+    const [promotionsByFiche, setPromotionsByFiche] = useState({});
+    const [loadingPromos, setLoadingPromos] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
@@ -34,15 +41,14 @@ const MesPromotions = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingPromo, setEditingPromo] = useState(null);
 
+    // Modal suppression
+    const [deleteModal, setDeleteModal] = useState({ isOpen: false, promo: null });
+    const [deleteConfirmText, setDeleteConfirmText] = useState('');
+    const [deleteLoading, setDeleteLoading] = useState(false);
+
     useEffect(() => {
         loadFiches();
     }, []);
-
-    useEffect(() => {
-        if (selectedFicheId) {
-            loadPromotions(selectedFicheId);
-        }
-    }, [selectedFicheId]);
 
     const loadFiches = async () => {
         try {
@@ -50,7 +56,9 @@ const MesPromotions = () => {
             if (result.success && result.data.fiches.length > 0) {
                 setFiches(result.data.fiches);
                 // Sélectionner la première fiche par défaut
-                setSelectedFicheId(result.data.fiches[0].id);
+                const firstFicheId = result.data.fiches[0].id;
+                setSelectedFicheId(firstFicheId);
+                loadPromotions(firstFicheId);
             }
         } catch (err) {
             setError('Erreur lors du chargement des fiches');
@@ -60,22 +68,42 @@ const MesPromotions = () => {
     };
 
     const loadPromotions = async (prestataireId) => {
-        setLoading(true);
+        setLoadingPromos(prev => ({ ...prev, [prestataireId]: true }));
         try {
             const result = await PromotionService.getMyPromotions(prestataireId);
             if (result.success) {
-                setPromotions(result.data || []);
+                setPromotionsByFiche(prev => ({
+                    ...prev,
+                    [prestataireId]: result.data || []
+                }));
             } else {
                 setError(result.message);
             }
         } catch (err) {
             setError('Erreur lors du chargement des promotions');
         } finally {
-            setLoading(false);
+            setLoadingPromos(prev => ({ ...prev, [prestataireId]: false }));
+        }
+    };
+
+    const handleSelectFiche = (ficheId) => {
+        if (selectedFicheId === ficheId) {
+            // Désélectionner si on clique sur la même
+            setSelectedFicheId(null);
+        } else {
+            setSelectedFicheId(ficheId);
+            // Charger les promos si pas encore fait
+            if (!promotionsByFiche[ficheId]) {
+                loadPromotions(ficheId);
+            }
         }
     };
 
     const handleCreate = () => {
+        if (!selectedFicheId) {
+            setError('Veuillez sélectionner une fiche commerce');
+            return;
+        }
         setEditingPromo(null);
         setIsModalOpen(true);
     };
@@ -85,20 +113,36 @@ const MesPromotions = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (promo) => {
-        if (!window.confirm(`Supprimer la promotion "${promo.titre}" ?`)) return;
+    const handleDeleteClick = (promo) => {
+        setDeleteModal({ isOpen: true, promo });
+        setDeleteConfirmText('');
+    };
 
+    const confirmDelete = async () => {
+        if (deleteConfirmText.toLowerCase() !== 'supprimer') return;
+
+        setDeleteLoading(true);
         try {
-            const result = await PromotionService.delete(promo.id);
+            const result = await PromotionService.delete(deleteModal.promo.id);
             if (result.success) {
                 setSuccess('Promotion supprimée');
+                setDeleteModal({ isOpen: false, promo: null });
+                setDeleteConfirmText('');
                 loadPromotions(selectedFicheId);
             } else {
                 setError(result.message);
             }
         } catch (err) {
             setError('Erreur lors de la suppression');
+        } finally {
+            setDeleteLoading(false);
         }
+    };
+
+    const closeDeleteModal = () => {
+        if (deleteLoading) return;
+        setDeleteModal({ isOpen: false, promo: null });
+        setDeleteConfirmText('');
     };
 
     const handleToggle = async (promo) => {
@@ -127,18 +171,18 @@ const MesPromotions = () => {
         const dateDebut = new Date(promo.dateDebut);
         const dateFin = new Date(promo.dateFin);
 
-        if (dateFin < now) return 'expired';
-        if (dateDebut > now) return 'pending';
-        if (!promo.estActive) return 'inactive';
-        return 'active';
+        if (dateFin < now) return 'promo-expired';
+        if (dateDebut > now) return 'promo-pending';
+        if (!promo.estActive) return 'promo-inactive';
+        return 'promo-active';
     };
 
     const getStatusLabel = (status) => {
         switch (status) {
-            case 'active': return 'Active';
-            case 'inactive': return 'Inactive';
-            case 'pending': return 'À venir';
-            case 'expired': return 'Expirée';
+            case 'promo-active': return 'Active';
+            case 'promo-inactive': return 'Inactive';
+            case 'promo-pending': return 'À venir';
+            case 'promo-expired': return 'Expirée';
             default: return '';
         }
     };
@@ -148,7 +192,22 @@ const MesPromotions = () => {
         return new Date(dateStr).toLocaleDateString('fr-FR');
     };
 
-    if (loading && fiches.length === 0) {
+    // Auto-hide messages
+    useEffect(() => {
+        if (success) {
+            const timer = setTimeout(() => setSuccess(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [success]);
+
+    useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => setError(null), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [error]);
+
+    if (loading) {
         return (
             <div className="prestataire-page">
                 <div className="loading-container">
@@ -166,31 +225,8 @@ const MesPromotions = () => {
                     <IonIcon icon={arrowBackOutline} />
                 </button>
                 <h1>Mes Promotions</h1>
-                <button
-                    className="add-btn"
-                    onClick={handleCreate}
-                    disabled={!selectedFicheId}
-                >
-                    <IonIcon icon={addOutline} />
-                </button>
+                <div className="header-spacer"></div>
             </div>
-
-            {/* Sélecteur de fiche */}
-            {fiches.length > 1 && (
-                <div className="fiche-selector">
-                    <label>Commerce :</label>
-                    <select
-                        value={selectedFicheId || ''}
-                        onChange={(e) => setSelectedFicheId(Number(e.target.value))}
-                    >
-                        {fiches.map(fiche => (
-                            <option key={fiche.id} value={fiche.id}>
-                                {fiche.nomCommerce} - {fiche.ville}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            )}
 
             {/* Messages */}
             {error && (
@@ -212,76 +248,155 @@ const MesPromotions = () => {
                 </div>
             )}
 
-            {/* Liste des promotions */}
-            {promotions.length === 0 ? (
-                <div className="no-promotions">
-                    <IonIcon icon={giftOutline} />
-                    <h3>Aucune promotion</h3>
-                    <p>Créez une promotion pour attirer des clients</p>
-                    {selectedFicheId && (
-                        <button className="btn-primary" onClick={handleCreate}>
-                            <IonIcon icon={addOutline} />
-                            Créer une promotion
-                        </button>
-                    )}
+            {/* Liste des fiches avec leurs promos */}
+            {fiches.length === 0 ? (
+                <div className="no-fiches">
+                    <IonIcon icon={storefrontOutline} />
+                    <h3>Aucune fiche commerce</h3>
+                    <p>Créez d'abord une fiche commerce pour ajouter des promotions</p>
+                    <button className="btn-primary" onClick={() => navigate('/auth/mon-commerce')}>
+                        <IonIcon icon={addOutline} />
+                        Créer une fiche
+                    </button>
                 </div>
             ) : (
-                <div className="promotions-list">
-                    {promotions.map(promo => {
-                        const status = getPromoStatus(promo);
+                <div className="fiches-promos-list">
+                    {fiches.map(fiche => {
+                        const isSelected = selectedFicheId === fiche.id;
+                        const promos = promotionsByFiche[fiche.id] || [];
+                        const isLoadingPromos = loadingPromos[fiche.id];
+
                         return (
-                            <div key={promo.id} className={`promo-card ${status}`}>
-                                <div className="promo-header">
-                                    <h3>{promo.titre}</h3>
-                                    <span className={`status-badge ${status}`}>
-                                        {getStatusLabel(status)}
-                                    </span>
+                            <div key={fiche.id} className={`fiche-accordion ${isSelected ? 'expanded' : ''}`}>
+                                {/* Fiche Card Header */}
+                                <div
+                                    className={`fiche-accordion-header ${isSelected ? 'selected' : ''}`}
+                                    onClick={() => handleSelectFiche(fiche.id)}
+                                >
+                                    <div className="fiche-checkbox">
+                                        {isSelected ? (
+                                            <IonIcon icon={checkmarkCircle} className="checked" />
+                                        ) : (
+                                            <div className="unchecked"></div>
+                                        )}
+                                    </div>
+
+                                    <div className="fiche-image-mini">
+                                        {fiche.imagePrincipale ? (
+                                            <img src={fiche.imagePrincipale} alt={fiche.nomCommerce} />
+                                        ) : (
+                                            <div className="no-image">
+                                                <IonIcon icon={storefrontOutline} />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="fiche-info">
+                                        <h3>{fiche.nomCommerce}</h3>
+                                        <div className="fiche-meta">
+                                            <span className="fiche-location">
+                                                <IonIcon icon={locationOutline} />
+                                                {fiche.ville}
+                                            </span>
+                                        </div>
+                                        <div className="fiche-promo-count">
+                                            <IonIcon icon={giftOutline} />
+                                            {promos.length} promotion{promos.length !== 1 ? 's' : ''}
+                                        </div>
+                                    </div>
+
+                                    <div className={`fiche-chevron ${isSelected ? 'rotated' : ''}`}>
+                                        <IonIcon icon={chevronDownOutline} />
+                                    </div>
                                 </div>
 
-                                {promo.description && (
-                                    <p className="promo-description">{promo.description}</p>
+                                {/* Promos Content (accordéon) */}
+                                {isSelected && (
+                                    <div className="fiche-accordion-content">
+                                        {isLoadingPromos ? (
+                                            <div className="promos-loading">
+                                                <div className="spinner-small"></div>
+                                                <span>Chargement des promotions...</span>
+                                            </div>
+                                        ) : promos.length === 0 ? (
+                                            <div className="no-promos-fiche">
+                                                <IonIcon icon={giftOutline} />
+                                                <p>Aucune promotion pour cette fiche</p>
+                                                <button className="btn-add-promo" onClick={handleCreate}>
+                                                    <IonIcon icon={addOutline} />
+                                                    Créer une promotion
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="promos-list">
+                                                {promos.map(promo => {
+                                                    const status = getPromoStatus(promo);
+                                                    return (
+                                                        <div key={promo.id} className={`promo-card ${status}`}>
+                                                            <div className="promo-header">
+                                                                <h3>{promo.titre}</h3>
+                                                                <span className={`promo-status-badge ${status}`}>
+                                                                    {getStatusLabel(status)}
+                                                                </span>
+                                                            </div>
+
+                                                            {promo.description && (
+                                                                <p className="promo-description">{promo.description}</p>
+                                                            )}
+
+                                                            <div className="promo-dates">
+                                                                <IonIcon icon={calendarOutline} />
+                                                                <span>{formatDate(promo.dateDebut)} → {formatDate(promo.dateFin)}</span>
+                                                            </div>
+
+                                                            <div className="promo-stats">
+                                                                <div className="stat">
+                                                                    <IonIcon icon={barcodeOutline} />
+                                                                    <span>{promo.nombreUtilisations || 0} scans</span>
+                                                                </div>
+                                                                <div className="stat">
+                                                                    <IonIcon icon={peopleOutline} />
+                                                                    <span>{promo.nombreClientsUniques || 0} clients</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="promo-actions">
+                                                                <button
+                                                                    className={`action-btn toggle ${promo.estActive ? '' : 'off'}`}
+                                                                    onClick={() => handleToggle(promo)}
+                                                                    title={promo.estActive ? 'Désactiver' : 'Activer'}
+                                                                    disabled={status === 'promo-expired'}
+                                                                >
+                                                                    <IonIcon icon={toggleOutline} />
+                                                                </button>
+                                                                <button
+                                                                    className="action-btn edit"
+                                                                    onClick={() => handleEdit(promo)}
+                                                                    title="Modifier"
+                                                                >
+                                                                    <IonIcon icon={createOutline} />
+                                                                </button>
+                                                                <button
+                                                                    className="action-btn delete"
+                                                                    onClick={() => handleDeleteClick(promo)}
+                                                                    title="Supprimer"
+                                                                >
+                                                                    <IonIcon icon={trashOutline} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+
+                                                {/* Bouton ajouter en bas */}
+                                                <button className="btn-add-promo-bottom" onClick={handleCreate}>
+                                                    <IonIcon icon={addOutline} />
+                                                    Ajouter une promotion
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
-
-                                <div className="promo-dates">
-                                    <IonIcon icon={calendarOutline} />
-                                    <span>{formatDate(promo.dateDebut)} → {formatDate(promo.dateFin)}</span>
-                                </div>
-
-                                <div className="promo-stats">
-                                    <div className="stat">
-                                        <IonIcon icon={barcodeOutline} />
-                                        <span>{promo.nombreUtilisations || 0} scans</span>
-                                    </div>
-                                    <div className="stat">
-                                        <IonIcon icon={peopleOutline} />
-                                        <span>{promo.nombreClientsUniques || 0} clients</span>
-                                    </div>
-                                </div>
-
-                                <div className="promo-actions">
-                                    <button
-                                        className={`action-btn toggle ${promo.estActive ? '' : 'off'}`}
-                                        onClick={() => handleToggle(promo)}
-                                        title={promo.estActive ? 'Désactiver' : 'Activer'}
-                                        disabled={status === 'expired'}
-                                    >
-                                        <IonIcon icon={toggleOutline} />
-                                    </button>
-                                    <button
-                                        className="action-btn edit"
-                                        onClick={() => handleEdit(promo)}
-                                        title="Modifier"
-                                    >
-                                        <IonIcon icon={createOutline} />
-                                    </button>
-                                    <button
-                                        className="action-btn delete"
-                                        onClick={() => handleDelete(promo)}
-                                        title="Supprimer"
-                                    >
-                                        <IonIcon icon={trashOutline} />
-                                    </button>
-                                </div>
                             </div>
                         );
                     })}
@@ -299,6 +414,71 @@ const MesPromotions = () => {
                 promotion={editingPromo}
                 prestataireId={selectedFicheId}
             />
+
+            {/* Modal confirmation suppression */}
+            {deleteModal.isOpen && (
+                <div className="delete-modal-overlay" onClick={closeDeleteModal}>
+                    <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="delete-modal-header">
+                            <div className="delete-modal-icon-wrapper">
+                                <IonIcon icon={trashOutline} className="delete-modal-icon" />
+                            </div>
+                            <h2>Supprimer cette promotion ?</h2>
+                        </div>
+
+                        <div className="delete-modal-content">
+                            <p className="delete-modal-promo-name">"{deleteModal.promo?.titre}"</p>
+
+                            <div className="delete-modal-warning">
+                                <IonIcon icon={warningOutline} />
+                                <div>
+                                    <strong>Attention !</strong>
+                                    <span>Cette action est irréversible. Les statistiques de cette promotion seront également supprimées.</span>
+                                </div>
+                            </div>
+
+                            <div className="delete-modal-confirm">
+                                <label>Pour confirmer, tapez <strong>supprimer</strong> ci-dessous :</label>
+                                <input
+                                    type="text"
+                                    value={deleteConfirmText}
+                                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                                    placeholder="supprimer"
+                                    autoComplete="off"
+                                    disabled={deleteLoading}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="delete-modal-actions">
+                            <button
+                                className="delete-modal-btn cancel"
+                                onClick={closeDeleteModal}
+                                disabled={deleteLoading}
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                className="delete-modal-btn confirm"
+                                onClick={confirmDelete}
+                                disabled={deleteConfirmText.toLowerCase() !== 'supprimer' || deleteLoading}
+                            >
+                                {deleteLoading ? (
+                                    <>
+                                        <div className="btn-spinner"></div>
+                                        Suppression...
+                                    </>
+                                ) : (
+                                    <>
+                                        <IonIcon icon={trashOutline} />
+                                        Supprimer définitivement
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

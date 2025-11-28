@@ -308,7 +308,7 @@
     position: relative;
     display: flex;
     justify-content: center;
-    padding: 40px 0;
+    padding: 60px 0px;
     overflow: visible;
     touch-action: none;
     -webkit-overflow-scrolling: touch;
@@ -324,7 +324,7 @@
 
 .prestataire-card {
     position: absolute !important;
-    width: 100%;
+    width: calc(80% - 40px);
     max-width: 400px;
     height: 70vh;
     max-height: 600px;
@@ -448,6 +448,7 @@
     background-repeat: no-repeat;
     border-radius: 18px;
     margin-top: auto;
+    position: relative;
 }
 
 /* ====================================
@@ -564,8 +565,8 @@
 
 @media (max-width: 480px) {
     .prestataire-card {
-        width: 100%;
-        height: 60vh;
+        width: 88%;
+        height: 55vh;
         padding: 4px;
     }
 
@@ -599,5 +600,72 @@
         font-size: 20px;
         top: 14px;
         left: 14px;
+    }
+}
+
+
+/* =============================================
+   BADGE PROMO SUR LES CARDS (Prestataires.jsx)
+   Style Badge flottant minimaliste
+   ============================================= */
+
+.promo-card-prestataires {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    background: linear-gradient(180deg, rgb(68 66 66 / 60%) 0%, rgb(28 28 28 / 99%) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: white;
+    padding: 12px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 100px;
+    border: 1px solid rgba(254, 126, 79, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 10;
+    max-width: 75%;
+
+}
+
+.promo-card-prestataires-icon {
+    width: 10px;
+    height: 10px;
+    background: #fe7e4f;
+    border-radius: 50%;
+    animation: promoCardPulse 2s infinite;
+    flex-shrink: 0;
+}
+
+.promo-card-prestataires-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.3px;
+}
+
+@keyframes promoCardPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: scale(0.8);
+    }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .promo-card-prestataires {
+        bottom: 12px;
+        right: 12px;
+        padding: 10px 16px;
+        font-size: 14px;
     }
 }

@@ -27,6 +27,9 @@ const Header = () => {
     // Vérifier si l'utilisateur est prestataire
     const isPrestataire = user?.role?.name === 'prestataire' || user?.role?.name === 'admin';
 
+    // Vérifier si l'utilisateur est client (pas prestataire)
+    const isClient = user?.role?.name === 'client';
+
     // =============================================
     // FERMER LE DRAWER QUAND LA ROUTE CHANGE
     // =============================================
@@ -292,13 +295,16 @@ const Header = () => {
                             <span>Mes informations</span>
                         </button>
 
-                        <button
-                            className="drawer-menu-item"
-                            onClick={() => handleNavigation('/auth/history')}
-                        >
-                            <HistoryOutlined className="menu-icon" />
-                            <span>Historique</span>
-                        </button>
+                        {/* Historique - uniquement pour les clients */}
+                        {isClient && (
+                            <button
+                                className="drawer-menu-item"
+                                onClick={() => handleNavigation('/auth/history')}
+                            >
+                                <HistoryOutlined className="menu-icon" />
+                                <span>Historique</span>
+                            </button>
+                        )}
 
                         {/* Section Prestataire */}
                         {isPrestataire && (

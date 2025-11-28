@@ -1,6 +1,6 @@
 /* ============================================
    FICHE FORM MODAL - CSS
-   Formulaire création/édition de fiche commerce
+   Modal de création/édition de fiche commerce
    ============================================ */
 
 /* ===== MODAL OVERLAY ===== */
@@ -11,11 +11,13 @@
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
     padding: 20px;
+    z-index: 10000;
     animation: fadeIn 0.2s ease;
 }
 
@@ -31,37 +33,44 @@
 
 /* ===== MODAL CONTAINER ===== */
 .fiche-form-modal {
-    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
-    border-radius: 20px;
+    background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+    border-radius: 24px;
     width: 100%;
-    max-width: 500px;
+    max-width: 550px;
     max-height: 85vh;
-    overflow: hidden;
+    overflow-y: auto;
     position: relative;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    animation: slideUp 0.3s ease;
-    display: flex;
-    flex-direction: column;
 }
 
 @keyframes slideUp {
     from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(30px) scale(0.95);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
+}
+
+.fiche-form-modal h2 {
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+    padding: 24px 24px 0;
+    text-align: center;
 }
 
 /* ===== CLOSE BUTTON ===== */
 .modal-close-btn {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 16px;
+    right: 16px;
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -77,92 +86,70 @@
 }
 
 .modal-close-btn:hover {
-    background: rgba(255, 100, 100, 0.2);
-    color: #ff6b6b;
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .modal-close-btn ion-icon {
     font-size: 22px;
 }
 
-/* ===== MODAL TITLE ===== */
-.fiche-form-modal h2 {
-    color: #fff;
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0;
-    padding: 25px 25px 15px;
-    text-align: center;
-}
-
-/* ===== FORM TABS ===== */
+/* ===== TABS ===== */
 .form-tabs {
     display: flex;
-    padding: 0 20px;
-    gap: 5px;
+    gap: 8px;
+    padding: 20px 24px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .form-tabs .tab {
     flex: 1;
-    padding: 12px 15px;
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.5);
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.6);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
-    position: relative;
 }
 
 .form-tabs .tab:hover {
+    background: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.8);
 }
 
 .form-tabs .tab.active {
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.2) 0%, rgba(243, 162, 133, 0.1) 100%);
+    border-color: rgba(254, 126, 79, 0.4);
     color: #fe7e4f;
-}
-
-.form-tabs .tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #fe7e4f 0%, #f3a285 100%);
-    border-radius: 2px 2px 0 0;
 }
 
 /* ===== ERROR MESSAGE ===== */
 .error-message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 24px 15px;
+    padding: 12px 16px;
     background: rgba(255, 100, 100, 0.15);
     border: 1px solid rgba(255, 100, 100, 0.3);
-    border-radius: 10px;
-    padding: 12px 15px;
-    margin: 15px 20px 0;
+    border-radius: 12px;
     color: #ff6b6b;
-    font-size: 13px;
-    text-align: center;
+    font-size: 14px;
 }
 
-/* ===== FORM ===== */
-.fiche-form-modal form {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
+.error-message ion-icon {
+    font-size: 20px;
+    flex-shrink: 0;
 }
 
 /* ===== TAB CONTENT ===== */
 .tab-content {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
+    padding: 20px 24px;
 }
 
-/* ===== FORM GROUP ===== */
+/* ===== FORM ELEMENTS ===== */
 .form-group {
     margin-bottom: 18px;
 }
@@ -170,36 +157,23 @@
 .form-group label {
     display: block;
     color: rgba(255, 255, 255, 0.8);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     margin-bottom: 8px;
 }
 
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group input[type="tel"],
-.form-group input[type="url"],
-.form-group input[type="number"],
-.form-group input[type="date"],
-.form-group input[type="time"],
+.form-group input,
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: 12px 15px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
     color: #fff;
-    font-size: 14px;
-    transition: all 0.2s ease;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+    font-size: 15px;
     outline: none;
-    border-color: rgba(254, 126, 79, 0.5);
-    background: rgba(0, 0, 0, 0.4);
+    transition: all 0.2s ease;
 }
 
 .form-group input::placeholder,
@@ -207,17 +181,24 @@
     color: rgba(255, 255, 255, 0.3);
 }
 
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: rgba(254, 126, 79, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+}
+
 .form-group select {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' fill-opacity='0.5' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 35px;
     cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
 }
 
 .form-group select option {
-    background: #1a1a1a;
+    background: #2a2a2a;
     color: #fff;
 }
 
@@ -226,287 +207,52 @@
     min-height: 80px;
 }
 
-/* ===== FORM ROW (2 colonnes) ===== */
 .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
     gap: 12px;
 }
 
 .form-row .form-group {
-    margin-bottom: 18px;
+    flex: 1;
 }
 
 /* ===== FORM SECTION TITLE ===== */
 .form-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     color: #f3a285;
     font-size: 14px;
     font-weight: 600;
-    margin: 10px 0 15px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 24px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(254, 126, 79, 0.2);
+}
+
+.form-section-title ion-icon {
+    font-size: 18px;
 }
 
 /* ===== HELP TEXT ===== */
 .help-text {
-    color: rgba(255, 255, 255, 0.4);
+    display: block;
+    color: rgba(255, 255, 255, 0.5);
     font-size: 12px;
     margin-top: 6px;
     line-height: 1.4;
 }
 
-/* ===== IMAGE PREVIEW ===== */
-.image-preview {
+.geo-help {
+    background: rgba(254, 126, 79, 0.1);
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(254, 126, 79, 0.15);
     margin-top: 12px;
-    border-radius: 10px;
-    overflow: hidden;
-    background: rgba(0, 0, 0, 0.3);
 }
 
-.image-preview img {
-    width: 100%;
-    max-height: 150px;
-    object-fit: cover;
-    display: block;
-}
-
-/* ===== HORAIRES ===== */
-.horaires-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.horaire-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 15px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.jour-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    min-width: 110px;
-}
-
-.jour-label input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    accent-color: #fe7e4f;
-    cursor: pointer;
-}
-
-.jour-label span {
-    color: #fff;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.horaire-times {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.horaire-times input[type="time"] {
-    padding: 8px 10px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: #fff;
-    font-size: 13px;
-}
-
-.horaire-times input[type="time"]:focus {
-    outline: none;
-    border-color: rgba(254, 126, 79, 0.5);
-}
-
-.horaire-times span {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.ferme-label {
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 13px;
-    font-style: italic;
-}
-
-/* ===== FORM ACTIONS ===== */
-.form-actions {
-    display: flex;
-    gap: 12px;
-    padding: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.btn-secondary {
-    flex: 1;
-    padding: 14px 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.form-actions .btn-primary {
-    flex: 1;
-    padding: 14px 20px;
-    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
-    border: none;
-    border-radius: 12px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 15px rgba(254, 126, 79, 0.3);
-}
-
-.form-actions .btn-primary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(254, 126, 79, 0.4);
-}
-
-.form-actions .btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 480px) {
-    .modal-overlay {
-        padding: 10px;
-    }
-
-    .fiche-form-modal {
-        max-height: 90vh;
-        border-radius: 16px;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .horaire-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .horaire-times {
-        width: 100%;
-        justify-content: flex-end;
-    }
-}
-
-/* ==========================================
-   STYLES POUR FicheFormModal - CATEGORIES
-   ========================================== */
-
-/* Catégories avec images */
-.category-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 12px;
-    margin-top: 10px;
-    max-height: 250px;
-    overflow-y: auto;
-    padding: 5px;
-}
-
-.category-card-mini {
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-    aspect-ratio: 1;
-}
-
-.category-card-mini:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.category-card-mini.selected {
-    border-color: #fe7e4f;
-    box-shadow: 0 0 0 3px rgba(254, 126, 79, 0.3);
-}
-
-.category-card-image {
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-}
-
-.category-card-mini::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
-}
-
-.category-card-name {
-    position: absolute;
-    bottom: 8px;
-    left: 8px;
-    right: 8px;
-    color: white;
-    font-size: 11px;
-    font-weight: 600;
-    text-align: center;
-    z-index: 1;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-.category-check {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: #fe7e4f;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
-}
-
-.category-check ion-icon {
-    color: white;
-    font-size: 16px;
-}
-
-/* ==========================================
-   STYLES POUR FicheFormModal - GEOLOCALISATION
-   ========================================== */
-
+/* ===== GEO STATUS ===== */
 .geo-status {
-    margin: 10px 0 15px;
-    min-height: 30px;
+    margin-bottom: 15px;
 }
 
 .geo-loading,
@@ -514,101 +260,194 @@
 .geo-error {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 15px;
-    border-radius: 8px;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
     font-size: 13px;
 }
 
 .geo-loading {
-    background: rgba(56, 128, 255, 0.15);
-    color: #3880ff;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .geo-success {
-    background: rgba(46, 125, 50, 0.15);
-    color: #4caf50;
+    background: rgba(100, 255, 150, 0.1);
+    color: #64ff96;
 }
 
 .geo-success ion-icon {
-    color: #4caf50;
     font-size: 18px;
 }
 
 .geo-error {
-    background: rgba(198, 40, 40, 0.15);
-    color: #f44336;
+    background: rgba(255, 100, 100, 0.1);
+    color: #ff6b6b;
 }
 
 .geo-error ion-icon {
-    color: #f44336;
     font-size: 18px;
 }
 
 .btn-retry {
     margin-left: auto;
-    background: #f44336;
-    color: white;
+    padding: 6px 12px;
+    background: rgba(255, 100, 100, 0.2);
     border: none;
-    padding: 5px 12px;
-    border-radius: 5px;
+    border-radius: 6px;
+    color: #ff6b6b;
     font-size: 12px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s ease;
 }
 
 .btn-retry:hover {
-    background: #d32f2f;
+    background: rgba(255, 100, 100, 0.3);
 }
 
-.spinner-small {
-    width: 18px;
-    height: 18px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-top-color: #fe7e4f;
+/* ===== GEO ACTIONS ===== */
+.geo-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.btn-geo {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.2) 0%, rgba(243, 162, 133, 0.1) 100%);
+    border: 1px solid rgba(254, 126, 79, 0.3);
+    border-radius: 10px;
+    color: #fe7e4f;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-geo:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.3) 0%, rgba(243, 162, 133, 0.2) 100%);
+    border-color: rgba(254, 126, 79, 0.5);
+}
+
+.btn-geo:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-geo.secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.btn-geo.secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #fff;
+}
+
+.btn-geo ion-icon {
+    font-size: 16px;
+}
+
+/* ===== CATEGORY CARDS ===== */
+.category-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+}
+
+.category-card-mini {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.category-card-mini:hover {
+    transform: translateY(-2px);
+}
+
+.category-card-mini.selected {
+    border-color: #fe7e4f;
+}
+
+.category-card-image {
+    width: 100%;
+    height: 60px;
+    background-size: cover;
+    background-position: center;
+}
+
+.category-card-name {
+    display: block;
+    padding: 8px 6px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: 11px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.category-check {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    background: #fe7e4f;
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+.category-check ion-icon {
+    font-size: 14px;
+    color: #fff;
 }
 
-/* ==========================================
-   STYLES POUR FicheFormModal - UPLOAD IMAGES
-   ========================================== */
-
+/* ===== IMAGE UPLOAD ===== */
 .image-upload-zone {
-    margin-top: 10px;
+    width: 100%;
 }
 
 .image-upload-placeholder {
-    border: 2px dashed rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
     padding: 40px 20px;
-    text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    background: rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
 }
 
 .image-upload-placeholder:hover {
-    border-color: #fe7e4f;
-    background: rgba(254, 126, 79, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(254, 126, 79, 0.4);
 }
 
 .image-upload-placeholder ion-icon {
-    font-size: 48px;
-    color: rgba(255, 255, 255, 0.4);
-    margin-bottom: 10px;
+    font-size: 40px;
+    color: rgba(254, 126, 79, 0.6);
 }
 
 .image-upload-placeholder span {
-    display: block;
-    color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 5px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
 }
 
 .image-upload-placeholder small {
@@ -621,12 +460,17 @@
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    color: rgba(255, 255, 255, 0.6);
+}
+
+.upload-loading span {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
 }
 
 .image-preview-container {
     position: relative;
-    border-radius: 12px;
+    width: 100%;
+    border-radius: 16px;
     overflow: hidden;
 }
 
@@ -634,51 +478,45 @@
     width: 100%;
     height: 200px;
     object-fit: cover;
-    display: block;
 }
 
 .image-remove-btn {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: rgba(244, 67, 54, 0.9);
-    color: white;
-    border: none;
-    border-radius: 50%;
     width: 36px;
     height: 36px;
+    background: rgba(255, 100, 100, 0.9);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s;
-    z-index: 2;
+    transition: all 0.2s ease;
 }
 
 .image-remove-btn:hover {
-    background: #f44336;
+    background: #ff6b6b;
     transform: scale(1.1);
 }
 
 .image-remove-btn ion-icon {
-    font-size: 20px;
+    font-size: 18px;
 }
 
-/* ==========================================
-   STYLES POUR FicheFormModal - GALERIE
-   ========================================== */
-
+/* ===== GALLERY GRID ===== */
 .gallery-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 10px;
+    gap: 10px;
 }
 
 .gallery-item {
     position: relative;
     aspect-ratio: 1;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
     cursor: grab;
     transition: all 0.2s ease;
@@ -703,25 +541,21 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    pointer-events: none;
 }
 
 .gallery-item-drag-handle {
     position: absolute;
-    top: 5px;
-    left: 5px;
+    top: 6px;
+    left: 6px;
+    width: 26px;
+    height: 26px;
     background: rgba(0, 0, 0, 0.6);
-    color: white;
-    border-radius: 5px;
-    width: 28px;
-    height: 28px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0;
-    transition: opacity 0.2s;
-    cursor: grab;
-    z-index: 2;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
 }
 
 .gallery-item:hover .gallery-item-drag-handle {
@@ -729,39 +563,42 @@
 }
 
 .gallery-item-drag-handle ion-icon {
-    font-size: 18px;
+    font-size: 16px;
+    color: #fff;
 }
 
 .gallery-item-number {
     position: absolute;
-    bottom: 5px;
-    left: 5px;
+    bottom: 6px;
+    left: 6px;
+    width: 22px;
+    height: 22px;
     background: rgba(0, 0, 0, 0.7);
-    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
     font-size: 11px;
     font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 10px;
-    z-index: 2;
 }
 
 .gallery-remove-btn {
     position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(244, 67, 54, 0.9);
-    color: white;
+    top: 6px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
+    background: rgba(255, 100, 100, 0.9);
     border: none;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
+    border-radius: 6px;
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     opacity: 0;
-    transition: all 0.2s;
-    z-index: 2;
+    transition: all 0.2s ease;
 }
 
 .gallery-item:hover .gallery-remove-btn {
@@ -769,54 +606,210 @@
 }
 
 .gallery-remove-btn:hover {
-    background: #f44336;
-    transform: scale(1.1);
+    background: #ff6b6b;
 }
 
 .gallery-remove-btn ion-icon {
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .gallery-add-item {
     aspect-ratio: 1;
-    border: 2px dashed rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    background: rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
 }
 
 .gallery-add-item:hover {
-    border-color: #fe7e4f;
-    background: rgba(254, 126, 79, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(254, 126, 79, 0.4);
 }
 
 .gallery-add-item ion-icon {
-    font-size: 32px;
-    color: rgba(255, 255, 255, 0.4);
-    margin-bottom: 5px;
+    font-size: 24px;
+    color: rgba(254, 126, 79, 0.6);
 }
 
 .gallery-add-item span {
-    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+}
+
+/* ===== HORAIRES ===== */
+.horaires-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.horaire-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.jour-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.jour-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #fe7e4f;
+    cursor: pointer;
+}
+
+.jour-label span {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.horaire-times {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.horaire-times input[type="time"] {
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.horaire-times input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+.horaire-times span {
     color: rgba(255, 255, 255, 0.5);
 }
 
-/* ==========================================
-   STYLES RESPONSIVE - GALERIE & CATEGORIES
-   ========================================== */
+.ferme-label {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 13px;
+    font-style: italic;
+}
 
+/* ===== FORM ACTIONS ===== */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary,
+.btn-primary {
+    flex: 1;
+    padding: 16px 24px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(254, 126, 79, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(254, 126, 79, 0.4);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ===== SPINNERS ===== */
+.spinner-small {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(254, 126, 79, 0.2);
+    border-top-color: #fe7e4f;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
+    .fiche-form-modal {
+        max-height: 90vh;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .form-tabs {
+        padding: 16px;
+    }
+
+    .form-tabs .tab {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .tab-content {
+        padding: 16px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
     .category-cards {
         grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
     }
 
     .gallery-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .geo-actions {
+        flex-direction: column;
+    }
+
+    .btn-geo {
+        width: 100%;
     }
 }

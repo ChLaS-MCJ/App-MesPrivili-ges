@@ -29,9 +29,14 @@ const MonCommerce = () => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
 
-    // Modal
+    // Modal création/édition
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingFiche, setEditingFiche] = useState(null);
+
+    // Modal suppression
+    const [deleteModal, setDeleteModal] = useState({ isOpen: false, fiche: null });
+    const [deleteConfirmText, setDeleteConfirmText] = useState('');
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     useEffect(() => {
         loadFiches();
@@ -69,20 +74,39 @@ const MonCommerce = () => {
         navigate(`/auth/prestataire/${fiche.id}`);
     };
 
-    const handleDelete = async (fiche) => {
-        if (!window.confirm(`Supprimer la fiche "${fiche.nomCommerce}" ?`)) return;
+    // Ouvrir la modal de suppression
+    const handleDelete = (fiche) => {
+        setDeleteModal({ isOpen: true, fiche });
+        setDeleteConfirmText('');
+    };
 
+    // Confirmer la suppression
+    const confirmDelete = async () => {
+        if (deleteConfirmText.toLowerCase() !== 'supprimer') return;
+
+        setDeleteLoading(true);
         try {
-            const result = await PrestataireService.deleteFiche(fiche.id);
+            const result = await PrestataireService.deleteFiche(deleteModal.fiche.id);
             if (result.success) {
                 setSuccess('Fiche supprimée avec succès');
+                setDeleteModal({ isOpen: false, fiche: null });
+                setDeleteConfirmText('');
                 loadFiches();
             } else {
                 setError(result.message);
             }
         } catch (err) {
             setError('Erreur lors de la suppression');
+        } finally {
+            setDeleteLoading(false);
         }
+    };
+
+    // Fermer la modal de suppression
+    const closeDeleteModal = () => {
+        if (deleteLoading) return;
+        setDeleteModal({ isOpen: false, fiche: null });
+        setDeleteConfirmText('');
     };
 
     const handleReactivate = async (fiche) => {
@@ -291,6 +315,71 @@ const MonCommerce = () => {
                 onSuccess={handleModalSuccess}
                 fiche={editingFiche}
             />
+
+            {/* Modal confirmation suppression */}
+            {deleteModal.isOpen && (
+                <div className="delete-modal-overlay" onClick={closeDeleteModal}>
+                    <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="delete-modal-header">
+                            <div className="delete-modal-icon-wrapper">
+                                <IonIcon icon={trashOutline} className="delete-modal-icon" />
+                            </div>
+                            <h2>Supprimer cette fiche ?</h2>
+                        </div>
+
+                        <div className="delete-modal-content">
+                            <p className="delete-modal-fiche-name">"{deleteModal.fiche?.nomCommerce}"</p>
+
+                            <div className="delete-modal-warning">
+                                <IonIcon icon={warningOutline} />
+                                <div>
+                                    <strong>Attention !</strong>
+                                    <span>Cette action est irréversible. Toutes les données associées à cette fiche seront définitivement supprimées (images, avis, statistiques...).</span>
+                                </div>
+                            </div>
+
+                            <div className="delete-modal-confirm">
+                                <label>Pour confirmer, tapez <strong>supprimer</strong> ci-dessous :</label>
+                                <input
+                                    type="text"
+                                    value={deleteConfirmText}
+                                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                                    placeholder="supprimer"
+                                    autoComplete="off"
+                                    disabled={deleteLoading}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="delete-modal-actions">
+                            <button
+                                className="delete-modal-btn cancel"
+                                onClick={closeDeleteModal}
+                                disabled={deleteLoading}
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                className="delete-modal-btn confirm"
+                                onClick={confirmDelete}
+                                disabled={deleteConfirmText.toLowerCase() !== 'supprimer' || deleteLoading}
+                            >
+                                {deleteLoading ? (
+                                    <>
+                                        <div className="btn-spinner"></div>
+                                        Suppression...
+                                    </>
+                                ) : (
+                                    <>
+                                        <IonIcon icon={trashOutline} />
+                                        Supprimer définitivement
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

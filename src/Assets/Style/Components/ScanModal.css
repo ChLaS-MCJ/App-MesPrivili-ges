@@ -1,6 +1,9 @@
-/* Ajouter à votre fichier CSS principal */
+/* ============================================
+   SCAN MODAL - CSS
+   Modal de scan QR code pour prestataires
+   ============================================ */
 
-/* ====== SCAN MODAL ====== */
+/* ===== MODAL OVERLAY ===== */
 .scan-modal-overlay {
     position: fixed;
     top: 0;
@@ -8,32 +11,236 @@
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 10000;
     padding: 20px;
 }
 
+/* ===== MODAL CONTAINER ===== */
 .scan-modal {
-    background: #1a1a1a;
+    background: linear-gradient(180deg, #1f1f1f 0%, #141414 100%);
     border-radius: 24px;
     width: 100%;
-    max-width: 400px;
+    max-width: 420px;
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
     padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
+/* ===== CLOSE BUTTON ===== */
+.modal-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-close-btn ion-icon {
+    font-size: 24px;
+}
+
+/* ===== MODAL HEADER ===== */
+.modal-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-right: 40px;
+}
+
+.modal-title {
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+}
+
+.modal-subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    margin: 0;
+}
+
+.modal-subtitle .current-promo {
+    color: #fe7e4f;
+    font-weight: 500;
+}
+
+/* ===== LOADING STATE ===== */
+.scan-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 16px;
+}
+
+.scan-loading p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+/* ===== FICHE SELECTION ===== */
+.fiche-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.fiche-select-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.fiche-select-item:hover {
+    background: rgba(254, 126, 79, 0.1);
+    border-color: rgba(254, 126, 79, 0.3);
+    transform: translateX(4px);
+}
+
+.fiche-select-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.fiche-select-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.fiche-select-no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.2) 0%, rgba(243, 162, 133, 0.1) 100%);
+}
+
+.fiche-select-no-image ion-icon {
+    font-size: 28px;
+    color: rgba(254, 126, 79, 0.6);
+}
+
+.fiche-select-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.fiche-select-info h3 {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fiche-select-location {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    margin: 0 0 4px;
+}
+
+.fiche-select-location ion-icon {
+    font-size: 12px;
+}
+
+.fiche-select-promo {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #fe7e4f;
+    font-size: 12px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.fiche-select-promo ion-icon {
+    font-size: 12px;
+}
+
+.fiche-select-arrow {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 24px;
+    font-weight: 300;
+    transition: all 0.2s ease;
+}
+
+.fiche-select-item:hover .fiche-select-arrow {
+    color: #fe7e4f;
+    transform: translateX(4px);
+}
+
+/* ===== BACK TO FICHES BUTTON ===== */
+.btn-back-fiches {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 16px;
+}
+
+.btn-back-fiches:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* ===== SCANNER ===== */
 .scanner-container {
     position: relative;
     width: 100%;
     aspect-ratio: 1;
-    border-radius: 16px;
+    border-radius: 20px;
     overflow: hidden;
     background: #000;
-    margin: 20px 0;
 }
 
 .scanner-view {
@@ -67,9 +274,9 @@
 
 .scanner-frame .corner {
     position: absolute;
-    width: 30px;
-    height: 30px;
-    border-color: #f3a285;
+    width: 40px;
+    height: 40px;
+    border-color: #fe7e4f;
     border-style: solid;
     border-width: 0;
 }
@@ -79,7 +286,7 @@
     left: 0;
     border-top-width: 4px;
     border-left-width: 4px;
-    border-top-left-radius: 8px;
+    border-top-left-radius: 12px;
 }
 
 .scanner-frame .corner.top-right {
@@ -87,7 +294,7 @@
     right: 0;
     border-top-width: 4px;
     border-right-width: 4px;
-    border-top-right-radius: 8px;
+    border-top-right-radius: 12px;
 }
 
 .scanner-frame .corner.bottom-left {
@@ -95,7 +302,7 @@
     left: 0;
     border-bottom-width: 4px;
     border-left-width: 4px;
-    border-bottom-left-radius: 8px;
+    border-bottom-left-radius: 12px;
 }
 
 .scanner-frame .corner.bottom-right {
@@ -103,195 +310,242 @@
     right: 0;
     border-bottom-width: 4px;
     border-right-width: 4px;
-    border-bottom-right-radius: 8px;
+    border-bottom-right-radius: 12px;
 }
 
 .flash-btn {
     position: absolute;
     bottom: 16px;
     right: 16px;
-    width: 48px;
-    height: 48px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: #fff;
     font-size: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
 }
 
+.flash-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.flash-btn ion-icon {
+    font-size: 24px;
+}
+
+.scan-instruction {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 13px;
+    margin-top: 16px;
+}
+
+/* ===== NO PROMO WARNING ===== */
 .no-promo-warning {
     background: rgba(255, 119, 7, 0.1);
     border: 1px solid rgba(255, 139, 7, 0.3);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 16px;
     display: flex;
     align-items: center;
     gap: 12px;
     color: #f3a285;
+    margin-top: 16px;
 }
 
 .no-promo-warning ion-icon {
     font-size: 24px;
+    flex-shrink: 0;
 }
 
-/* Liste des promotions */
-.promo-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin: 20px 0;
-}
-
-.promo-item {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: left;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.promo-item:hover {
-    background: rgba(255, 128, 0, 0.1);
-    border-color: rgba(255, 119, 0, 0.3);
-}
-
-.promo-item:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.promo-info h3 {
-    color: #fff;
-    font-size: 16px;
-    font-weight: 600;
-    margin: 0 0 4px 0;
-}
-
-.promo-info p {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 14px;
+.no-promo-warning p {
     margin: 0;
+    font-size: 14px;
 }
 
-.promo-meta {
-    text-align: right;
-}
-
-.promo-uses {
-    color: #f3a285;
-    font-size: 12px;
-}
-
-/* Résultats */
+/* ===== RESULTS ===== */
 .result-container {
     text-align: center;
-    padding: 40px 20px;
+    padding: 40px 10px;
 }
 
 .result-icon {
-    font-size: 80px;
     margin-bottom: 20px;
 }
 
-.result-container.success .result-icon {
-    color: #4CAF50;
+.result-icon ion-icon {
+    font-size: 80px;
 }
 
-.result-container.error .result-icon {
-    color: #f44336;
+.result-container.success .result-icon ion-icon {
+    color: #4ade80;
+}
+
+.result-container.error .result-icon ion-icon {
+    color: #f87171;
 }
 
 .result-container h2 {
     color: #fff;
-    font-size: 24px;
-    margin-bottom: 16px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 20px;
 }
 
 .scan-details {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 16px;
-    margin: 20px 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 0 0 24px;
 }
 
 .client-name {
     color: #fff;
-    font-size: 18px;
+    font-size: 1.2rem;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin: 0 0 8px;
+}
+
+.commerce-name {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    margin: 0 0 8px;
 }
 
 .promo-applied {
-    color: #f3a285;
+    color: #fe7e4f;
     font-size: 14px;
+    font-weight: 500;
+    margin: 0;
 }
 
 .error-message {
     color: rgba(255, 255, 255, 0.7);
     font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 24px;
 }
 
+/* ===== ACTION BUTTONS ===== */
 .result-actions {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-top: 24px;
 }
 
 .btn-primary {
     background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
-    color: #000;
+    color: #fff;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 16px 24px;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(254, 126, 79, 0.3);
 }
 
 .btn-primary:hover {
-    transform: scale(1.02);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(254, 126, 79, 0.4);
 }
 
 .btn-secondary {
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
     padding: 16px 24px;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-/* Loading overlay */
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ===== LOADING OVERLAY ===== */
 .loading-overlay {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     border-radius: 24px;
+    z-index: 100;
 }
 
 .loading-overlay p {
-    color: #fff;
+    color: rgba(255, 255, 255, 0.8);
     margin-top: 16px;
+    font-size: 14px;
+}
+
+/* ===== SPINNER ===== */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(254, 126, 79, 0.2);
+    border-top-color: #fe7e4f;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+    .scan-modal {
+        padding: 20px;
+        max-height: 95vh;
+    }
+
+    .modal-title {
+        font-size: 1.2rem;
+    }
+
+    .fiche-select-item {
+        padding: 12px;
+    }
+
+    .fiche-select-image {
+        width: 50px;
+        height: 50px;
+    }
+
+    .scanner-frame {
+        width: 200px;
+        height: 200px;
+    }
+
+    .result-icon ion-icon {
+        font-size: 60px;
+    }
+
+    .client-name {
+        font-size: 1.1rem;
+    }
 }

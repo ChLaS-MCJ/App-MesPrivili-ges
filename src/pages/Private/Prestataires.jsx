@@ -265,6 +265,43 @@ const Prestataires = () => {
         await fetchPrestataires([]);
     };
 
+    // Vérifier si un prestataire a des promotions actives
+    const hasActivePromotion = (prestataire) => {
+        if (!prestataire.promotions || prestataire.promotions.length === 0) return false;
+
+        const now = new Date();
+        return prestataire.promotions.some(promo => {
+            const dateDebut = new Date(promo.dateDebut);
+            const dateFin = new Date(promo.dateFin);
+            const isValid = promo.estActive && dateDebut <= now && dateFin >= now;
+
+            // Vérifier aussi la limite d'utilisations
+            if (promo.limiteUtilisations !== null && promo.nombreUtilisations >= promo.limiteUtilisations) {
+                return false;
+            }
+
+            return isValid;
+        });
+    };
+
+    // Récupérer la première promotion active
+    const getActivePromotion = (prestataire) => {
+        if (!prestataire.promotions || prestataire.promotions.length === 0) return null;
+
+        const now = new Date();
+        return prestataire.promotions.find(promo => {
+            const dateDebut = new Date(promo.dateDebut);
+            const dateFin = new Date(promo.dateFin);
+            const isValid = promo.estActive && dateDebut <= now && dateFin >= now;
+
+            if (promo.limiteUtilisations !== null && promo.nombreUtilisations >= promo.limiteUtilisations) {
+                return false;
+            }
+
+            return isValid;
+        });
+    };
+
     const getCardStyle = (index) => {
         const offset = index - currentIndex;
 
@@ -275,7 +312,7 @@ const Prestataires = () => {
         let translateX = 0;
         let rotateZ = 0;
         let opacity = 1;
-        let scale = 0.85;
+        let scale = 1;
 
         const curveIntensity = 10;
 
@@ -421,48 +458,63 @@ const Prestataires = () => {
                 onMouseDown={handleMouseDown}
                 onWheel={handleWheel}
             >
-                {filteredPrestataires.map((prestataire, index) => (
-                    <div
-                        key={prestataire.id}
-                        className="prestataire-card"
-                        style={getCardStyle(index)}
-                        onClick={() => {
-                            if (index === currentIndex && !hasDragged.current) {
-                                handlePrestataireClick(prestataire.id);
-                            }
-                        }}
-                    >
-                        <div className="category-icon">
-                            <img
-                                src={categoryIcons[prestataire.category?.image]}
-                                alt={prestataire.category?.nom}
-                            />
-                        </div>
+                {filteredPrestataires.map((prestataire, index) => {
+                    const activePromo = getActivePromotion(prestataire);
 
-                        <button
-                            className="go-to-prestataire"
-                            onMouseDown={(e) => e.stopPropagation()}
-                            onTouchStart={(e) => e.stopPropagation()}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/prestataire/${prestataire.id}`);
+                    return (
+                        <div
+                            key={prestataire.id}
+                            className="prestataire-card"
+                            style={getCardStyle(index)}
+                            onClick={() => {
+                                if (index === currentIndex && !hasDragged.current) {
+                                    handlePrestataireClick(prestataire.id);
+                                }
                             }}
                         >
-                            <ArrowRightOutlined />
-                        </button>
+                            {/* Badge Promotion */}
 
-                        <div className="card-name">
-                            <h2>{prestataire.nomCommerce}</h2>
+
+                            <div className="category-icon">
+                                <img
+                                    src={categoryIcons[prestataire.category?.image]}
+                                    alt={prestataire.category?.nom}
+                                />
+                            </div>
+
+                            <button
+                                className="go-to-prestataire"
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onTouchStart={(e) => e.stopPropagation()}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/prestataire/${prestataire.id}`);
+                                }}
+                            >
+                                <ArrowRightOutlined />
+                            </button>
+
+                            <div className="card-name">
+                                <h2>{prestataire.nomCommerce}</h2>
+                            </div>
+
+                            <div
+                                className="card-image"
+                                style={{
+                                    backgroundImage: `url(${prestataire.imagePrincipale || '/placeholder.jpg'})`
+                                }}
+                            >
+                                {/* Badge Promo - en bas à droite de l'image */}
+                                {activePromo && (
+                                    <div className="promo-card-prestataires">
+                                        <span className="promo-card-prestataires-icon"></span>
+                                        <span className="promo-card-prestataires-text">{activePromo.titre}</span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-
-                        <div
-                            className="card-image"
-                            style={{
-                                backgroundImage: `url(${prestataire.imagePrincipale || '/placeholder.jpg'})`
-                            }}
-                        />
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Indicateur de position */}

@@ -3,13 +3,26 @@ import Caller from './Caller.services';
 
 const ScanService = {
     /**
+     * Récupérer mes fiches avec leurs promotions (PRESTATAIRE)
+     */
+    getMyFichesWithPromos: async () => {
+        try {
+            const response = await Caller.get('/prestataires/me/fiches');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { success: false, message: 'Erreur lors de la récupération des fiches' };
+        }
+    },
+
+    /**
      * Scanner le QR code d'un client (PRESTATAIRE)
      */
-    scan: async (qrCode, promotionId) => {
+    scan: async (qrCode, promotionId, prestataireId) => {
         try {
             const response = await Caller.post('/scans/scan', {
                 qrCode,
-                promotionId
+                promotionId,
+                prestataireId
             });
             return response.data;
         } catch (error) {
