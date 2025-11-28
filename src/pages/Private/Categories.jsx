@@ -101,7 +101,7 @@ const Categories = () => {
     const getDefaultImage = (categoryName) => {
         const images = {
             'Mode': modeImg,
-            'Restaurants': restaurantsImg,
+            'Restaurants & Salons de thé': restaurantsImg,
             'Hôtels': hotelsImg,
             'Beauté & Spa': beauteImg,
             'Voyage': voyageImg,
@@ -109,7 +109,7 @@ const Categories = () => {
             'High-Tech': techImg,
             'Enfants': enfantsImg,
             'Maison': maisonImg,
-            'Loisir': loisirImg,
+            'Loisirs': loisirImg,
         };
         return images[categoryName] || modeImg;
     };

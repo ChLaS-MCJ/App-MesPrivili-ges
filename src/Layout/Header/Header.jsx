@@ -13,7 +13,8 @@ import {
     SafetyOutlined,
     ShopOutlined,
     GiftOutlined,
-    BarChartOutlined
+    BarChartOutlined,
+    HeartOutlined
 } from '@ant-design/icons';
 
 const Header = () => {
@@ -228,11 +229,6 @@ const Header = () => {
                     </svg>
                 </div>
 
-                <div className="notification-bell">
-                    <BellOutlined style={{ fontSize: '20px', color: 'white' }} />
-                    <div className="bell-dot"></div>
-                </div>
-
                 <div className="profile-container" onClick={toggleDrawer}>
                     <div className="profile-circle">
                         <img
@@ -305,6 +301,16 @@ const Header = () => {
                                 <span>Historique</span>
                             </button>
                         )}
+
+                        {/* Favoris - uniquement pour les clients */}
+                        <button
+                            className="drawer-menu-item"
+                            onClick={() => handleNavigation('/auth/favoris')}
+                        >
+                            <HeartOutlined className="menu-icon" />
+                            <span>Mes Favoris</span>
+                        </button>
+
 
                         {/* Section Prestataire */}
                         {isPrestataire && (

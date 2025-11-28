@@ -26,6 +26,8 @@
 @import './Pages/Mespromotions.css';
 @import './Pages/Messtatistiques.css';
 @import './Pages/Moncommerce.css';
+@import './Pages/Favoris.css';
+
 
 /*--------------Components-----------------*/
 @import './Components/Loader.css';

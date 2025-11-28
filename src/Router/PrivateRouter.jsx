@@ -18,6 +18,8 @@ import MonCommerce from '../pages/Private/MonCommerce';
 import MesPromotions from '../pages/Private/MesPromotions';
 import MesStatistiques from '../pages/Private/MesStatistiques';
 
+import Favoris from '../pages/Private/Favoris';
+
 const PrivateRouter = () => {
     const { isAuthenticated, loading } = useAuth();
 
@@ -52,6 +54,7 @@ const PrivateRouter = () => {
                 <Route path="mon-commerce" element={<MonCommerce />} />
                 <Route path="mes-promotions" element={<MesPromotions />} />
                 <Route path="mes-statistiques" element={<MesStatistiques />} />
+                <Route path="favoris" element={<Favoris />} />
             </Route>
 
         </Routes>

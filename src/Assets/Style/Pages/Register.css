@@ -15,8 +15,8 @@
     -webkit-overflow-scrolling: touch;
     /* Pour un scroll fluide sur iOS */
     background:
-        linear-gradient(135deg, rgba(224, 195, 179, 0.7) 0%, rgba(197, 166, 143, 0.7) 50%, rgba(158, 168, 184, 0.7) 100%),
-        url('../../Images/register-bg4.jpeg') center/cover no-repeat;
+        linear-gradient(135deg, rgba(224, 195, 179, 0.3) 0%, rgba(197, 166, 143, 0.3) 50%, rgba(158, 168, 184, 0.3) 100%),
+        url('../../Images/register-bg6.jpg') center/cover no-repeat;
     background-attachment: fixed;
     background-position: center top;
     position: relative;
@@ -29,7 +29,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(4px);
     pointer-events: none;
 }

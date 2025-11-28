@@ -1,0 +1,836 @@
+/* ===== FAVORIS PAGE ===== */
+.favoris-page {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+    padding: 20px 15px;
+    padding-bottom: 100px;
+}
+
+/* ===== PAGE HEADER ===== */
+.favoris-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 0 5px;
+}
+
+.favoris-title {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    flex: 1;
+    text-align: center;
+}
+
+.favoris-back-btn,
+.favoris-view-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.favoris-back-btn:hover,
+.favoris-view-toggle:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.favoris-view-toggle.active {
+    background: rgba(254, 126, 79, 0.2);
+    color: #fe7e4f;
+}
+
+/* ===== LOADING ===== */
+.favoris-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 15px;
+}
+
+.favoris-loading p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+/* ===== EMPTY STATE ===== */
+.favoris-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.favoris-empty-icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.15) 0%, rgba(255, 100, 150, 0.1) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.favoris-empty-icon ion-icon {
+    font-size: 48px;
+    color: rgba(254, 126, 79, 0.6);
+}
+
+.favoris-empty h3 {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 10px;
+}
+
+.favoris-empty p {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    margin: 0 0 25px;
+    max-width: 280px;
+    line-height: 1.5;
+}
+
+.favoris-explore-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(254, 126, 79, 0.3);
+}
+
+.favoris-explore-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(254, 126, 79, 0.4);
+}
+
+.favoris-explore-btn ion-icon {
+    font-size: 20px;
+}
+
+/* ===== STATS ROW ===== */
+.favoris-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.favoris-stat-mini {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1f1f1f 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.favoris-stat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(254, 126, 79, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.favoris-stat-icon ion-icon {
+    font-size: 16px;
+    color: #fe7e4f;
+}
+
+.favoris-stat-icon.promos {
+    background: rgba(100, 255, 150, 0.15);
+}
+
+.favoris-stat-icon.promos ion-icon {
+    color: #64ff96;
+}
+
+.favoris-stat-icon.rating {
+    background: rgba(255, 193, 7, 0.15);
+}
+
+.favoris-stat-icon.rating ion-icon {
+    color: #ffc107;
+}
+
+.favoris-stat-icon.cities {
+    background: rgba(100, 181, 255, 0.15);
+}
+
+.favoris-stat-icon.cities ion-icon {
+    color: #64b5ff;
+}
+
+.favoris-stat-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.favoris-stat-value {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.favoris-stat-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* ===== SEARCH BAR ===== */
+.favoris-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    margin-bottom: 14px;
+    transition: all 0.3s ease;
+}
+
+.favoris-search:focus-within {
+    border-color: rgba(254, 126, 79, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.favoris-search-icon {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.favoris-search input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-size: 14px;
+}
+
+.favoris-search input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.favoris-clear-search {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.6);
+    transition: all 0.2s ease;
+}
+
+.favoris-clear-search:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+.favoris-clear-search ion-icon {
+    font-size: 14px;
+}
+
+/* ===== FILTERS ROW ===== */
+.favoris-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.favoris-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.favoris-category-chip {
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.favoris-category-chip:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.favoris-category-chip.active {
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+    border-color: transparent;
+    color: #fff;
+}
+
+/* ===== SORT DROPDOWN ===== */
+.favoris-sort-dropdown {
+    position: relative;
+}
+
+.favoris-sort-trigger {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.favoris-sort-trigger:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.favoris-sort-trigger ion-icon {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.favoris-sort-trigger ion-icon.rotated {
+    transform: rotate(180deg);
+}
+
+.favoris-sort-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99;
+}
+
+.favoris-sort-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 150px;
+    background: linear-gradient(135deg, #2c2c2c 0%, #1f1f1f 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 100;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    animation: favorisSlideDown 0.2s ease;
+}
+
+@keyframes favorisSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.favoris-sort-option {
+    width: 100%;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    text-align: left;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.favoris-sort-option:last-child {
+    border-bottom: none;
+}
+
+.favoris-sort-option:hover {
+    background: rgba(254, 126, 79, 0.1);
+}
+
+.favoris-sort-option.active {
+    color: #fe7e4f;
+    background: rgba(254, 126, 79, 0.1);
+}
+
+/* ===== RESULTS COUNT ===== */
+.favoris-results-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0 5px;
+}
+
+.favoris-results-count {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+}
+
+/* ===== NO RESULTS ===== */
+.favoris-no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.favoris-no-results ion-icon {
+    font-size: 48px;
+    color: rgba(254, 126, 79, 0.3);
+    margin-bottom: 16px;
+}
+
+.favoris-no-results p {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    margin: 0 0 16px;
+}
+
+.favoris-no-results button {
+    padding: 10px 20px;
+    background: rgba(254, 126, 79, 0.15);
+    border: 1px solid rgba(254, 126, 79, 0.3);
+    border-radius: 10px;
+    color: #fe7e4f;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.favoris-no-results button:hover {
+    background: rgba(254, 126, 79, 0.25);
+}
+
+/* ===== LIST MODE ===== */
+.favoris-list.list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.favori-card.list {
+    display: flex;
+    gap: 14px;
+    padding: 14px;
+    background: linear-gradient(135deg, #2c2c2c 0%, #1f1f1f 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.favori-card.list:hover {
+    border-color: rgba(254, 126, 79, 0.3);
+    transform: translateY(-2px);
+}
+
+.favori-card.list .favori-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.favori-card.list .favori-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== GRID MODE ===== */
+.favoris-list.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.favori-card.grid {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #2c2c2c 0%, #1f1f1f 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.favori-card.grid:hover {
+    border-color: rgba(254, 126, 79, 0.3);
+    transform: translateY(-2px);
+}
+
+.favori-card.grid .favori-image {
+    width: 100%;
+    height: 120px;
+    position: relative;
+}
+
+.favori-card.grid .favori-content {
+    padding: 12px;
+}
+
+/* ===== SHARED CARD STYLES ===== */
+.favori-card.removing {
+    opacity: 0;
+    transform: translateX(-100%) !important;
+    transition: all 0.3s ease;
+}
+
+.favori-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.favori-image .image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.1) 0%, rgba(243, 162, 133, 0.05) 100%);
+}
+
+.favori-image .image-placeholder ion-icon {
+    font-size: 32px;
+    color: rgba(254, 126, 79, 0.4);
+}
+
+/* Promo Badge */
+.favoris-promo-badge {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 5px 10px;
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(254, 126, 79, 0.4);
+}
+
+.favoris-promo-badge ion-icon {
+    font-size: 14px;
+}
+
+/* Heart Button */
+.favori-heart-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.favori-heart-btn ion-icon {
+    font-size: 18px;
+    color: #ff6b6b;
+}
+
+.favori-heart-btn:hover {
+    background: rgba(255, 100, 100, 0.3);
+    transform: scale(1.1);
+}
+
+/* Content */
+.favori-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.favori-name {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.favori-rating-badge {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 6px;
+    background: rgba(255, 193, 7, 0.15);
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.favori-rating-badge ion-icon {
+    font-size: 12px;
+    color: #ffc107;
+}
+
+.favori-rating-badge span {
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffc107;
+}
+
+.favori-type {
+    color: #f3a285;
+    font-size: 12px;
+    margin: 0 0 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.favori-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.favori-location {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+}
+
+.favori-location ion-icon {
+    font-size: 14px;
+    color: rgba(254, 126, 79, 0.7);
+}
+
+.favori-reviews {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 11px;
+}
+
+/* Stars (grid mode) */
+.favori-stars {
+    display: flex;
+    gap: 2px;
+    margin-top: auto;
+}
+
+.favori-stars ion-icon {
+    font-size: 12px;
+}
+
+.favori-stars .star-filled {
+    color: #ffc107;
+}
+
+.favori-stars .star-empty {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+/* Actions (list mode) */
+.favori-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.action-btn.navigate {
+    background: rgba(254, 126, 79, 0.15);
+    color: #fe7e4f;
+    border: 1px solid rgba(254, 126, 79, 0.2);
+}
+
+.action-btn.navigate:hover {
+    background: rgba(254, 126, 79, 0.25);
+}
+
+.action-btn.navigate ion-icon {
+    font-size: 14px;
+}
+
+.action-btn.remove {
+    background: rgba(255, 100, 100, 0.1);
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 100, 100, 0.2);
+}
+
+.action-btn.remove:hover {
+    background: rgba(255, 100, 100, 0.2);
+}
+
+.action-btn.remove ion-icon {
+    font-size: 14px;
+}
+
+/* ===== EXPLORE MORE ===== */
+.favoris-explore-more {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.favoris-explore-more button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: transparent;
+    border: 1px dashed rgba(254, 126, 79, 0.4);
+    border-radius: 12px;
+    color: #fe7e4f;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.favoris-explore-more button:hover {
+    background: rgba(254, 126, 79, 0.1);
+    border-style: solid;
+}
+
+.favoris-explore-more button ion-icon {
+    font-size: 18px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (min-width: 768px) {
+    .favoris-page {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 30px 20px;
+        padding-bottom: 100px;
+    }
+
+    .favoris-title {
+        font-size: 24px;
+    }
+
+    .favoris-stats {
+        gap: 14px;
+    }
+
+    .favoris-stat-mini {
+        padding: 16px 12px;
+    }
+
+    .favoris-stat-value {
+        font-size: 22px;
+    }
+
+    .favoris-list.grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .favori-card.list .favori-image {
+        width: 120px;
+        height: 120px;
+    }
+
+    .favori-name {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 380px) {
+    .favoris-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .favoris-stat-mini {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+
+    .favoris-stat-info {
+        align-items: flex-start;
+    }
+
+    .favoris-list.grid {
+        grid-template-columns: 1fr;
+    }
+
+    .favori-card.grid .favori-image {
+        height: 160px;
+    }
+}
