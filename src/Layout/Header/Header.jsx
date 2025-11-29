@@ -14,7 +14,8 @@ import {
     ShopOutlined,
     GiftOutlined,
     BarChartOutlined,
-    HeartOutlined
+    HeartOutlined,
+    CreditCardOutlined
 } from '@ant-design/icons';
 
 const Header = () => {
@@ -340,6 +341,15 @@ const Header = () => {
                                 >
                                     <BarChartOutlined className="menu-icon" />
                                     <span>Mes Statistiques</span>
+                                </button>
+
+                                {/* NOUVEAU: Lien vers Abonnement */}
+                                <button
+                                    className="drawer-menu-item prestataire"
+                                    onClick={() => handleNavigation('/auth/abonnement')}
+                                >
+                                    <CreditCardOutlined className="menu-icon" />
+                                    <span>Mon Abonnement</span>
                                 </button>
                             </>
                         )}

@@ -1,0 +1,440 @@
+/* ============================================
+   PAGE ABONNEMENT - STYLES
+   ============================================ */
+
+.abonnement-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    padding: 20px;
+    padding-bottom: 100px;
+}
+
+/* Header */
+.abonnement-page .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.abonnement-page .page-header h1 {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.abonnement-page .back-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.abonnement-page .back-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.abonnement-page .header-spacer {
+    width: 40px;
+}
+
+/* Messages */
+.abonnement-page .message-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    animation: slideIn 0.3s ease;
+}
+
+.abonnement-page .message-banner.error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+}
+
+.abonnement-page .message-banner.success {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #86efac;
+}
+
+.abonnement-page .message-banner ion-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.abonnement-page .message-banner span {
+    flex: 1;
+    font-size: 0.95rem;
+}
+
+.abonnement-page .message-banner button {
+    background: none;
+    border: none;
+    color: inherit;
+    opacity: 0.7;
+    cursor: pointer;
+    padding: 4px;
+}
+
+/* Souscription actuelle */
+.current-subscription {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.2) 100%);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.subscription-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(34, 197, 94, 0.3);
+    padding: 6px 14px;
+    border-radius: 20px;
+    color: #86efac;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.subscription-badge ion-icon {
+    font-size: 1rem;
+}
+
+.subscription-details h3 {
+    color: white;
+    font-size: 1.2rem;
+    margin: 0 0 8px 0;
+}
+
+.subscription-details p {
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.subscription-details .days-left {
+    color: #86efac;
+    font-weight: 500;
+    margin-top: 8px;
+}
+
+/* Section intro */
+.section-intro {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.section-intro h2 {
+    color: white;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+}
+
+.section-intro p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Grille d'abonnements */
+.abonnements-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+@media (min-width: 768px) {
+    .abonnements-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Carte d'abonnement */
+.abonnement-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.abonnement-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.abonnement-card.popular {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+    border-color: rgba(139, 92, 246, 0.4);
+}
+
+.abonnement-card.popular:hover {
+    border-color: rgba(139, 92, 246, 0.6);
+}
+
+/* Badge populaire */
+.popular-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.popular-badge ion-icon {
+    font-size: 0.9rem;
+}
+
+/* En-tête de carte */
+.card-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-top: 8px;
+}
+
+.card-header h3 {
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+}
+
+.card-header .duration {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Prix */
+.card-pricing {
+    text-align: center;
+    padding: 20px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+}
+
+.price-monthly {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.price-monthly .amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+.price-monthly .period {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.95rem;
+}
+
+.price-total {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+.savings {
+    background: rgba(34, 197, 94, 0.2);
+    color: #86efac;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+/* Liste des fonctionnalités */
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px 0;
+}
+
+.features-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.features-list li ion-icon {
+    color: #86efac;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* Bouton sélection */
+.select-btn {
+    width: 100%;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+}
+
+.select-btn.primary {
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+    color: white;
+}
+
+.select-btn.primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+}
+
+.select-btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.select-btn.secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.select-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.select-btn .btn-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Section infos */
+.abonnement-info {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.abonnement-info h3 {
+    color: white;
+    font-size: 1.2rem;
+    margin: 0 0 20px 0;
+}
+
+.faq-item {
+    margin-bottom: 20px;
+}
+
+.faq-item:last-child {
+    margin-bottom: 0;
+}
+
+.faq-item h4 {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0 0 8px 0;
+}
+
+.faq-item p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Paiement sécurisé */
+.secure-payment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+    padding: 16px;
+}
+
+.secure-payment ion-icon {
+    font-size: 1.2rem;
+    color: #86efac;
+}
+
+/* Loading */
+.abonnement-page .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.abonnement-page .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #8b5cf6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 16px;
+}
+
+/* Animations */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

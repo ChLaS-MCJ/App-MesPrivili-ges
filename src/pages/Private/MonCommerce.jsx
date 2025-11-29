@@ -48,7 +48,7 @@ const MonCommerce = () => {
             const result = await PrestataireService.getMyFiches();
             if (result.success) {
                 setFiches(result.data.fiches || []);
-                setMaxFiches(result.data.maxFiches || 1);
+                setMaxFiches(result.data.maxFiches ?? 1);
                 setPeutCreer(result.data.peutCreer || false);
             } else {
                 setError(result.message);
@@ -168,7 +168,7 @@ const MonCommerce = () => {
                 <button className="back-btn" onClick={() => navigate(previousPath, { state: { openDrawer: true } })}>
                     <IonIcon icon={arrowBackOutline} />
                 </button>
-                <h1>Mes Commerces</h1>
+                <h1>Mes Fiches</h1>
                 <button
                     className="add-btn"
                     onClick={handleCreate}

@@ -91,6 +91,43 @@
     letter-spacing: -0.5px;
 }
 
+/* ========== ACCOUNT TYPE SELECTOR ========== */
+.account-type-selector {
+    margin-bottom: 20px;
+    animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+.account-type-segment {
+    --background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 4px;
+    backdrop-filter: blur(10px);
+}
+
+.account-type-segment ion-segment-button {
+    --background: transparent;
+    --background-checked: rgba(255, 255, 255, 0.95);
+    --color: rgba(255, 255, 255, 0.8);
+    --color-checked: #1a1a1a;
+    --indicator-color: transparent;
+    --border-radius: 12px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    min-height: 50px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.account-type-segment ion-segment-button ion-icon {
+    font-size: 20px;
+    margin-right: 8px;
+}
+
+.account-type-segment ion-segment-button ion-label {
+    font-size: 14px;
+    text-transform: none;
+}
+
 /* Form glassmorphism */
 .register-form {
     background: rgba(255, 255, 255, 0.15);
@@ -208,6 +245,81 @@ ion-input.register-input {
     font-weight: 300;
 }
 
+/* ========== PRESTATAIRE SECTION ========== */
+.prestataire-section {
+    margin: 0px 0;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.prestataire-section .section-title {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0 0 16px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.9;
+}
+
+/* SIRET Input avec status */
+.siret-input-group {
+    position: relative;
+}
+
+.siret-input-group .register-input {
+    padding-right: 40px !important;
+}
+
+.siret-status {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.siret-spinner {
+    --color: white;
+    width: 20px;
+    height: 20px;
+}
+
+.siret-icon {
+    font-size: 22px;
+}
+
+.siret-icon.valid {
+    color: #4ade80;
+}
+
+.siret-icon.invalid {
+    color: #f87171;
+}
+
+.siret-message {
+    font-size: 12px;
+    margin: -16px 0 16px 0;
+    padding: 0;
+    font-weight: 400;
+}
+
+.siret-message.valid {
+    color: #4ade80;
+}
+
+.siret-message.invalid,
+.siret-message.error {
+    color: #f87171;
+}
+
+.siret-message.checking {
+    color: rgba(255, 255, 255, 0.7);
+}
+
 /* Button */
 .register-button {
     --background: #1a1a1a;
@@ -220,6 +332,44 @@ ion-input.register-input {
     text-transform: none;
     margin: 30px 0 16px 0;
     letter-spacing: 0.5px;
+}
+
+/* Google button */
+.google-button {
+    --background: rgba(255, 255, 255, 0.9);
+    --background-hover: white;
+    --color: #1a1a1a;
+    --border-radius: 30px;
+    --border-color: transparent;
+    height: 52px;
+    font-size: 15px;
+    font-weight: 500;
+    text-transform: none;
+    margin: 0 0 12px 0;
+}
+
+.google-button ion-icon {
+    font-size: 20px;
+    margin-right: 8px;
+}
+
+/* Apple button */
+.apple-button {
+    --background: rgba(0, 0, 0, 0.8);
+    --background-hover: black;
+    --color: white;
+    --border-radius: 30px;
+    --border-color: transparent;
+    height: 52px;
+    font-size: 15px;
+    font-weight: 500;
+    text-transform: none;
+    margin: 0;
+}
+
+.apple-button ion-icon {
+    font-size: 22px;
+    margin-right: 8px;
 }
 
 /* Login group */
@@ -301,6 +451,11 @@ ion-input.register-input {
         height: 45px;
         font-size: 15px;
     }
+
+    .prestataire-section {
+        margin: 15px 0;
+        padding-top: 15px;
+    }
 }
 
 /* Pour les très petits écrans */
@@ -323,6 +478,16 @@ ion-input.register-input {
 
     .input-group {
         margin-bottom: 16px;
+    }
+
+    .account-type-selector {
+        margin-bottom: 15px;
+    }
+
+    .account-type-segment ion-segment-button {
+        --padding-top: 10px;
+        --padding-bottom: 10px;
+        min-height: 44px;
     }
 }
 
@@ -364,4 +529,20 @@ ion-input.register-input {
 /* Si tu as le lien "Oublié?" à droite aussi */
 .input-password-group .forgot-link {
     right: 50px;
+}
+
+/* Toast styles */
+.toast-success {
+    --background: #10b981;
+    --color: white;
+}
+
+.toast-danger {
+    --background: #ef4444;
+    --color: white;
+}
+
+.toast-warning {
+    --background: #f59e0b;
+    --color: white;
 }

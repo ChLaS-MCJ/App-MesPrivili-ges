@@ -175,7 +175,7 @@ const Login = () => {
                                 type="email"
                                 placeholder="Nom d'utilisateur/Email"
                                 value={email}
-                                onIonChange={(e) => setEmail(e.detail.value)}
+                                onIonInput={(e) => setEmail(e.detail.value || '')}
                             />
                         </div>
 
@@ -185,7 +185,7 @@ const Login = () => {
                                 type={showPassword ? 'text' : 'password'}
                                 placeholder="Mot de passe"
                                 value={password}
-                                onIonChange={(e) => setPassword(e.detail.value)}
+                                onIonInput={(e) => setPassword(e.detail.value || '')}
                             />
                             <button
                                 type="button"

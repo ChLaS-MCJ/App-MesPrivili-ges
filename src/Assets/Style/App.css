@@ -28,7 +28,8 @@
 @import './Pages/Moncommerce.css';
 @import './Pages/Favoris.css';
 
-
+@import './Pages/Abonnement.css';
+@import './Pages/AbonnementSuccess.css';
 /*--------------Components-----------------*/
 @import './Components/Loader.css';
 @import './Components/Toast-custom.css';

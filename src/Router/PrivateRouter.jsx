@@ -20,6 +20,10 @@ import MesStatistiques from '../pages/Private/MesStatistiques';
 
 import Favoris from '../pages/Private/Favoris';
 
+// Ajouter l'import
+import Abonnement from '../pages/Private/Abonnement';
+import AbonnementSuccess from '../pages/Private/AbonnementSuccess';
+
 const PrivateRouter = () => {
     const { isAuthenticated, loading } = useAuth();
 
@@ -55,6 +59,11 @@ const PrivateRouter = () => {
                 <Route path="mes-promotions" element={<MesPromotions />} />
                 <Route path="mes-statistiques" element={<MesStatistiques />} />
                 <Route path="favoris" element={<Favoris />} />
+
+
+                {/* Routes Abonnement */}
+                <Route path="abonnement" element={<Abonnement />} />
+                <Route path="abonnement/success" element={<AbonnementSuccess />} />
             </Route>
 
         </Routes>
