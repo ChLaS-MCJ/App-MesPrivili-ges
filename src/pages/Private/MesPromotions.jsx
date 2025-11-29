@@ -254,7 +254,7 @@ const MesPromotions = () => {
                     <IonIcon icon={storefrontOutline} />
                     <h3>Aucune fiche commerce</h3>
                     <p>Créez d'abord une fiche commerce pour ajouter des promotions</p>
-                    <button className="btn-primary" onClick={() => navigate('/auth/mon-commerce')}>
+                    <button className="btn-primary-promotion" onClick={() => navigate('/auth/mon-commerce')}>
                         <IonIcon icon={addOutline} />
                         Créer une fiche
                     </button>

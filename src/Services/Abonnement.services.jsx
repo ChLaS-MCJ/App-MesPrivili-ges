@@ -98,13 +98,18 @@ class AbonnementService {
 
   /**
    * Créer une session de paiement Stripe
+   * @param {string} abonnementCode - Code de l'abonnement (semestriel, annuel)
+   * @param {number} nombreFiches - Nombre de fiches à souscrire (défaut: 1)
    */
-  static async createCheckout(abonnementCode) {
+  static async createCheckout(abonnementCode, nombreFiches = 1) {
     try {
       const response = await fetch(`${API_URL}/abonnements/checkout`, {
         method: 'POST',
         headers: this.getAuthHeader(),
-        body: JSON.stringify({ abonnementCode })
+        body: JSON.stringify({
+          abonnementCode,
+          nombreFiches: parseInt(nombreFiches, 10)
+        })
       });
       return await response.json();
     } catch (error) {

@@ -259,6 +259,23 @@
     font-size: 18px;
 }
 
+
+.btn-primary-promotion {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(254, 126, 79, 0.3);
+}
+
 /* ===== PROMOS LIST ===== */
 .promos-list {
     display: flex;
@@ -502,9 +519,9 @@
 }
 
 .no-fiches ion-icon {
-    font-size: 64px;
-    color: rgba(254, 126, 79, 0.4);
-    margin-bottom: 20px;
+    font-size: 18px !important;
+    color: white !important;
+    margin-bottom: 0px !important;
 }
 
 .no-fiches h3 {

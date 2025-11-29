@@ -1,38 +1,62 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { IonIcon } from '@ionic/react';
 import {
     arrowBackOutline,
     checkmarkCircle,
-    starOutline,
+    removeOutline,
+    addOutline,
+    storefrontOutline,
+    timeOutline,
     shieldCheckmarkOutline,
+    sparklesOutline,
+    trendingUpOutline,
     statsChartOutline,
-    qrCodeOutline,
     megaphoneOutline,
     ribbonOutline,
     alertCircleOutline,
-    closeCircleOutline
+    closeOutline,
+    cardOutline,
+    giftOutline,
+    chevronDownOutline,
+    chevronUpOutline
 } from 'ionicons/icons';
 import AbonnementService from '../../Services/Abonnement.services';
 import { useAuth } from '../../Utils/AuthContext';
 
-
 const Abonnement = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [searchParams] = useSearchParams();
-    const { user, refreshUser } = useAuth();
+    const { user } = useAuth();
+
+    const previousPath = location.state?.previousPath || '/auth/maps';
 
     const [abonnements, setAbonnements] = useState([]);
     const [maSouscription, setMaSouscription] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [checkoutLoading, setCheckoutLoading] = useState(null);
+    const [checkoutLoading, setCheckoutLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
 
-    // Vérifier si retour annulé
+    const [selectedDuration, setSelectedDuration] = useState(null);
+    const [nombreFiches, setNombreFiches] = useState(1);
+    const [showFaq, setShowFaq] = useState(false);
+
+    // État pour détecter le scroll
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    const MAX_FICHES = 10;
+    const MIN_FICHES = 1;
+
+    // Gérer le scroll pour afficher la border du header
+    const handleScroll = (e) => {
+        const scrollTop = e.target.scrollTop;
+        setIsScrolled(scrollTop > 10);
+    };
+
     useEffect(() => {
         if (searchParams.get('canceled') === 'true') {
-            setError('Le paiement a été annulé');
+            setError('Le paiement a été annulé. Vous pouvez réessayer quand vous le souhaitez.');
         }
     }, [searchParams]);
 
@@ -43,43 +67,68 @@ const Abonnement = () => {
     const loadData = async () => {
         setLoading(true);
         try {
-            // Charger les abonnements disponibles
             const abonnementsResult = await AbonnementService.getAbonnements();
             if (abonnementsResult.success) {
                 setAbonnements(abonnementsResult.data);
+                const populaire = abonnementsResult.data.find(a => a.estPopulaire);
+                if (populaire) {
+                    setSelectedDuration(populaire.code);
+                } else if (abonnementsResult.data.length > 0) {
+                    setSelectedDuration(abonnementsResult.data[0].code);
+                }
             }
 
-            // Charger ma souscription actuelle
             const souscriptionResult = await AbonnementService.getMaSouscription();
             if (souscriptionResult.success) {
                 setMaSouscription(souscriptionResult.data);
             }
         } catch (err) {
             console.error('Erreur chargement:', err);
-            setError('Erreur lors du chargement des données');
+            setError('Erreur lors du chargement des offres');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSelectAbonnement = async (abonnementCode) => {
-        setCheckoutLoading(abonnementCode);
+    const getSelectedAbonnement = () => {
+        return abonnements.find(a => a.code === selectedDuration);
+    };
+
+    const calculateTotal = () => {
+        const abonnement = getSelectedAbonnement();
+        if (!abonnement) return { ht: 0, ttc: 0, mensuel: 0, duree: 0 };
+
+        const prixUnitaireHT = parseFloat(abonnement.prixTotalHT);
+        const prixUnitaireTTC = parseFloat(abonnement.prixTotalTTC);
+        const prixMensuelHT = parseFloat(abonnement.prixMensuelHT);
+
+        return {
+            ht: prixUnitaireHT * nombreFiches,
+            ttc: prixUnitaireTTC * nombreFiches,
+            mensuel: prixMensuelHT * nombreFiches,
+            duree: abonnement.dureeEnMois
+        };
+    };
+
+    const handleCheckout = async () => {
+        if (!selectedDuration || nombreFiches < 1) return;
+
+        setCheckoutLoading(true);
         setError(null);
 
         try {
-            const result = await AbonnementService.createCheckout(abonnementCode);
+            const result = await AbonnementService.createCheckout(selectedDuration, nombreFiches);
 
             if (result.success && result.data.checkoutUrl) {
-                // Rediriger vers Stripe Checkout
                 window.location.href = result.data.checkoutUrl;
             } else {
                 setError(result.message || 'Erreur lors de la création du paiement');
             }
         } catch (err) {
             console.error('Erreur checkout:', err);
-            setError('Une erreur est survenue');
+            setError('Une erreur est survenue. Veuillez réessayer.');
         } finally {
-            setCheckoutLoading(null);
+            setCheckoutLoading(false);
         }
     };
 
@@ -90,23 +139,26 @@ const Abonnement = () => {
         }).format(price);
     };
 
-    const getFeatureIcon = (feature) => {
-        const lowerFeature = feature.toLowerCase();
-        if (lowerFeature.includes('fiche')) return checkmarkCircle;
-        if (lowerFeature.includes('carte') || lowerFeature.includes('visible')) return starOutline;
-        if (lowerFeature.includes('qr')) return qrCodeOutline;
-        if (lowerFeature.includes('promotion')) return megaphoneOutline;
-        if (lowerFeature.includes('statistique')) return statsChartOutline;
-        if (lowerFeature.includes('support')) return shieldCheckmarkOutline;
-        if (lowerFeature.includes('badge') || lowerFeature.includes('partenaire')) return ribbonOutline;
-        return checkmarkCircle;
+    const incrementFiches = () => {
+        if (nombreFiches < MAX_FICHES) {
+            setNombreFiches(prev => prev + 1);
+        }
     };
+
+    const decrementFiches = () => {
+        if (nombreFiches > MIN_FICHES) {
+            setNombreFiches(prev => prev - 1);
+        }
+    };
+
+    const totals = calculateTotal();
+    const selectedAbonnement = getSelectedAbonnement();
 
     if (loading) {
         return (
             <div className="abonnement-page">
-                <div className="loading-container">
-                    <div className="spinner"></div>
+                <div className="abonnement-loading">
+                    <div className="loading-spinner"></div>
                     <p>Chargement des offres...</p>
                 </div>
             </div>
@@ -116,145 +168,262 @@ const Abonnement = () => {
     return (
         <div className="abonnement-page">
             {/* Header */}
-            <div className="page-header">
-                <button className="back-btn" onClick={() => navigate(-1)}>
+            <div className={`page-header ${isScrolled ? 'scrolled' : ''}`}>
+                <button
+                    className="header-btn back"
+                    onClick={() => navigate(previousPath, { state: { openDrawer: true } })}
+                >
                     <IonIcon icon={arrowBackOutline} />
                 </button>
-                <h1>Abonnements</h1>
-                <div className="header-spacer"></div>
+                <h1 className="page-title">Abonnement</h1>
+                <div className="header-btn placeholder"></div>
             </div>
 
-            {/* Messages */}
-            {error && (
-                <div className="message-banner error">
-                    <IonIcon icon={alertCircleOutline} />
-                    <span>{error}</span>
-                    <button onClick={() => setError(null)}>
-                        <IonIcon icon={closeCircleOutline} />
-                    </button>
-                </div>
-            )}
-
-            {success && (
-                <div className="message-banner success">
-                    <IonIcon icon={checkmarkCircle} />
-                    <span>{success}</span>
-                    <button onClick={() => setSuccess(null)}>
-                        <IonIcon icon={closeCircleOutline} />
-                    </button>
-                </div>
-            )}
-
-            {/* Souscription actuelle */}
-            {maSouscription?.hasSouscription && (
-                <div className="current-subscription">
-                    <div className="subscription-badge">
-                        <IonIcon icon={checkmarkCircle} />
-                        <span>Abonnement actif</span>
-                    </div>
-                    <div className="subscription-details">
-                        <h3>{maSouscription.souscription.abonnement?.nom}</h3>
-                        <p>Expire le {new Date(maSouscription.souscription.dateFin).toLocaleDateString('fr-FR')}</p>
-                        <p className="days-left">
-                            {maSouscription.souscription.joursRestants} jours restants
-                        </p>
-                    </div>
-                </div>
-            )}
-
-            {/* Titre section */}
-            <div className="section-intro">
-                <h2>Choisissez votre formule</h2>
-                <p>Sélectionnez l'abonnement qui correspond à vos besoins et commencez à promouvoir votre commerce</p>
-            </div>
-
-            {/* Cartes d'abonnement */}
-            <div className="abonnements-grid">
-                {abonnements.map((abonnement) => (
-                    <div
-                        key={abonnement.code}
-                        className={`abonnement-card ${abonnement.estPopulaire ? 'popular' : ''}`}
-                    >
-                        {abonnement.estPopulaire && (
-                            <div className="popular-badge">
-                                <IonIcon icon={starOutline} />
-                                Meilleure offre
-                            </div>
-                        )}
-
-                        <div className="card-header">
-                            <h3>{abonnement.nom}</h3>
-                            <p className="duration">{abonnement.dureeEnMois} mois</p>
-                        </div>
-
-                        <div className="card-pricing">
-                            <div className="price-monthly">
-                                <span className="amount">{formatPrice(abonnement.prixMensuelHT)}</span>
-                                <span className="period">HT / mois</span>
-                            </div>
-                            <div className="price-total">
-                                Soit {formatPrice(abonnement.prixTotalTTC)} TTC au total
-                            </div>
-                            {abonnement.code === 'annuel' && (
-                                <div className="savings">
-                                    Économisez 60€ par rapport au semestriel !
-                                </div>
-                            )}
-                        </div>
-
-                        <ul className="features-list">
-                            {abonnement.features?.map((feature, index) => (
-                                <li key={index}>
-                                    <IonIcon icon={getFeatureIcon(feature)} />
-                                    <span>{feature}</span>
-                                </li>
-                            ))}
-                        </ul>
-
-                        <button
-                            className={`select-btn ${abonnement.estPopulaire ? 'primary' : 'secondary'}`}
-                            onClick={() => handleSelectAbonnement(abonnement.code)}
-                            disabled={checkoutLoading !== null || maSouscription?.hasSouscription}
-                        >
-                            {checkoutLoading === abonnement.code ? (
-                                <>
-                                    <div className="btn-spinner"></div>
-                                    Redirection...
-                                </>
-                            ) : maSouscription?.hasSouscription ? (
-                                'Abonnement actif'
-                            ) : (
-                                'Choisir cette offre'
-                            )}
+            {/* Contenu scrollable */}
+            <div className="abonnement-scroll" onScroll={handleScroll}>
+                {/* Message d'erreur */}
+                {error && (
+                    <div className="error-banner">
+                        <IonIcon icon={alertCircleOutline} />
+                        <span>{error}</span>
+                        <button onClick={() => setError(null)}>
+                            <IonIcon icon={closeOutline} />
                         </button>
                     </div>
-                ))}
+                )}
+
+                {/* Souscription active */}
+                {maSouscription?.hasSouscription && (
+                    <div className="active-subscription">
+                        <div className="subscription-icon">
+                            <IonIcon icon={checkmarkCircle} />
+                        </div>
+                        <div className="subscription-info">
+                            <span className="subscription-label">Abonnement actif</span>
+                            <span className="subscription-name">{maSouscription.souscription.abonnement?.nom}</span>
+                            <span className="subscription-expiry">
+                                {maSouscription.souscription.joursRestants} jours restants
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                <div className="abonnement-content">
+                    {/* Section 1: Nombre de fiches */}
+                    <section className="selection-section">
+                        <div className="section-header">
+                            <div className="section-number">1</div>
+                            <div className="section-title">
+                                <h2>Nombre de fiches</h2>
+                                <p>Combien de commerces souhaitez-vous référencer ?</p>
+                            </div>
+                        </div>
+
+                        <div className="fiches-selector">
+                            <button
+                                className="fiches-btn minus"
+                                onClick={decrementFiches}
+                                disabled={nombreFiches <= MIN_FICHES}
+                            >
+                                <IonIcon icon={removeOutline} />
+                            </button>
+
+                            <div className="fiches-display">
+                                <div className="fiches-icon">
+                                    <IonIcon icon={storefrontOutline} />
+                                </div>
+                                <span className="fiches-count">{nombreFiches}</span>
+                                <span className="fiches-label">fiche{nombreFiches > 1 ? 's' : ''}</span>
+                            </div>
+
+                            <button
+                                className="fiches-btn plus"
+                                onClick={incrementFiches}
+                                disabled={nombreFiches >= MAX_FICHES}
+                            >
+                                <IonIcon icon={addOutline} />
+                            </button>
+                        </div>
+
+                        {nombreFiches > 1 && (
+                            <div className="fiches-info">
+                                <IonIcon icon={sparklesOutline} />
+                                <span>Idéal pour gérer {nombreFiches} établissements depuis un seul compte</span>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* Section 2: Durée d'engagement */}
+                    <section className="selection-section">
+                        <div className="section-header">
+                            <div className="section-number">2</div>
+                            <div className="section-title">
+                                <h2>Durée d'engagement</h2>
+                                <p>Choisissez la durée de votre abonnement</p>
+                            </div>
+                        </div>
+
+                        <div className="duration-options">
+                            {abonnements.map((abonnement) => {
+                                const isSelected = selectedDuration === abonnement.code;
+                                const prixMensuel = parseFloat(abonnement.prixMensuelHT);
+                                const prixTotal = parseFloat(abonnement.prixTotalTTC);
+
+                                return (
+                                    <button
+                                        key={abonnement.code}
+                                        className={`duration-card ${isSelected ? 'selected' : ''} ${abonnement.estPopulaire ? 'popular' : ''}`}
+                                        onClick={() => setSelectedDuration(abonnement.code)}
+                                    >
+                                        {abonnement.estPopulaire && (
+                                            <div className="popular-badge">
+                                                <IonIcon icon={trendingUpOutline} />
+                                                <span>Économique</span>
+                                            </div>
+                                        )}
+
+                                        <div className="duration-header">
+                                            <div className="duration-icon">
+                                                <IonIcon icon={timeOutline} />
+                                            </div>
+                                            <div className="duration-info">
+                                                <span className="duration-name">{abonnement.nom}</span>
+                                                <span className="duration-months">{abonnement.dureeEnMois} mois</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="duration-pricing">
+                                            <div className="price-main">
+                                                <span className="price-amount">{formatPrice(prixMensuel)}</span>
+                                                <span className="price-period">HT / mois / fiche</span>
+                                            </div>
+                                            <div className="price-total">
+                                                soit {formatPrice(prixTotal)} TTC / fiche
+                                            </div>
+                                        </div>
+
+                                        <div className={`selection-indicator ${isSelected ? 'active' : ''}`}>
+                                            {isSelected && <IonIcon icon={checkmarkCircle} />}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {selectedAbonnement?.code === 'annuel' && (
+                            <div className="savings-banner">
+                                <IonIcon icon={giftOutline} />
+                                <span>Vous économisez <strong>{formatPrice(60 * nombreFiches)}</strong> par rapport au semestriel !</span>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* Section 3: Ce qui est inclus */}
+                    <section className="features-section">
+                        <h3>Ce qui est inclus</h3>
+                        <div className="features-grid">
+                            <div className="feature-item">
+                                <div className="feature-icon">
+                                    <IonIcon icon={storefrontOutline} />
+                                </div>
+                                <span>{nombreFiches} fiche{nombreFiches > 1 ? 's' : ''} commerce</span>
+                            </div>
+                            <div className="feature-item">
+                                <div className="feature-icon">
+                                    <IonIcon icon={megaphoneOutline} />
+                                </div>
+                                <span>Promotions illimitées</span>
+                            </div>
+                            <div className="feature-item">
+                                <div className="feature-icon">
+                                    <IonIcon icon={statsChartOutline} />
+                                </div>
+                                <span>Statistiques détaillées</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* FAQ */}
+                    <section className="faq-section">
+                        <button
+                            className="faq-toggle"
+                            onClick={() => setShowFaq(!showFaq)}
+                        >
+                            <span>Questions fréquentes</span>
+                            <IonIcon icon={showFaq ? chevronUpOutline : chevronDownOutline} />
+                        </button>
+
+                        {showFaq && (
+                            <div className="faq-content">
+                                <div className="faq-item">
+                                    <h4>Comment fonctionne le paiement ?</h4>
+                                    <p>Le paiement est sécurisé par Stripe. Vous payez le montant total en une seule fois pour la durée choisie.</p>
+                                </div>
+                                <div className="faq-item">
+                                    <h4>Puis-je annuler mon abonnement ?</h4>
+                                    <p>L'abonnement n'est pas résiliable. Une fois souscrit, il reste actif jusqu'à sa date d'expiration.</p>
+                                </div>
+                                <div className="faq-item">
+                                    <h4>Que se passe-t-il à expiration ?</h4>
+                                    <p>Vos fiches seront automatiquement désactivées le jour de l'expiration. Renouvelez votre abonnement pour les réactiver.</p>
+                                </div>
+                                <div className="faq-item">
+                                    <h4>Puis-je ajouter des fiches plus tard ?</h4>
+                                    <p>Oui, vous pouvez souscrire à des fiches supplémentaires à tout moment depuis votre espace.</p>
+                                </div>
+                                <div className="faq-item">
+                                    <h4>Quels moyens de paiement acceptez-vous ?</h4>
+                                    <p>Nous acceptons les cartes bancaires (Visa, Mastercard) via notre partenaire Stripe.</p>
+                                </div>
+                                <div className="faq-item">
+                                    <h4>Vais-je recevoir une facture ?</h4>
+                                    <p>Oui, une facture vous sera envoyée par email après chaque paiement.</p>
+                                </div>
+                            </div>
+                        )}
+                    </section>
+                </div>
             </div>
 
-            {/* Infos supplémentaires */}
-            <div className="abonnement-info">
-                <h3>Questions fréquentes</h3>
+            {/* Footer fixe */}
+            <div className="checkout-footer">
+                <div className="checkout-summary">
+                    <div className="summary-details">
+                        <div className="summary-line">
+                            <span>{nombreFiches} fiche{nombreFiches > 1 ? 's' : ''} × {totals.duree} mois</span>
+                            <span>{formatPrice(totals.ht)} HT</span>
+                        </div>
+                        <div className="summary-total">
+                            <span>Total TTC</span>
+                            <span className="total-amount">{formatPrice(totals.ttc)}</span>
+                        </div>
+                    </div>
 
-                <div className="faq-item">
-                    <h4>Comment fonctionne le paiement ?</h4>
-                    <p>Le paiement est sécurisé par Stripe. Vous payez le montant total de votre abonnement en une seule fois.</p>
+                    <button
+                        className="checkout-button"
+                        onClick={handleCheckout}
+                        disabled={checkoutLoading || !selectedDuration || maSouscription?.hasSouscription}
+                    >
+                        {checkoutLoading ? (
+                            <span className="loading-text">
+                                <span className="loading-dots"></span>
+                                Redirection...
+                            </span>
+                        ) : maSouscription?.hasSouscription ? (
+                            'Abonnement actif'
+                        ) : (
+                            <>
+                                <IonIcon icon={cardOutline} />
+                                <span>Payer {formatPrice(totals.ttc)}</span>
+                            </>
+                        )}
+                    </button>
                 </div>
 
-                <div className="faq-item">
-                    <h4>Puis-je annuler mon abonnement ?</h4>
-                    <p>Votre abonnement est valable pour la durée choisie. Vous pouvez demander une annulation mais aucun remboursement ne sera effectué.</p>
+                <div className="secure-badge">
+                    <IonIcon icon={shieldCheckmarkOutline} />
+                    <span>Paiement sécurisé par Stripe</span>
                 </div>
-
-                <div className="faq-item">
-                    <h4>Que se passe-t-il à la fin de mon abonnement ?</h4>
-                    <p>Votre fiche reste visible pendant 30 jours après expiration, puis sera désactivée. Vous pourrez renouveler à tout moment.</p>
-                </div>
-            </div>
-
-            {/* Paiement sécurisé */}
-            <div className="secure-payment">
-                <IonIcon icon={shieldCheckmarkOutline} />
-                <span>Paiement 100% sécurisé par Stripe</span>
             </div>
         </div>
     );

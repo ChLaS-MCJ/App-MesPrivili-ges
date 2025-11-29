@@ -454,7 +454,7 @@
 
 .drawer-menu-item.prestataire:hover,
 .drawer-menu-item.prestataire:active {
-    background: rgba(255, 215, 0, 0.1);
+    background: rgba(255, 106, 0, 0.1);
     border-left-color: #f3a285;
 }
 
