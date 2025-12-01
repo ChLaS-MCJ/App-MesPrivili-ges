@@ -40,16 +40,27 @@ axiosInstance.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
+        // Si pas de réponse (erreur réseau), rejeter directement
+        if (!error.response) {
+            return Promise.reject(error);
+        }
+
         // Si c'est une erreur 401
         if (error.response?.status === 401 && !originalRequest._retry) {
 
             // ⚠️ NE PAS rafraîchir si c'est déjà une requête de refresh-token
             if (originalRequest.url?.includes('/refresh-token')) {
-
                 isRefreshing = false;
                 processQueue(error, null);
-                await AuthService.logout();
-                window.location.href = '/login';
+                // Ne pas rediriger ici, laisser le AuthContext gérer
+                return Promise.reject(error);
+            }
+
+            // ⚠️ NE PAS rafraîchir si c'est une requête de login ou register
+            if (originalRequest.url?.includes('/login') ||
+                originalRequest.url?.includes('/register') ||
+                originalRequest.url?.includes('/google') ||
+                originalRequest.url?.includes('/apple')) {
                 return Promise.reject(error);
             }
 
@@ -71,10 +82,18 @@ axiosInstance.interceptors.response.use(
             isRefreshing = true;
 
             try {
+                const refreshToken = await AuthService.getRefreshToken();
+
+                // Si pas de refresh token, rejeter sans tenter le refresh
+                if (!refreshToken) {
+                    isRefreshing = false;
+                    processQueue(error, null);
+                    return Promise.reject(error);
+                }
+
                 const newToken = await AuthService.refreshToken();
 
                 if (newToken) {
-
                     originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
                     axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
 
@@ -88,8 +107,7 @@ axiosInstance.interceptors.response.use(
                 processQueue(refreshError, null);
                 isRefreshing = false;
 
-                await AuthService.logout();
-                window.location.href = '/login';
+
                 return Promise.reject(refreshError);
             }
         }

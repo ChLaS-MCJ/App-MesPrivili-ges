@@ -10,7 +10,12 @@ import {
     alertCircleOutline,
     locationOutline,
     reorderThreeOutline,
-    refreshOutline
+    refreshOutline,
+    businessOutline,
+    searchOutline,
+    lockClosedOutline,
+    globeOutline,
+    arrowForwardOutline
 } from 'ionicons/icons';
 import PrestataireService from '../../Services/Prestataire.services';
 
@@ -30,6 +35,7 @@ import loisirImg from '../../Assets/Images/Categories/loisir.png';
 const categoryImages = {
     'Mode': modeImg,
     'Restaurants': restaurantsImg,
+    'Restaurants & Salons de thé': restaurantsImg,
     'Hôtels': hotelsImg,
     'Beauté & Spa': beauteImg,
     'Voyage': voyageImg,
@@ -38,6 +44,7 @@ const categoryImages = {
     'Enfants': enfantsImg,
     'Maison': maisonImg,
     'Loisir': loisirImg,
+    'Loisirs': loisirImg,
 };
 
 // Types de commerce disponibles
@@ -109,14 +116,21 @@ const typesCommerce = [
 
 const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
     const [categories, setCategories] = useState([]);
+    const [filteredCategories, setFilteredCategories] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [activeTab, setActiveTab] = useState('infos');
+    const [activeTab, setActiveTab] = useState('siret'); // Commence par l'onglet SIRET pour nouvelle fiche
+
+    // État pour la validation SIRET
+    const [siretInput, setSiretInput] = useState('');
+    const [siretLoading, setSiretLoading] = useState(false);
+    const [siretValidated, setSiretValidated] = useState(false);
+    const [entrepriseData, setEntrepriseData] = useState(null);
 
     // Pour la géolocalisation automatique
     const [geoLoading, setGeoLoading] = useState(false);
-    const [geoStatus, setGeoStatus] = useState(null); // 'success', 'error', null
-    const [manualGeoEdit, setManualGeoEdit] = useState(false); // Pour savoir si l'utilisateur a modifié manuellement
+    const [geoStatus, setGeoStatus] = useState(null);
+    const [manualGeoEdit, setManualGeoEdit] = useState(false);
 
     // Pour l'upload d'images
     const [uploadingMain, setUploadingMain] = useState(false);
@@ -133,6 +147,7 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         typeCommerce: '',
         categoryId: '',
         descriptionCourte: '',
+        website: '',
         adresse: '',
         codePostal: '',
         ville: '',
@@ -149,7 +164,13 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
             vendredi: { ouvert: false, debut: '09:00', fin: '18:00' },
             samedi: { ouvert: false, debut: '09:00', fin: '18:00' },
             dimanche: { ouvert: false, debut: '09:00', fin: '18:00' }
-        }
+        },
+        // Données entreprise (remplies par validation SIRET)
+        siret: '',
+        siren: '',
+        codeApe: '',
+        raisonSociale: '',
+        formeJuridique: ''
     });
 
     // Reset form when modal opens/closes or fiche changes
@@ -157,23 +178,18 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         if (isOpen) {
             loadCategories();
             if (fiche) {
+                // MODE ÉDITION - On a déjà les données SIRET
                 // Parse images si c'est une string JSON
                 let parsedImages = [];
                 if (fiche.images) {
                     if (typeof fiche.images === 'string') {
                         try {
-                            // Nettoyer la chaîne avant de parser
                             let cleanedImages = fiche.images.trim();
-
                             if (cleanedImages && cleanedImages !== '[]' && cleanedImages !== 'null') {
                                 let parsed = JSON.parse(cleanedImages);
-
-                                // Si le résultat est encore une string (double encodage), parser à nouveau
                                 if (typeof parsed === 'string') {
                                     parsed = JSON.parse(parsed);
                                 }
-
-                                // S'assurer que c'est un tableau et filtrer les valeurs vides
                                 if (Array.isArray(parsed)) {
                                     parsedImages = parsed.filter(img => img && typeof img === 'string' && img.trim() !== '');
                                 }
@@ -183,13 +199,11 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                             parsedImages = [];
                         }
                     } else if (Array.isArray(fiche.images)) {
-                        // Filtrer les valeurs vides
                         parsedImages = fiche.images.filter(img => img && typeof img === 'string' && img.trim() !== '');
                     }
                 }
-                console.log('Images parsées:', parsedImages, 'Original:', fiche.images);
 
-                // Parse horaires si c'est une string JSON
+                // Parse horaires
                 const defaultHoraires = {
                     lundi: { ouvert: false, debut: '09:00', fin: '18:00' },
                     mardi: { ouvert: false, debut: '09:00', fin: '18:00' },
@@ -217,6 +231,7 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                     typeCommerce: fiche.typeCommerce || '',
                     categoryId: fiche.categoryId?.toString() || '',
                     descriptionCourte: fiche.descriptionCourte || '',
+                    website: fiche.website || '',
                     adresse: fiche.adresse || '',
                     codePostal: fiche.codePostal || '',
                     ville: fiche.ville || '',
@@ -225,20 +240,45 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                     googlePlaceId: fiche.googlePlaceId || '',
                     imagePrincipale: fiche.imagePrincipale || '',
                     images: parsedImages,
-                    horaires: parsedHoraires
+                    horaires: parsedHoraires,
+                    // Données entreprise
+                    siret: fiche.siret || '',
+                    siren: fiche.siren || '',
+                    codeApe: fiche.codeApe || '',
+                    raisonSociale: fiche.raisonSociale || '',
+                    formeJuridique: fiche.formeJuridique || ''
                 });
 
-                // Si la fiche a déjà des coordonnées, on considère que c'est une édition manuelle
+                // En mode édition, SIRET déjà validé
+                setSiretValidated(true);
+                setSiretInput(fiche.siret || '');
+                setEntrepriseData({
+                    siret: fiche.siret,
+                    siren: fiche.siren,
+                    codeApe: fiche.codeApe,
+                    raisonSociale: fiche.raisonSociale,
+                    formeJuridique: fiche.formeJuridique
+                });
+
+                // Charger les catégories filtrées par APE
+                if (fiche.codeApe) {
+                    loadCategoriesByApe(fiche.codeApe);
+                }
+
                 if (fiche.latitude && fiche.longitude) {
                     setManualGeoEdit(true);
                 }
+
+                // En édition, on va directement sur l'onglet infos
+                setActiveTab('infos');
             } else {
-                // Reset pour nouvelle fiche
+                // MODE CRÉATION - Reset complet
                 setFormData({
                     nomCommerce: '',
                     typeCommerce: '',
                     categoryId: '',
                     descriptionCourte: '',
+                    website: '',
                     adresse: '',
                     codePostal: '',
                     ville: '',
@@ -255,11 +295,21 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                         vendredi: { ouvert: false, debut: '09:00', fin: '18:00' },
                         samedi: { ouvert: false, debut: '09:00', fin: '18:00' },
                         dimanche: { ouvert: false, debut: '09:00', fin: '18:00' }
-                    }
+                    },
+                    siret: '',
+                    siren: '',
+                    codeApe: '',
+                    raisonSociale: '',
+                    formeJuridique: ''
                 });
+                setSiretValidated(false);
+                setSiretInput('');
+                setEntrepriseData(null);
+                setFilteredCategories([]);
                 setManualGeoEdit(false);
+                // En création, on commence par l'onglet SIRET
+                setActiveTab('siret');
             }
-            setActiveTab('infos');
             setError(null);
             setGeoStatus(null);
         }
@@ -276,17 +326,137 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         }
     };
 
+    // Charger les catégories filtrées par code APE
+    const loadCategoriesByApe = async (codeApe) => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/categories/for-ape/${encodeURIComponent(codeApe)}`);
+            const result = await response.json();
+
+            if (result.success && result.data.categories) {
+                setFilteredCategories(result.data.categories);
+                console.log(`✅ ${result.data.categories.length} catégorie(s) disponible(s) pour APE ${codeApe}`);
+            } else {
+                // Fallback : toutes les catégories
+                setFilteredCategories(categories);
+            }
+        } catch (error) {
+            console.error('Erreur chargement catégories par APE:', error);
+            setFilteredCategories(categories);
+        }
+    };
+
+    // Validation du SIRET via API entreprise.data.gouv.fr (gratuite, sans CORS)
+    const validateSiret = async () => {
+        const siret = siretInput.replace(/\s/g, '');
+
+        if (!siret || siret.length !== 14) {
+            setError('Le SIRET doit contenir 14 chiffres');
+            return;
+        }
+
+        if (!/^\d{14}$/.test(siret)) {
+            setError('Le SIRET ne doit contenir que des chiffres');
+            return;
+        }
+
+        setSiretLoading(true);
+        setError(null);
+
+        try {
+            // Utiliser l'API entreprise.data.gouv.fr (gratuite et sans restriction CORS)
+            const response = await fetch(`https://recherche-entreprises.api.gouv.fr/search?q=${siret}&page=1&per_page=1`);
+
+            if (!response.ok) {
+                throw new Error('Erreur lors de la recherche');
+            }
+
+            const data = await response.json();
+
+            if (!data.results || data.results.length === 0) {
+                throw new Error('SIRET non trouvé. Vérifiez le numéro et réessayez.');
+            }
+
+            const result = data.results[0];
+
+            // Trouver l'établissement correspondant au SIRET
+            const etablissement = result.matching_etablissements?.find(e => e.siret === siret)
+                || result.siege;
+
+            if (!etablissement) {
+                throw new Error('Établissement non trouvé pour ce SIRET');
+            }
+
+            const entreprise = {
+                siret: siret,
+                siren: result.siren || siret.substring(0, 9),
+                codeApe: result.activite_principale || '',
+                raisonSociale: result.nom_complet || result.nom_raison_sociale || 'Non renseigné',
+                formeJuridique: result.nature_juridique || '',
+                adresse: etablissement.adresse || '',
+                codePostal: etablissement.code_postal || '',
+                ville: etablissement.libelle_commune || ''
+            };
+
+            console.log('✅ Entreprise trouvée:', entreprise);
+
+            setEntrepriseData(entreprise);
+            setSiretValidated(true);
+
+            // Mettre à jour le formData avec les infos entreprise
+            setFormData(prev => ({
+                ...prev,
+                siret: entreprise.siret,
+                siren: entreprise.siren,
+                codeApe: entreprise.codeApe,
+                raisonSociale: entreprise.raisonSociale,
+                formeJuridique: entreprise.formeJuridique,
+                // Pré-remplir l'adresse si disponible et pas déjà remplie
+                adresse: prev.adresse || entreprise.adresse || '',
+                codePostal: prev.codePostal || entreprise.codePostal || '',
+                ville: prev.ville || entreprise.ville || ''
+            }));
+
+            // Charger les catégories compatibles avec le code APE
+            if (entreprise.codeApe) {
+                await loadCategoriesByApe(entreprise.codeApe);
+            }
+
+            // Passer automatiquement à l'onglet suivant
+            setActiveTab('infos');
+
+        } catch (error) {
+            console.error('Erreur validation SIRET:', error);
+            setError(error.message || 'Erreur lors de la validation du SIRET');
+        } finally {
+            setSiretLoading(false);
+        }
+    };
+
+    // Formater le SIRET pendant la saisie
+    const handleSiretChange = (e) => {
+        let value = e.target.value.replace(/\D/g, ''); // Garder seulement les chiffres
+        if (value.length > 14) value = value.slice(0, 14);
+
+        // Formater avec espaces : XXX XXX XXX XXXXX
+        let formatted = '';
+        for (let i = 0; i < value.length; i++) {
+            if (i === 3 || i === 6 || i === 9) formatted += ' ';
+            formatted += value[i];
+        }
+
+        setSiretInput(formatted);
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
 
-        // Si l'utilisateur modifie manuellement lat/lng, on le note
         if (name === 'latitude' || name === 'longitude') {
             setManualGeoEdit(true);
         }
     };
 
-    // Géolocalisation automatique via API adresse.data.gouv.fr
+    // Géolocalisation automatique
     const geocodeAddress = async () => {
         const { adresse, codePostal, ville } = formData;
 
@@ -315,7 +485,7 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                     longitude: lng.toFixed(6)
                 }));
                 setGeoStatus('success');
-                setManualGeoEdit(false); // Reset car c'est une géoloc auto
+                setManualGeoEdit(false);
             } else {
                 setGeoStatus('error');
                 setError('Adresse non trouvée. Vérifiez les informations ou saisissez les coordonnées manuellement.');
@@ -329,14 +499,13 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         }
     };
 
-    // Déclencher la géolocalisation quand adresse + code postal + ville sont remplis
-    // Seulement si l'utilisateur n'a pas déjà modifié manuellement les coordonnées
+    // Déclencher la géolocalisation automatique
     useEffect(() => {
         const { adresse, codePostal, ville, latitude } = formData;
         if (adresse && codePostal && codePostal.length === 5 && ville && !latitude && !manualGeoEdit) {
             const timer = setTimeout(() => {
                 geocodeAddress();
-            }, 1000); // Debounce de 1 seconde
+            }, 1000);
             return () => clearTimeout(timer);
         }
     }, [formData.adresse, formData.codePostal, formData.ville]);
@@ -359,13 +528,12 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Validation du fichier
         if (!file.type.startsWith('image/')) {
             setError('Le fichier doit être une image');
             return;
         }
 
-        if (file.size > 5 * 1024 * 1024) { // 5MB max
+        if (file.size > 5 * 1024 * 1024) {
             setError('L\'image ne doit pas dépasser 5 Mo');
             return;
         }
@@ -412,7 +580,6 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Validation
         if (!file.type.startsWith('image/')) {
             setError('Le fichier doit être une image');
             return;
@@ -465,17 +632,15 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         }
     };
 
-    // Supprimer image principale (avec suppression backend)
+    // Supprimer image principale
     const removeMainImage = async () => {
         const imageUrl = formData.imagePrincipale;
 
-        // Mettre à jour le state immédiatement
         setFormData(prev => ({
             ...prev,
             imagePrincipale: ''
         }));
 
-        // Supprimer le fichier côté backend si on a un prestataireId
         if (fiche?.id && imageUrl) {
             try {
                 await fetch(`${import.meta.env.VITE_API_URL}/prestataires/me/delete-image`, {
@@ -496,17 +661,15 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         }
     };
 
-    // Supprimer image galerie (avec suppression backend)
+    // Supprimer image galerie
     const removeGalleryImage = async (index) => {
         const imageUrl = formData.images[index];
 
-        // Mettre à jour le state immédiatement
         setFormData(prev => ({
             ...prev,
             images: prev.images.filter((_, i) => i !== index)
         }));
 
-        // Supprimer le fichier côté backend si on a un prestataireId
         if (fiche?.id && imageUrl) {
             try {
                 await fetch(`${import.meta.env.VITE_API_URL}/prestataires/me/delete-image`, {
@@ -553,7 +716,6 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
             return;
         }
 
-        // Réorganiser les images
         setFormData(prev => {
             const newImages = [...prev.images];
             const [draggedImage] = newImages.splice(draggedIndex, 1);
@@ -575,6 +737,14 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Vérifier que le SIRET est validé
+        if (!siretValidated) {
+            setError('Veuillez d\'abord valider votre SIRET');
+            setActiveTab('siret');
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -619,9 +789,32 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
     };
 
+    // Obtenir le libellé du code APE
+    const getApeLabel = (code) => {
+        // Mapping des codes APE les plus courants
+        const apeLabels = {
+            '56.10A': 'Restauration traditionnelle',
+            '56.10B': 'Cafétérias et autres libres-services',
+            '56.10C': 'Restauration de type rapide',
+            '56.30Z': 'Débits de boissons',
+            '47.71Z': 'Commerce de détail d\'habillement',
+            '47.72A': 'Commerce de détail de la chaussure',
+            '96.02A': 'Coiffure',
+            '96.02B': 'Soins de beauté',
+            '55.10Z': 'Hôtels et hébergement similaire',
+            '93.13Z': 'Activités des centres de culture physique',
+            '47.41Z': 'Commerce de détail d\'ordinateurs',
+            // Ajouter d'autres selon besoin
+        };
+        return apeLabels[code] || code;
+    };
+
     if (!isOpen) return null;
 
     const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+
+    // Catégories à afficher (filtrées par APE si disponible, sinon toutes)
+    const categoriesToShow = filteredCategories.length > 0 ? filteredCategories : categories;
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -634,21 +827,33 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
 
                 {/* Onglets */}
                 <div className="form-tabs">
+                    {!fiche && (
+                        <button
+                            className={`tab ${activeTab === 'siret' ? 'active' : ''} ${siretValidated ? 'validated' : ''}`}
+                            onClick={() => setActiveTab('siret')}
+                        >
+                            {siretValidated && <IonIcon icon={checkmarkCircleOutline} />}
+                            Entreprise
+                        </button>
+                    )}
                     <button
                         className={`tab ${activeTab === 'infos' ? 'active' : ''}`}
                         onClick={() => setActiveTab('infos')}
+                        disabled={!fiche && !siretValidated}
                     >
                         Informations
                     </button>
                     <button
                         className={`tab ${activeTab === 'photos' ? 'active' : ''}`}
                         onClick={() => setActiveTab('photos')}
+                        disabled={!fiche && !siretValidated}
                     >
                         Photos
                     </button>
                     <button
                         className={`tab ${activeTab === 'horaires' ? 'active' : ''}`}
                         onClick={() => setActiveTab('horaires')}
+                        disabled={!fiche && !siretValidated}
                     >
                         Horaires
                     </button>
@@ -662,9 +867,145 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                 )}
 
                 <form onSubmit={handleSubmit}>
+                    {/* ONGLET SIRET (uniquement pour création) */}
+                    {activeTab === 'siret' && !fiche && (
+                        <div className="tab-content">
+                            <div className="siret-intro">
+                                <div className="siret-icon">
+                                    <IonIcon icon={businessOutline} />
+                                </div>
+                                <h3>Identifiez votre établissement</h3>
+                                <p>Entrez votre numéro SIRET pour récupérer automatiquement les informations de votre entreprise.</p>
+                            </div>
+
+                            <div className="form-group siret-input-group">
+                                <label>Numéro SIRET *</label>
+                                <div className="siret-input-wrapper">
+                                    <input
+                                        type="text"
+                                        value={siretInput}
+                                        onChange={handleSiretChange}
+                                        placeholder="XXX XXX XXX XXXXX"
+                                        maxLength={17}
+                                        disabled={siretValidated}
+                                    />
+                                    {siretValidated && (
+                                        <div className="siret-validated-icon">
+                                            <IonIcon icon={checkmarkCircleOutline} />
+                                        </div>
+                                    )}
+                                </div>
+                                <small className="help-text">14 chiffres - Trouvez-le sur vos documents officiels ou sur societe.com</small>
+                            </div>
+
+                            {!siretValidated ? (
+                                <button
+                                    type="button"
+                                    className="btn-validate-siret"
+                                    onClick={validateSiret}
+                                    disabled={siretLoading || siretInput.replace(/\s/g, '').length !== 14}
+                                >
+                                    {siretLoading ? (
+                                        <>
+                                            <div className="spinner-small"></div>
+                                            Vérification en cours...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <IonIcon icon={searchOutline} />
+                                            Valider le SIRET
+                                        </>
+                                    )}
+                                </button>
+                            ) : (
+                                <>
+                                    {/* Affichage des données entreprise */}
+                                    <div className="entreprise-data">
+                                        <div className="entreprise-header">
+                                            <IonIcon icon={checkmarkCircleOutline} />
+                                            <span>Établissement identifié</span>
+                                        </div>
+
+                                        <div className="entreprise-info-grid">
+                                            <div className="entreprise-info-item">
+                                                <span className="label">Raison sociale</span>
+                                                <span className="value">{entrepriseData?.raisonSociale || '-'}</span>
+                                            </div>
+                                            <div className="entreprise-info-item">
+                                                <span className="label">SIREN</span>
+                                                <span className="value">{entrepriseData?.siren || '-'}</span>
+                                            </div>
+                                            <div className="entreprise-info-item">
+                                                <span className="label">Code APE</span>
+                                                <span className="value">
+                                                    {entrepriseData?.codeApe || '-'}
+                                                    {entrepriseData?.codeApe && (
+                                                        <small className="ape-label">{getApeLabel(entrepriseData.codeApe)}</small>
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <div className="entreprise-info-item">
+                                                <span className="label">Forme juridique</span>
+                                                <span className="value">{entrepriseData?.formeJuridique || '-'}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="entreprise-lock-notice">
+                                            <IonIcon icon={lockClosedOutline} />
+                                            <span>Ces informations ne sont pas modifiables</span>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        className="btn-primary btn-continue"
+                                        onClick={() => setActiveTab('infos')}
+                                    >
+                                        Continuer
+                                        <IonIcon icon={arrowForwardOutline} />
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="btn-change-siret"
+                                        onClick={() => {
+                                            setSiretValidated(false);
+                                            setSiretInput('');
+                                            setEntrepriseData(null);
+                                            setFilteredCategories([]);
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                siret: '',
+                                                siren: '',
+                                                codeApe: '',
+                                                raisonSociale: '',
+                                                formeJuridique: ''
+                                            }));
+                                        }}
+                                    >
+                                        Utiliser un autre SIRET
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    )}
+
                     {/* ONGLET INFOS */}
                     {activeTab === 'infos' && (
                         <div className="tab-content">
+                            {/* Résumé entreprise en mode édition ou après validation */}
+                            {(fiche || siretValidated) && entrepriseData && (
+                                <div className="entreprise-summary">
+                                    <div className="entreprise-summary-item">
+                                        <IonIcon icon={businessOutline} />
+                                        <span>{entrepriseData.raisonSociale}</span>
+                                    </div>
+                                    <div className="entreprise-summary-item">
+                                        <span className="ape-badge">{entrepriseData.codeApe}</span>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="form-group">
                                 <label>Nom du commerce *</label>
                                 <input
@@ -698,9 +1039,16 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
 
                             {/* Sélection de catégorie avec images */}
                             <div className="form-group">
-                                <label>Catégorie *</label>
+                                <label>
+                                    Catégorie *
+                                    {filteredCategories.length > 0 && filteredCategories.length < categories.length && (
+                                        <span className="category-filter-info">
+                                            ({filteredCategories.length} disponible{filteredCategories.length > 1 ? 's' : ''} pour votre activité)
+                                        </span>
+                                    )}
+                                </label>
                                 <div className="category-cards">
-                                    {categories.map(cat => (
+                                    {categoriesToShow.map(cat => (
                                         <div
                                             key={cat.id}
                                             className={`category-card-mini ${formData.categoryId === cat.id.toString() ? 'selected' : ''}`}
@@ -719,7 +1067,6 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                         </div>
                                     ))}
                                 </div>
-                                {/* Select caché pour la validation */}
                                 <select
                                     name="categoryId"
                                     value={formData.categoryId}
@@ -728,7 +1075,7 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                     style={{ display: 'none' }}
                                 >
                                     <option value="">Sélectionner...</option>
-                                    {categories.map(cat => (
+                                    {categoriesToShow.map(cat => (
                                         <option key={cat.id} value={cat.id}>
                                             {cat.nom}
                                         </option>
@@ -745,6 +1092,22 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                     rows={3}
                                     placeholder="Décrivez votre commerce..."
                                 />
+                            </div>
+
+                            {/* NOUVEAU : Champ Website */}
+                            <div className="form-group">
+                                <label>
+                                    <IonIcon icon={globeOutline} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                                    Site web
+                                </label>
+                                <input
+                                    type="url"
+                                    name="website"
+                                    value={formData.website}
+                                    onChange={handleChange}
+                                    placeholder="https://www.moncommerce.fr"
+                                />
+                                <small className="help-text">Optionnel - L'adresse de votre site internet</small>
                             </div>
 
                             <div className="form-section-title">Adresse</div>
@@ -793,7 +1156,6 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                 Géolocalisation
                             </div>
 
-                            {/* Indicateur de géolocalisation automatique */}
                             <div className="geo-status">
                                 {geoLoading && (
                                     <div className="geo-loading">
@@ -815,7 +1177,6 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                 )}
                             </div>
 
-                            {/* Champs Latitude / Longitude */}
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>Latitude</label>
@@ -839,7 +1200,6 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                 </div>
                             </div>
 
-                            {/* Boutons d'aide géolocalisation */}
                             <div className="geo-actions">
                                 <button
                                     type="button"
@@ -1033,7 +1393,11 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                         <button type="button" className="btn-secondary" onClick={onClose}>
                             Annuler
                         </button>
-                        <button type="submit" className="btn-primary" disabled={loading}>
+                        <button
+                            type="submit"
+                            className="btn-primary"
+                            disabled={loading || (!fiche && !siretValidated)}
+                        >
                             {loading ? 'Enregistrement...' : (fiche ? 'Modifier' : 'Créer')}
                         </button>
                     </div>

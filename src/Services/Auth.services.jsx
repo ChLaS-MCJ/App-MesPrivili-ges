@@ -395,43 +395,71 @@ const AuthService = {
      * Stocker le token JWT
      */
     async setToken(token) {
-        localStorage.setItem('token', token);
+        if (token && token !== 'undefined' && token !== 'null') {
+            localStorage.setItem('token', token);
+        }
     },
 
     /**
      * Récupérer le token JWT
      */
     async getToken() {
-        return localStorage.getItem('token');
+        const token = localStorage.getItem('token');
+        // Vérifier que ce n'est pas une valeur invalide
+        if (!token || token === 'undefined' || token === 'null') {
+            return null;
+        }
+        return token;
     },
 
     /**
      * Stocker le refresh token
      */
     async setRefreshToken(refreshToken) {
-        localStorage.setItem('refreshToken', refreshToken);
+        if (refreshToken && refreshToken !== 'undefined' && refreshToken !== 'null') {
+            localStorage.setItem('refreshToken', refreshToken);
+        }
     },
 
     /**
      * Récupérer le refresh token
      */
     async getRefreshToken() {
-        return localStorage.getItem('refreshToken');
+        const token = localStorage.getItem('refreshToken');
+        // Vérifier que ce n'est pas une valeur invalide
+        if (!token || token === 'undefined' || token === 'null') {
+            return null;
+        }
+        return token;
     },
 
     /**
      * Stocker les infos utilisateur
      */
     async setUser(user) {
-        localStorage.setItem('user', JSON.stringify(user));
+        // Ne stocker que si user est valide
+        if (user && typeof user === 'object') {
+            localStorage.setItem('user', JSON.stringify(user));
+        }
     },
 
     /**
      * Récupérer les infos utilisateur
      */
     async getUser() {
-        const userStr = localStorage.getItem('user');
-        return userStr ? JSON.parse(userStr) : null;
+        try {
+            const userStr = localStorage.getItem('user');
+            // Vérifier que ce n'est pas une valeur invalide
+            if (!userStr || userStr === 'undefined' || userStr === 'null') {
+                return null;
+            }
+            return JSON.parse(userStr);
+        } catch (error) {
+            // Si le JSON est invalide, nettoyer et retourner null
+            console.error('❌ Erreur parsing user:', error);
+            localStorage.removeItem('user');
+            return null;
+        }
     },
 
     /**
@@ -460,6 +488,7 @@ const AuthService = {
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         localStorage.removeItem('rememberMe');
+        localStorage.removeItem('prestataire');
     }
 };
 

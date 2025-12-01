@@ -19,7 +19,7 @@
    HEADER
    ================================================ */
 
-.page-header {
+.abonnement-page .page-header {
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -30,11 +30,11 @@
     transition: border-color 0.2s ease;
 }
 
-.page-header.scrolled {
+.abonnement-page .page-header.scrolled {
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.header-btn {
+.abonnement-page .header-btn {
     width: 38px;
     height: 38px;
     border-radius: 10px;
@@ -47,16 +47,16 @@
     font-size: 20px;
 }
 
-.header-btn:active {
+.abonnement-page .header-btn:active {
     transform: scale(0.95);
     background: rgba(255, 255, 255, 0.12);
 }
 
-.header-btn.placeholder {
+.abonnement-page .header-btn.placeholder {
     visibility: hidden;
 }
 
-.page-title {
+.abonnement-page .page-title {
     font-size: 18px;
     font-weight: 600;
     color: #fff;
@@ -67,14 +67,14 @@
    SCROLLABLE CONTENT
    ================================================ */
 
-.abonnement-scroll {
+.abonnement-page .abonnement-scroll {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
 }
 
-.abonnement-content {
+.abonnement-page .abonnement-content {
     padding: 0 16px 24px;
 }
 
@@ -82,7 +82,7 @@
    LOADING
    ================================================ */
 
-.abonnement-loading {
+.abonnement-page .abonnement-loading {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -91,7 +91,7 @@
     gap: 16px;
 }
 
-.loading-spinner {
+.abonnement-page .loading-spinner {
     width: 40px;
     height: 40px;
     border: 3px solid rgba(255, 255, 255, 0.1);
@@ -106,7 +106,7 @@
     }
 }
 
-.abonnement-loading p {
+.abonnement-page .abonnement-loading p {
     color: rgba(255, 255, 255, 0.5);
     font-size: 15px;
 }
@@ -115,7 +115,7 @@
    ERROR BANNER
    ================================================ */
 
-.error-banner {
+.abonnement-page .error-banner {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -128,16 +128,16 @@
     font-size: 15px;
 }
 
-.error-banner ion-icon:first-child {
+.abonnement-page .error-banner ion-icon:first-child {
     font-size: 20px;
     flex-shrink: 0;
 }
 
-.error-banner span {
+.abonnement-page .error-banner span {
     flex: 1;
 }
 
-.error-banner button {
+.abonnement-page .error-banner button {
     width: 26px;
     height: 26px;
     border-radius: 6px;
@@ -152,73 +152,191 @@
 }
 
 /* ================================================
-   ACTIVE SUBSCRIPTION
+   ACTIVE SUBSCRIPTION - NOUVEAU DESIGN
    ================================================ */
 
-.active-subscription {
+.abonnement-page .active-subscription {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0 16px 16px;
-    padding: 14px;
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
-    border: 1px solid rgba(34, 197, 94, 0.2);
-    border-radius: 14px;
+    flex-direction: column;
+    gap: 0;
+    margin: 16px 16px 20px;
+    padding: 0;
+    background: #1e1e1e;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    overflow: hidden;
 }
 
-.subscription-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+.abonnement-page .subscription-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.abonnement-page .subscription-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     background: rgba(34, 197, 94, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
     color: #4ade80;
-    font-size: 20px;
+    font-size: 22px;
 }
 
-.subscription-info {
+.abonnement-page .subscription-info {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.subscription-label {
-    font-size: 12px;
+.abonnement-page .subscription-label {
+    font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: #4ade80;
 }
 
-.subscription-name {
-    font-size: 16px;
+.abonnement-page .subscription-name {
+    font-size: 17px;
     font-weight: 600;
     color: #fff;
 }
 
-.subscription-expiry {
-    font-size: 14px;
+/* Stats de l'abonnement */
+.abonnement-page .subscription-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.abonnement-page .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 8px;
+    background: #1e1e1e;
+    text-align: center;
+}
+
+.abonnement-page .stat-item ion-icon {
+    font-size: 22px;
+    color: #fe7e4f;
+}
+
+.abonnement-page .stat-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.abonnement-page .stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.abonnement-page .stat-label {
+    font-size: 10px;
     color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.abonnement-page .stat-divider {
+    display: none;
+}
+
+/* Tip abonnement */
+.abonnement-page .subscription-tip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.1) 0%, rgba(243, 162, 133, 0.06) 100%);
+    border-top: 1px solid rgba(254, 126, 79, 0.15);
+}
+
+.abonnement-page .subscription-tip ion-icon {
+    font-size: 18px;
+    color: #fe7e4f;
+    flex-shrink: 0;
+}
+
+.abonnement-page .subscription-tip span {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.4;
+}
+
+/* Section intro pour ajouter des fiches */
+.abonnement-page .section-intro {
+    text-align: center;
+    padding: 20px 20px 24px;
+}
+
+.abonnement-page .section-intro ion-icon {
+    font-size: 40px;
+    color: #fe7e4f;
+    margin-bottom: 12px;
+}
+
+.abonnement-page .section-intro h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 6px 0;
+}
+
+.abonnement-page .section-intro p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.55);
+    margin: 0;
+}
+
+/* Résultat après achat */
+.abonnement-page .fiches-result {
+    text-align: center;
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: rgba(74, 222, 128, 0.08);
+    border: 1px solid rgba(74, 222, 128, 0.15);
+    border-radius: 10px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.abonnement-page .fiches-result strong {
+    color: #4ade80;
+    font-weight: 600;
 }
 
 /* ================================================
    SECTIONS
    ================================================ */
 
-.selection-section {
+.abonnement-page .selection-section {
     margin-bottom: 24px;
 }
 
-.section-header {
+.abonnement-page .section-header {
     display: flex;
     align-items: flex-start;
     gap: 12px;
     margin-bottom: 14px;
 }
 
-.section-number {
+.abonnement-page .section-number {
     width: 30px;
     height: 30px;
     border-radius: 8px;
@@ -232,14 +350,14 @@
     flex-shrink: 0;
 }
 
-.section-title h2 {
+.abonnement-page .section-title h2 {
     font-size: 17px;
     font-weight: 600;
     color: #fff;
     margin: 0 0 2px 0;
 }
 
-.section-title p {
+.abonnement-page .section-title p {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.5);
     margin: 0;
@@ -249,7 +367,7 @@
    FICHES SELECTOR
    ================================================ */
 
-.fiches-selector {
+.abonnement-page .fiches-selector {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -260,7 +378,7 @@
     border-radius: 16px;
 }
 
-.fiches-btn {
+.abonnement-page .fiches-btn {
     width: 46px;
     height: 46px;
     border-radius: 12px;
@@ -273,25 +391,25 @@
     color: #fff;
 }
 
-.fiches-btn:active {
+.abonnement-page .fiches-btn:active {
     transform: scale(0.95);
 }
 
-.fiches-btn:disabled {
+.abonnement-page .fiches-btn:disabled {
     opacity: 0.3;
 }
 
-.fiches-btn.minus {
+.abonnement-page .fiches-btn.minus {
     color: #f87171;
     border-color: rgba(248, 113, 113, 0.2);
 }
 
-.fiches-btn.plus {
+.abonnement-page .fiches-btn.plus {
     color: #4ade80;
     border-color: rgba(74, 222, 128, 0.2);
 }
 
-.fiches-display {
+.abonnement-page .fiches-display {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -299,7 +417,7 @@
     min-width: 80px;
 }
 
-.fiches-icon {
+.abonnement-page .fiches-icon {
     width: 46px;
     height: 46px;
     border-radius: 12px;
@@ -312,21 +430,21 @@
     color: #fe7e4f;
 }
 
-.fiches-count {
+.abonnement-page .fiches-count {
     font-size: 34px;
     font-weight: 700;
     color: #fff;
     line-height: 1;
 }
 
-.fiches-label {
+.abonnement-page .fiches-label {
     font-size: 13px;
     color: rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-.fiches-info {
+.abonnement-page .fiches-info {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -339,7 +457,7 @@
     font-size: 14px;
 }
 
-.fiches-info ion-icon {
+.abonnement-page .fiches-info ion-icon {
     font-size: 18px;
     color: #fe7e4f;
 }
@@ -348,13 +466,13 @@
    DURATION OPTIONS
    ================================================ */
 
-.duration-options {
+.abonnement-page .duration-options {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.duration-card {
+.abonnement-page .duration-card {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -365,20 +483,20 @@
     text-align: left;
 }
 
-.duration-card.selected {
+.abonnement-page .duration-card.selected {
     border-color: #fe7e4f;
     background: rgba(254, 126, 79, 0.05);
 }
 
-.duration-card.popular {
+.abonnement-page .duration-card.popular {
     border-color: rgba(254, 126, 79, 0.3);
 }
 
-.duration-card:active {
+.abonnement-page .duration-card:active {
     transform: scale(0.99);
 }
 
-.popular-badge {
+.abonnement-page .popular-badge {
     position: absolute;
     top: 0;
     right: 0;
@@ -394,18 +512,18 @@
     text-transform: uppercase;
 }
 
-.popular-badge ion-icon {
+.abonnement-page .popular-badge ion-icon {
     font-size: 14px;
 }
 
-.duration-header {
+.abonnement-page .duration-header {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 10px;
 }
 
-.duration-icon {
+.abonnement-page .duration-icon {
     width: 40px;
     height: 40px;
     border-radius: 10px;
@@ -417,60 +535,60 @@
     color: rgba(255, 255, 255, 0.6);
 }
 
-.duration-card.selected .duration-icon {
+.abonnement-page .duration-card.selected .duration-icon {
     background: rgba(254, 126, 79, 0.1);
     color: #fe7e4f;
 }
 
-.duration-info {
+.abonnement-page .duration-info {
     display: flex;
     flex-direction: column;
     gap: 1px;
 }
 
-.duration-name {
+.abonnement-page .duration-name {
     font-size: 16px;
     font-weight: 600;
     color: #fff;
 }
 
-.duration-months {
+.abonnement-page .duration-months {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.5);
 }
 
-.duration-pricing {
+.abonnement-page .duration-pricing {
     padding-left: 52px;
 }
 
-.price-main {
+.abonnement-page .price-main {
     display: flex;
     align-items: baseline;
     gap: 5px;
     margin-bottom: 2px;
 }
 
-.price-amount {
+.abonnement-page .price-amount {
     font-size: 22px;
     font-weight: 700;
     color: #fff;
 }
 
-.duration-card.selected .price-amount {
+.abonnement-page .duration-card.selected .price-amount {
     color: #fe7e4f;
 }
 
-.price-period {
+.abonnement-page .price-period {
     font-size: 13px;
     color: rgba(255, 255, 255, 0.5);
 }
 
-.price-total {
+.abonnement-page .price-total {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.4);
 }
 
-.selection-indicator {
+.abonnement-page .selection-indicator {
     position: absolute;
     right: 14px;
     top: 50%;
@@ -484,14 +602,14 @@
     justify-content: center;
 }
 
-.selection-indicator.active {
+.abonnement-page .selection-indicator.active {
     border-color: #fe7e4f;
     background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
     color: #fff;
     font-size: 16px;
 }
 
-.savings-banner {
+.abonnement-page .savings-banner {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -504,12 +622,12 @@
     font-size: 15px;
 }
 
-.savings-banner ion-icon {
+.abonnement-page .savings-banner ion-icon {
     font-size: 20px;
     color: #4ade80;
 }
 
-.savings-banner strong {
+.abonnement-page .savings-banner strong {
     font-weight: 600;
 }
 
@@ -517,14 +635,14 @@
    FEATURES
    ================================================ */
 
-.features-section {
+.abonnement-page .features-section {
     padding: 16px;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 14px;
 }
 
-.features-section h3 {
+.abonnement-page .features-section h3 {
     font-size: 13px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.5);
@@ -534,13 +652,13 @@
     text-align: center;
 }
 
-.features-grid {
+.abonnement-page .features-grid {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.feature-item {
+.abonnement-page .feature-item {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -549,7 +667,7 @@
     border-radius: 10px;
 }
 
-.feature-icon {
+.abonnement-page .feature-icon {
     width: 36px;
     height: 36px;
     border-radius: 8px;
@@ -562,7 +680,7 @@
     flex-shrink: 0;
 }
 
-.feature-item span {
+.abonnement-page .feature-item span {
     font-size: 15px;
     color: rgba(255, 255, 255, 0.8);
 }
@@ -571,11 +689,11 @@
    FAQ
    ================================================ */
 
-.faq-section {
+.abonnement-page .faq-section {
     margin-top: 20px;
 }
 
-.faq-toggle {
+.abonnement-page .faq-toggle {
     width: 100%;
     display: flex;
     align-items: center;
@@ -589,12 +707,12 @@
     font-weight: 500;
 }
 
-.faq-toggle ion-icon {
+.abonnement-page .faq-toggle ion-icon {
     font-size: 20px;
     color: rgba(255, 255, 255, 0.4);
 }
 
-.faq-content {
+.abonnement-page .faq-content {
     margin-top: 10px;
     padding: 14px;
     background: rgba(255, 255, 255, 0.02);
@@ -602,28 +720,28 @@
     border-radius: 12px;
 }
 
-.faq-item {
+.abonnement-page .faq-item {
     padding: 12px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.faq-item:last-child {
+.abonnement-page .faq-item:last-child {
     border-bottom: none;
     padding-bottom: 0;
 }
 
-.faq-item:first-child {
+.abonnement-page .faq-item:first-child {
     padding-top: 0;
 }
 
-.faq-item h4 {
+.abonnement-page .faq-item h4 {
     font-size: 15px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.85);
     margin: 0 0 6px 0;
 }
 
-.faq-item p {
+.abonnement-page .faq-item p {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.5);
     margin: 0;
@@ -634,7 +752,7 @@
    CHECKOUT FOOTER - TOUJOURS EN BAS
    ================================================ */
 
-.checkout-footer {
+.abonnement-page .checkout-footer {
     flex-shrink: 0;
     background: linear-gradient(180deg, rgba(30, 28, 26, 0.98) 0%, rgba(20, 18, 16, 1) 100%);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -642,17 +760,17 @@
     padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
 }
 
-.checkout-summary {
+.abonnement-page .checkout-summary {
     display: flex;
     align-items: center;
     gap: 14px;
 }
 
-.summary-details {
+.abonnement-page .summary-details {
     flex: 1;
 }
 
-.summary-line {
+.abonnement-page .summary-line {
     display: flex;
     justify-content: space-between;
     font-size: 13px;
@@ -660,24 +778,24 @@
     margin-bottom: 4px;
 }
 
-.summary-total {
+.abonnement-page .summary-total {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.summary-total span:first-child {
+.abonnement-page .summary-total span:first-child {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.6);
 }
 
-.total-amount {
+.abonnement-page .total-amount {
     font-size: 22px;
     font-weight: 700;
     color: #fff;
 }
 
-.checkout-button {
+.abonnement-page .checkout-button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -686,33 +804,33 @@
     background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
     border: none;
     border-radius: 12px;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     color: #fff;
     white-space: nowrap;
     min-width: 140px;
 }
 
-.checkout-button:active {
+.abonnement-page .checkout-button:active {
     transform: scale(0.98);
 }
 
-.checkout-button:disabled {
+.abonnement-page .checkout-button:disabled {
     opacity: 0.5;
 }
 
-.checkout-button ion-icon {
+.abonnement-page .checkout-button ion-icon {
     font-size: 20px;
 }
 
-.loading-text {
+.abonnement-page .loading-text {
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-.loading-dots::before,
-.loading-dots::after {
+.abonnement-page .loading-dots::before,
+.abonnement-page .loading-dots::after {
     content: '';
     display: inline-block;
     width: 5px;
@@ -722,7 +840,7 @@
     animation: dot 1s infinite;
 }
 
-.loading-dots::after {
+.abonnement-page .loading-dots::after {
     animation-delay: 0.2s;
 }
 
@@ -738,7 +856,7 @@
     }
 }
 
-.secure-badge {
+.abonnement-page .secure-badge {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -748,7 +866,37 @@
     color: rgba(255, 255, 255, 0.35);
 }
 
-.secure-badge ion-icon {
+.abonnement-page .secure-badge ion-icon {
     font-size: 16px;
     color: #4ade80;
+}
+
+/* ================================================
+   RESPONSIVE
+   ================================================ */
+
+@media (max-width: 380px) {
+    .abonnement-page .subscription-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .abonnement-page .stat-item {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 12px 16px;
+    }
+
+    .abonnement-page .stat-content {
+        align-items: flex-start;
+    }
+
+    .abonnement-page .checkout-summary {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .abonnement-page .checkout-button {
+        width: 100%;
+    }
 }

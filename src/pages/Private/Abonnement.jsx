@@ -19,7 +19,9 @@ import {
     cardOutline,
     giftOutline,
     chevronDownOutline,
-    chevronUpOutline
+    chevronUpOutline,
+    addCircleOutline,
+    layersOutline
 } from 'ionicons/icons';
 import AbonnementService from '../../Services/Abonnement.services';
 import { useAuth } from '../../Utils/AuthContext';
@@ -151,8 +153,21 @@ const Abonnement = () => {
         }
     };
 
+    // Calculer le nombre de fiches actives de l'utilisateur
+    const getFichesActives = () => {
+        return user?.maxFiches || 0;
+    };
+
+    // Calculer le nombre de fiches utilisées
+    const getFichesUtilisees = () => {
+        return user?.fichesCount || 0;
+    };
+
     const totals = calculateTotal();
     const selectedAbonnement = getSelectedAbonnement();
+    const fichesActives = getFichesActives();
+    const fichesUtilisees = getFichesUtilisees();
+    const hasActiveSouscription = maSouscription?.hasSouscription;
 
     if (loading) {
         return (
@@ -192,30 +207,71 @@ const Abonnement = () => {
                     </div>
                 )}
 
-                {/* Souscription active */}
-                {maSouscription?.hasSouscription && (
+                {/* Résumé des fiches actives */}
+                {hasActiveSouscription && (
                     <div className="active-subscription">
-                        <div className="subscription-icon">
-                            <IonIcon icon={checkmarkCircle} />
+                        <div className="subscription-header">
+                            <div className="subscription-icon">
+                                <IonIcon icon={checkmarkCircle} />
+                            </div>
+                            <div className="subscription-info">
+                                <span className="subscription-label">Mon abonnement</span>
+                                <span className="subscription-name">{maSouscription.souscription.abonnement?.nom}</span>
+                            </div>
                         </div>
-                        <div className="subscription-info">
-                            <span className="subscription-label">Abonnement actif</span>
-                            <span className="subscription-name">{maSouscription.souscription.abonnement?.nom}</span>
-                            <span className="subscription-expiry">
-                                {maSouscription.souscription.joursRestants} jours restants
-                            </span>
+
+                        <div className="subscription-stats">
+                            <div className="stat-item">
+                                <IonIcon icon={layersOutline} />
+                                <div className="stat-content">
+                                    <span className="stat-value">{fichesActives}</span>
+                                    <span className="stat-label">fiche{fichesActives > 1 ? 's' : ''} disponible{fichesActives > 1 ? 's' : ''}</span>
+                                </div>
+                            </div>
+                            <div className="stat-divider"></div>
+                            <div className="stat-item">
+                                <IonIcon icon={storefrontOutline} />
+                                <div className="stat-content">
+                                    <span className="stat-value">{fichesUtilisees}</span>
+                                    <span className="stat-label">fiche{fichesUtilisees > 1 ? 's' : ''} créée{fichesUtilisees > 1 ? 's' : ''}</span>
+                                </div>
+                            </div>
+                            <div className="stat-divider"></div>
+                            <div className="stat-item">
+                                <IonIcon icon={timeOutline} />
+                                <div className="stat-content">
+                                    <span className="stat-value">{maSouscription.souscription.joursRestants}</span>
+                                    <span className="stat-label">jours restants</span>
+                                </div>
+                            </div>
                         </div>
+
+                        {fichesActives > fichesUtilisees && (
+                            <div className="subscription-tip">
+                                <IonIcon icon={sparklesOutline} />
+                                <span>Vous pouvez encore créer {fichesActives - fichesUtilisees} fiche{(fichesActives - fichesUtilisees) > 1 ? 's' : ''} commerce</span>
+                            </div>
+                        )}
                     </div>
                 )}
 
                 <div className="abonnement-content">
+                    {/* Titre section achat */}
+                    {hasActiveSouscription && (
+                        <div className="section-intro">
+                            <IonIcon icon={addCircleOutline} />
+                            <h2>Ajouter des fiches</h2>
+                            <p>Besoin de plus de fiches ? Ajoutez-en à votre abonnement</p>
+                        </div>
+                    )}
+
                     {/* Section 1: Nombre de fiches */}
                     <section className="selection-section">
                         <div className="section-header">
                             <div className="section-number">1</div>
                             <div className="section-title">
                                 <h2>Nombre de fiches</h2>
-                                <p>Combien de commerces souhaitez-vous référencer ?</p>
+                                <p>{hasActiveSouscription ? 'Combien de fiches supplémentaires ?' : 'Combien de commerces souhaitez-vous référencer ?'}</p>
                             </div>
                         </div>
 
@@ -249,6 +305,12 @@ const Abonnement = () => {
                             <div className="fiches-info">
                                 <IonIcon icon={sparklesOutline} />
                                 <span>Idéal pour gérer {nombreFiches} établissements depuis un seul compte</span>
+                            </div>
+                        )}
+
+                        {hasActiveSouscription && (
+                            <div className="fiches-result">
+                                <span>Après achat : <strong>{fichesActives + nombreFiches} fiches</strong> au total</span>
                             </div>
                         )}
                     </section>
@@ -402,19 +464,22 @@ const Abonnement = () => {
                     <button
                         className="checkout-button"
                         onClick={handleCheckout}
-                        disabled={checkoutLoading || !selectedDuration || maSouscription?.hasSouscription}
+                        disabled={checkoutLoading || !selectedDuration}
                     >
                         {checkoutLoading ? (
                             <span className="loading-text">
                                 <span className="loading-dots"></span>
                                 Redirection...
                             </span>
-                        ) : maSouscription?.hasSouscription ? (
-                            'Abonnement actif'
                         ) : (
                             <>
-                                <IonIcon icon={cardOutline} />
-                                <span>Payer {formatPrice(totals.ttc)}</span>
+                                <IonIcon icon={hasActiveSouscription ? addCircleOutline : cardOutline} />
+                                <span>
+                                    {hasActiveSouscription
+                                        ? `Ajouter ${nombreFiches} fiche${nombreFiches > 1 ? 's' : ''} · ${formatPrice(totals.ttc)}`
+                                        : `Payer ${formatPrice(totals.ttc)}`
+                                    }
+                                </span>
                             </>
                         )}
                     </button>

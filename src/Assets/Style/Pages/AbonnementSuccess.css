@@ -1,271 +1,509 @@
-/* ============================================
-   PAGE ABONNEMENT SUCCESS - STYLES
-   ============================================ */
+/* AbonnementSuccess.css */
+/* Style cohérent avec l'application - Gris/Noir + Orange */
 
-.success-page {
+.abonnement-success-page {
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    height: 100%;
+    background: #121212;
+    color: #ffffff;
+}
+
+/* ========== HEADER ========== */
+.abonnement-success-page .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: #1a1a1a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.abonnement-success-page .header-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-/* Loading */
-.success-page .loading-container {
+.abonnement-success-page .header-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.abonnement-success-page .header-btn:active {
+    transform: scale(0.95);
+}
+
+.abonnement-success-page .header-btn.back {
+    font-size: 18px;
+}
+
+.abonnement-success-page .header-btn.placeholder {
+    visibility: hidden;
+}
+
+.abonnement-success-page .page-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+/* ========== CONTENU ========== */
+.abonnement-success-page .success-content {
+    flex: 1;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    color: rgba(255, 255, 255, 0.7);
+    justify-content: center;
+    padding: 24px 20px;
+    overflow-y: auto;
 }
 
-.success-page .spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid rgba(255, 255, 255, 0.1);
-    border-top-color: #8b5cf6;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 16px;
-}
-
-/* Container résultat */
-.result-container {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px;
-    padding: 40px 30px;
-    max-width: 450px;
+.abonnement-success-page .status-container {
     width: 100%;
+    max-width: 400px;
+}
+
+/* ========== CARTE DE STATUT ========== */
+.abonnement-success-page .status-card {
+    background: #1e1e1e;
+    border-radius: 24px;
+    padding: 40px 24px 32px;
     text-align: center;
-    position: relative;
-    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    animation: slideUp 0.4s ease-out;
 }
 
-.result-container.success {
-    border-color: rgba(34, 197, 94, 0.3);
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.result-container.error {
-    border-color: rgba(239, 68, 68, 0.3);
+.abonnement-success-page .status-card h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 8px 0;
 }
 
-.result-container.pending {
-    border-color: rgba(251, 191, 36, 0.3);
+.abonnement-success-page .status-card>p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 0 24px 0;
+    line-height: 1.5;
 }
 
-/* Icône résultat */
-.result-icon {
+/* ========== ICÔNE DE STATUT ========== */
+.abonnement-success-page .status-icon-wrapper {
     width: 80px;
     height: 80px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 24px auto;
-    font-size: 2.5rem;
+    margin: 0 auto 20px;
+    position: relative;
+    animation: popIn 0.5s ease-out 0.2s both;
 }
 
-.result-icon.success {
-    background: rgba(34, 197, 94, 0.2);
-    color: #86efac;
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
-.result-icon.error {
-    background: rgba(239, 68, 68, 0.2);
-    color: #fca5a5;
+.abonnement-success-page .status-icon-wrapper ion-icon {
+    font-size: 40px;
+    position: relative;
+    z-index: 2;
 }
 
-.result-icon.pending {
-    background: rgba(251, 191, 36, 0.2);
+.abonnement-success-page .status-icon-wrapper .icon-ring {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    opacity: 0.3;
 }
 
-.result-icon.pending .spinner {
+.abonnement-success-page .status-icon-wrapper.success {
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+}
+
+.abonnement-success-page .status-icon-wrapper.success ion-icon {
+    color: #ffffff;
+}
+
+.abonnement-success-page .status-icon-wrapper.success .icon-ring {
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.abonnement-success-page .status-icon-wrapper.pending {
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+}
+
+.abonnement-success-page .status-icon-wrapper.pending ion-icon {
+    color: #ffffff;
+}
+
+.abonnement-success-page .status-icon-wrapper.pending .icon-ring {
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.abonnement-success-page .status-icon-wrapper.error {
+    background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+}
+
+.abonnement-success-page .status-icon-wrapper.error ion-icon {
+    color: #ffffff;
+}
+
+.abonnement-success-page .status-icon-wrapper.error .icon-ring {
+    background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: scale(1.15);
+        opacity: 0.15;
+    }
+}
+
+/* ========== CONFETTI ========== */
+.abonnement-success-page .confetti-emoji {
+    font-size: 32px;
+    margin-bottom: 8px;
+    animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+/* ========== LOADING ========== */
+.abonnement-success-page .loading-animation {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.abonnement-success-page .loading-animation .spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #fe7e4f;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========== CARTE DE SOUSCRIPTION ========== */
+.abonnement-success-page .souscription-card {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 16px;
+    margin: 24px 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.abonnement-success-page .souscription-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.15) 0%, rgba(243, 162, 133, 0.1) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.abonnement-success-page .souscription-header ion-icon {
+    font-size: 18px;
+    color: #fe7e4f;
+}
+
+.abonnement-success-page .souscription-header span {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.abonnement-success-page .souscription-details {
+    padding: 8px;
+}
+
+.abonnement-success-page .detail-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 12px;
+    border-radius: 12px;
+    transition: background 0.2s;
+}
+
+.abonnement-success-page .detail-row:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.abonnement-success-page .detail-icon {
     width: 40px;
     height: 40px;
-    border-top-color: #fbbf24;
-}
-
-/* Textes */
-.result-container h1 {
-    color: white;
-    font-size: 1.8rem;
-    font-weight: 600;
-    margin: 0 0 12px 0;
-}
-
-.result-container > p {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 1rem;
-    line-height: 1.5;
-    margin: 0 0 30px 0;
-}
-
-/* Résumé souscription */
-.subscription-summary {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 24px;
-}
-
-.summary-item {
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    justify-content: center;
 }
 
-.summary-item:last-child {
-    border-bottom: none;
-}
-
-.summary-item .label {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.9rem;
-}
-
-.summary-item .value {
-    color: white;
-    font-weight: 500;
-    font-size: 0.95rem;
-}
-
-/* Prochaines étapes */
-.next-steps {
-    background: rgba(139, 92, 246, 0.1);
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 24px;
-}
-
-.next-steps h3 {
-    color: #c4b5fd;
-    font-size: 1rem;
-    margin: 0 0 8px 0;
-}
-
-.next-steps p {
+.abonnement-success-page .detail-icon ion-icon {
+    font-size: 18px;
     color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9rem;
-    margin: 0;
-    line-height: 1.4;
 }
 
-/* Boutons */
-.action-buttons {
+.abonnement-success-page .detail-icon.highlight {
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.2) 0%, rgba(34, 197, 94, 0.15) 100%);
+}
+
+.abonnement-success-page .detail-icon.highlight ion-icon {
+    color: #4ade80;
+}
+
+.abonnement-success-page .detail-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.abonnement-success-page .detail-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 3px;
+}
+
+.abonnement-success-page .detail-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.abonnement-success-page .detail-value.highlight {
+    color: #fe7e4f;
+    font-size: 17px;
+}
+
+.abonnement-success-page .detail-row.total {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.08) 0%, rgba(243, 162, 133, 0.05) 100%);
+    border-radius: 12px;
+}
+
+.abonnement-success-page .detail-row.total .detail-icon {
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+}
+
+.abonnement-success-page .detail-row.total .detail-icon ion-icon {
+    color: #ffffff;
+}
+
+/* ========== BOUTONS D'ACTION ========== */
+.abonnement-success-page .action-buttons {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    margin-top: 8px;
 }
 
-.primary-btn {
+.abonnement-success-page .btn-primary {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
     width: 100%;
     padding: 16px 24px;
-    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
-    color: white;
     border: none;
-    border-radius: 12px;
-    font-size: 1rem;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+    color: #ffffff;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 4px 20px rgba(254, 126, 79, 0.3);
 }
 
-.primary-btn:hover {
+.abonnement-success-page .btn-primary ion-icon {
+    font-size: 20px;
+}
+
+.abonnement-success-page .btn-primary ion-icon.arrow {
+    margin-left: auto;
+    font-size: 18px;
+    opacity: 0.8;
+}
+
+.abonnement-success-page .btn-primary span {
+    flex: 1;
+    text-align: left;
+}
+
+.abonnement-success-page .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 6px 24px rgba(254, 126, 79, 0.4);
 }
 
-.primary-btn ion-icon {
-    font-size: 1.2rem;
+.abonnement-success-page .btn-primary:active {
+    transform: translateY(0);
 }
 
-.secondary-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+.abonnement-success-page .btn-secondary {
     width: 100%;
     padding: 14px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
     background: transparent;
     color: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    font-size: 0.95rem;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.secondary-btn:hover {
+.abonnement-success-page .btn-secondary:hover {
     background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.25);
 }
 
-.secondary-btn ion-icon {
-    font-size: 1.1rem;
+.abonnement-success-page .btn-secondary:active {
+    background: rgba(255, 255, 255, 0.08);
 }
 
-/* Confetti animation */
-.confetti-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    overflow: hidden;
+/* ========== ÉTATS SPÉCIFIQUES ========== */
+.abonnement-success-page .status-card.loading h2 {
+    color: rgba(255, 255, 255, 0.9);
 }
 
-.confetti {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    top: -10px;
-    animation: confetti-fall 3s ease-in-out forwards;
+.abonnement-success-page .status-card.error>p {
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(239, 68, 68, 0.1);
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-.confetti-0 { background: #8b5cf6; left: 10%; animation-delay: 0s; }
-.confetti-1 { background: #86efac; left: 25%; animation-delay: 0.2s; }
-.confetti-2 { background: #fbbf24; left: 40%; animation-delay: 0.4s; }
-.confetti-3 { background: #f472b6; left: 55%; animation-delay: 0.1s; }
-.confetti-4 { background: #60a5fa; left: 70%; animation-delay: 0.3s; }
-
-@keyframes confetti-fall {
-    0% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(500px) rotate(720deg);
-        opacity: 0;
-    }
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* Responsive */
+/* ========== RESPONSIVE ========== */
 @media (max-width: 480px) {
-    .result-container {
-        padding: 30px 20px;
+    .abonnement-success-page .success-content {
+        padding: 20px 16px;
     }
-    
-    .result-container h1 {
-        font-size: 1.5rem;
+
+    .abonnement-success-page .status-card {
+        padding: 32px 20px 28px;
+        border-radius: 20px;
     }
-    
-    .result-icon {
-        width: 70px;
-        height: 70px;
-        font-size: 2rem;
+
+    .abonnement-success-page .status-card h2 {
+        font-size: 20px;
+    }
+
+    .abonnement-success-page .status-card>p {
+        font-size: 13px;
+    }
+
+    .abonnement-success-page .status-icon-wrapper {
+        width: 72px;
+        height: 72px;
+    }
+
+    .abonnement-success-page .status-icon-wrapper ion-icon {
+        font-size: 36px;
+    }
+
+    .abonnement-success-page .detail-row {
+        padding: 12px 10px;
+        gap: 12px;
+    }
+
+    .abonnement-success-page .detail-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .abonnement-success-page .detail-icon ion-icon {
+        font-size: 16px;
+    }
+
+    .abonnement-success-page .detail-label {
+        font-size: 10px;
+    }
+
+    .abonnement-success-page .detail-value {
+        font-size: 14px;
+    }
+
+    .abonnement-success-page .detail-value.highlight {
+        font-size: 16px;
+    }
+
+    .abonnement-success-page .btn-primary {
+        padding: 14px 20px;
+        font-size: 14px;
+    }
+
+    .abonnement-success-page .btn-secondary {
+        padding: 12px 20px;
+        font-size: 13px;
     }
 }

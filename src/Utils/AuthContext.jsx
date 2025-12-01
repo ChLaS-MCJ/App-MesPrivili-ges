@@ -53,12 +53,38 @@ export const AuthProvider = ({ children }) => {
             const storedToken = await AuthService.getToken();
             const storedUser = await AuthService.getUser();
 
-            if (storedToken && storedUser) {
+            // Si pas de token ou pas d'utilisateur stocké, pas authentifié
+            if (!storedToken || !storedUser) {
+                // Nettoyer le storage au cas où il y a des données corrompues
+                await AuthService.clearStorage();
+                setLoading(false);
+                return;
+            }
+
+            // On a un token et un user stocké, on considère authentifié
+            // même si le getProfile échoue (offline, erreur réseau, etc.)
+            setToken(storedToken);
+            setUser(storedUser);
+            setIsAuthenticated(true);
+
+            // Si c'est un prestataire, charger ses données stockées
+            if (storedUser.role?.name === 'prestataire' || storedUser.role === 'prestataire') {
+                try {
+                    const storedPrestataire = localStorage.getItem('prestataire');
+                    if (storedPrestataire && storedPrestataire !== 'undefined') {
+                        setPrestataire(JSON.parse(storedPrestataire));
+                    }
+                } catch (e) {
+                    console.warn('Erreur parsing prestataire:', e);
+                    localStorage.removeItem('prestataire');
+                }
+            }
+
+            // Essayer de rafraîchir le profil en background (non bloquant)
+            try {
                 const result = await AuthService.getProfile();
 
                 if (result.success) {
-                    setToken(storedToken);
-
                     // Fusionner les données du backend avec les données stockées localement
                     const mergedUser = {
                         ...storedUser,
@@ -71,22 +97,61 @@ export const AuthProvider = ({ children }) => {
 
                     setUser(mergedUser);
                     await AuthService.setUser(mergedUser);
-                    setIsAuthenticated(true);
+                } else {
+                    // ============================================================
+                    // ⚠️ Le getProfile a échoué mais on garde l'utilisateur connecté
+                    // avec les données locales. On ne déconnecte que si c'est une
+                    // erreur d'authentification claire (401 après refresh échoué)
+                    // ============================================================
+                    console.warn('⚠️ getProfile échoué, utilisation des données locales');
 
-                    // Si c'est un prestataire, charger ses données
-                    if (result.data.role?.name === 'prestataire' || storedUser.role === 'prestataire') {
-                        const storedPrestataire = localStorage.getItem('prestataire');
-                        if (storedPrestataire) {
-                            setPrestataire(JSON.parse(storedPrestataire));
+                    // Vérifier si c'est une vraie erreur d'auth (token invalide)
+                    // Dans ce cas, le message contiendra généralement "401" ou "unauthorized"
+                    const isAuthError = result.message?.toLowerCase().includes('401') ||
+                        result.message?.toLowerCase().includes('unauthorized') ||
+                        result.message?.toLowerCase().includes('token');
+
+                    if (isAuthError) {
+                        // Essayer de refresh le token une fois
+                        try {
+                            await AuthService.refreshToken();
+                            // Si ça marche, réessayer getProfile
+                            const retryResult = await AuthService.getProfile();
+                            if (retryResult.success) {
+                                const mergedUser = {
+                                    ...storedUser,
+                                    ...retryResult.data,
+                                    client: {
+                                        ...storedUser?.client,
+                                        ...retryResult.data.client
+                                    }
+                                };
+                                setUser(mergedUser);
+                                await AuthService.setUser(mergedUser);
+                            }
+                        } catch (refreshError) {
+                            console.error('❌ Refresh token échoué, déconnexion');
+                            await AuthService.clearStorage();
+                            setUser(null);
+                            setPrestataire(null);
+                            setToken(null);
+                            setIsAuthenticated(false);
                         }
                     }
-                } else {
-                    await AuthService.clearStorage();
+                    // Si ce n'est pas une erreur d'auth, on garde les données locales
                 }
+            } catch (error) {
+                // Erreur réseau ou autre, on garde les données locales
+                console.warn('⚠️ Erreur lors du refresh profil:', error.message);
             }
+
         } catch (error) {
             console.error('Erreur checkAuth:', error);
             await AuthService.clearStorage();
+            setUser(null);
+            setPrestataire(null);
+            setToken(null);
+            setIsAuthenticated(false);
         } finally {
             setLoading(false);
         }
@@ -113,6 +178,34 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (error) {
             console.error('Erreur refresh user:', error);
+        }
+    };
+
+    /**
+     * Rafraîchir les données utilisateur après un paiement/achat
+     * Utilisé notamment après AbonnementSuccess
+     */
+    const refreshUser = async () => {
+        try {
+            const result = await AuthService.getProfile();
+            if (result.success) {
+                const storedUser = await AuthService.getUser();
+                const mergedUser = {
+                    ...storedUser,
+                    ...result.data,
+                    client: {
+                        ...storedUser?.client,
+                        ...result.data.client
+                    }
+                };
+                setUser(mergedUser);
+                await AuthService.setUser(mergedUser);
+                return { success: true };
+            }
+            return { success: false };
+        } catch (error) {
+            console.error('Erreur refreshUser:', error);
+            return { success: false, message: error.message };
         }
     };
 
@@ -463,6 +556,7 @@ export const AuthProvider = ({ children }) => {
         deleteAccount,
         getStats,
         refreshUserData,
+        refreshUser,
         // Inscription prestataire
         registerPrestataire,
         registerPrestataireGoogle,

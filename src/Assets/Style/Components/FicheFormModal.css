@@ -1,6 +1,7 @@
 /* ============================================
    FICHE FORM MODAL - CSS
    Modal de création/édition de fiche commerce
+   MISE À JOUR: Styles pour validation SIRET
    ============================================ */
 
 /* ===== MODAL OVERLAY ===== */
@@ -112,17 +113,35 @@
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
-.form-tabs .tab:hover {
+.form-tabs .tab:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.8);
+}
+
+.form-tabs .tab:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .form-tabs .tab.active {
     background: linear-gradient(135deg, rgba(254, 126, 79, 0.2) 0%, rgba(243, 162, 133, 0.1) 100%);
     border-color: rgba(254, 126, 79, 0.4);
     color: #fe7e4f;
+}
+
+.form-tabs .tab.validated {
+    border-color: rgba(100, 255, 150, 0.4);
+}
+
+.form-tabs .tab.validated ion-icon {
+    color: #64ff96;
+    font-size: 16px;
 }
 
 /* ===== ERROR MESSAGE ===== */
@@ -149,7 +168,277 @@
     padding: 20px 24px;
 }
 
-/* ===== FORM ELEMENTS ===== */
+/* ============================================
+   SIRET TAB STYLES
+   ============================================ */
+
+.siret-intro {
+    text-align: center;
+    padding: 20px 0 30px;
+}
+
+.siret-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.2) 0%, rgba(243, 162, 133, 0.1) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.siret-icon ion-icon {
+    font-size: 40px;
+    color: #fe7e4f;
+}
+
+.siret-intro h3 {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0 0 10px;
+}
+
+.siret-intro p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* SIRET Input Group */
+.siret-input-group {
+    margin-bottom: 24px;
+}
+
+.siret-input-wrapper {
+    position: relative;
+}
+
+.siret-input-wrapper input {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+    font-size: 18px;
+    letter-spacing: 2px;
+    text-align: center;
+    padding: 18px 50px 18px 20px;
+}
+
+.siret-input-wrapper input:disabled {
+    background: rgba(100, 255, 150, 0.08);
+    border-color: rgba(100, 255, 150, 0.3);
+    color: #64ff96;
+}
+
+.siret-validated-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64ff96;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+}
+
+/* Validate SIRET Button */
+.btn-validate-siret {
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(254, 126, 79, 0.3);
+}
+
+.btn-validate-siret:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(254, 126, 79, 0.4);
+}
+
+.btn-validate-siret:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-validate-siret ion-icon {
+    font-size: 20px;
+}
+
+/* Entreprise Data Display */
+.entreprise-data {
+    background: rgba(100, 255, 150, 0.05);
+    border: 1px solid rgba(100, 255, 150, 0.2);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.entreprise-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: rgba(100, 255, 150, 0.1);
+    border-bottom: 1px solid rgba(100, 255, 150, 0.15);
+}
+
+.entreprise-header ion-icon {
+    font-size: 20px;
+    color: #64ff96;
+}
+
+.entreprise-header span {
+    color: #64ff96;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.entreprise-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.entreprise-info-item {
+    padding: 14px 18px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.entreprise-info-item .label {
+    display: block;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.entreprise-info-item .value {
+    display: block;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.entreprise-info-item .value .ape-label {
+    display: block;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    font-weight: 400;
+    margin-top: 2px;
+}
+
+.entreprise-lock-notice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.entreprise-lock-notice ion-icon {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.entreprise-lock-notice span {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+}
+
+/* Continue Button */
+.btn-continue {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.btn-continue ion-icon {
+    font-size: 18px;
+}
+
+/* Change SIRET Button */
+.btn-change-siret {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-change-siret:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Entreprise Summary (in info tab) */
+.entreprise-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(100, 255, 150, 0.08);
+    border: 1px solid rgba(100, 255, 150, 0.2);
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.entreprise-summary-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.entreprise-summary-item ion-icon {
+    font-size: 18px;
+    color: #64ff96;
+}
+
+.entreprise-summary-item span {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.entreprise-summary-item .ape-badge {
+    background: rgba(254, 126, 79, 0.2);
+    color: #f3a285;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'SF Mono', monospace;
+}
+
+/* Category Filter Info */
+.category-filter-info {
+    font-weight: 400;
+    font-size: 12px;
+    color: rgba(100, 255, 150, 0.8);
+    margin-left: 8px;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
 .form-group {
     margin-bottom: 18px;
 }
@@ -743,6 +1032,10 @@
     background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
     color: #fff;
     box-shadow: 0 4px 15px rgba(254, 126, 79, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -781,11 +1074,12 @@
 
     .form-tabs {
         padding: 16px;
+        gap: 6px;
     }
 
     .form-tabs .tab {
-        padding: 10px 12px;
-        font-size: 12px;
+        padding: 10px 8px;
+        font-size: 11px;
     }
 
     .tab-content {
@@ -811,5 +1105,14 @@
 
     .btn-geo {
         width: 100%;
+    }
+
+    .entreprise-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .siret-input-wrapper input {
+        font-size: 16px;
+        letter-spacing: 1px;
     }
 }
