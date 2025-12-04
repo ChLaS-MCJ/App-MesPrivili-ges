@@ -537,7 +537,6 @@ const Prestataires = () => {
                                 <CloseOutlined />
                             </button>
                         </div>
-
                         <div className="filters-category-name">
                             {categoryName}
                         </div>

@@ -15,11 +15,18 @@ import {
     searchOutline,
     lockClosedOutline,
     globeOutline,
-    arrowForwardOutline
+    arrowForwardOutline,
+    arrowBackOutline,
+    mailOutline,
+    warningOutline,
+    storefrontOutline,
+    optionsOutline,
+    timeOutline,
+    checkmarkOutline
 } from 'ionicons/icons';
 import PrestataireService from '../../Services/Prestataire.services';
 
-// Import des images de catégories (comme dans Categories.jsx)
+// Import des images de catégories
 import modeImg from '../../Assets/Images/Categories/mode.jpeg';
 import restaurantsImg from '../../Assets/Images/Categories/restaurants.jpeg';
 import hotelsImg from '../../Assets/Images/Categories/hotels.png';
@@ -31,7 +38,6 @@ import enfantsImg from '../../Assets/Images/Categories/enfants.png';
 import maisonImg from '../../Assets/Images/Categories/maison.png';
 import loisirImg from '../../Assets/Images/Categories/loisir.png';
 
-// Mapping des images de catégories
 const categoryImages = {
     'Mode': modeImg,
     'Restaurants': restaurantsImg,
@@ -47,7 +53,6 @@ const categoryImages = {
     'Loisirs': loisirImg,
 };
 
-// Types de commerce disponibles
 const typesCommerce = [
     { value: 'restaurant', label: 'Restaurant' },
     { value: 'brasserie', label: 'Brasserie' },
@@ -114,18 +119,50 @@ const typesCommerce = [
     { value: 'autre', label: 'Autre' }
 ];
 
+// Configuration des étapes du stepper
+const STEPS_CREATE = [
+    { id: 'siret', title: 'Entreprise', icon: businessOutline },
+    { id: 'infos', title: 'Informations', icon: storefrontOutline },
+    { id: 'filtres', title: 'Services', icon: optionsOutline },
+    { id: 'adresse', title: 'Adresse', icon: locationOutline },
+    { id: 'photos', title: 'Photos', icon: imageOutline },
+    { id: 'horaires', title: 'Horaires', icon: timeOutline }
+];
+
+const STEPS_EDIT = [
+    { id: 'infos', title: 'Informations', icon: storefrontOutline },
+    { id: 'filtres', title: 'Services', icon: optionsOutline },
+    { id: 'adresse', title: 'Adresse', icon: locationOutline },
+    { id: 'photos', title: 'Photos', icon: imageOutline },
+    { id: 'horaires', title: 'Horaires', icon: timeOutline }
+];
+
 const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
+    const isEditMode = !!fiche;
+    const steps = isEditMode ? STEPS_EDIT : STEPS_CREATE;
+
+    // DEBUG - à retirer après résolution
+    console.log('🔧 FicheFormModal rendu:', { isOpen, isEditMode, ficheId: fiche?.id, stepsCount: steps.length });
+
+    const modalContentRef = useRef(null);
+    const [currentStep, setCurrentStep] = useState(0);
+
     const [categories, setCategories] = useState([]);
     const [filteredCategories, setFilteredCategories] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [activeTab, setActiveTab] = useState('siret'); // Commence par l'onglet SIRET pour nouvelle fiche
+
+    // État pour les filtres
+    const [availableFilters, setAvailableFilters] = useState([]);
+    const [selectedFilters, setSelectedFilters] = useState([]);
+    const [loadingFilters, setLoadingFilters] = useState(false);
 
     // État pour la validation SIRET
     const [siretInput, setSiretInput] = useState('');
     const [siretLoading, setSiretLoading] = useState(false);
     const [siretValidated, setSiretValidated] = useState(false);
     const [entrepriseData, setEntrepriseData] = useState(null);
+    const [apeNotSupported, setApeNotSupported] = useState(false);
 
     // Pour la géolocalisation automatique
     const [geoLoading, setGeoLoading] = useState(false);
@@ -165,7 +202,6 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
             samedi: { ouvert: false, debut: '09:00', fin: '18:00' },
             dimanche: { ouvert: false, debut: '09:00', fin: '18:00' }
         },
-        // Données entreprise (remplies par validation SIRET)
         siret: '',
         siren: '',
         codeApe: '',
@@ -173,13 +209,19 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         formeJuridique: ''
     });
 
+    // Scroll en haut à chaque changement d'étape
+    useEffect(() => {
+        if (modalContentRef.current) {
+            modalContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [currentStep]);
+
     // Reset form when modal opens/closes or fiche changes
     useEffect(() => {
         if (isOpen) {
             loadCategories();
             if (fiche) {
-                // MODE ÉDITION - On a déjà les données SIRET
-                // Parse images si c'est une string JSON
+                // MODE ÉDITION
                 let parsedImages = [];
                 if (fiche.images) {
                     if (typeof fiche.images === 'string') {
@@ -203,7 +245,6 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                     }
                 }
 
-                // Parse horaires
                 const defaultHoraires = {
                     lundi: { ouvert: false, debut: '09:00', fin: '18:00' },
                     mardi: { ouvert: false, debut: '09:00', fin: '18:00' },
@@ -241,7 +282,6 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                     imagePrincipale: fiche.imagePrincipale || '',
                     images: parsedImages,
                     horaires: parsedHoraires,
-                    // Données entreprise
                     siret: fiche.siret || '',
                     siren: fiche.siren || '',
                     codeApe: fiche.codeApe || '',
@@ -249,7 +289,6 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                     formeJuridique: fiche.formeJuridique || ''
                 });
 
-                // En mode édition, SIRET déjà validé
                 setSiretValidated(true);
                 setSiretInput(fiche.siret || '');
                 setEntrepriseData({
@@ -260,17 +299,21 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                     formeJuridique: fiche.formeJuridique
                 });
 
-                // Charger les catégories filtrées par APE
                 if (fiche.codeApe) {
                     loadCategoriesByApe(fiche.codeApe);
+                }
+
+                // Charger les filtres existants de la fiche
+                if (fiche.filtres && Array.isArray(fiche.filtres)) {
+                    setSelectedFilters(fiche.filtres.map(f => f.id));
                 }
 
                 if (fiche.latitude && fiche.longitude) {
                     setManualGeoEdit(true);
                 }
 
-                // En édition, on va directement sur l'onglet infos
-                setActiveTab('infos');
+                setCurrentStep(0);
+                setApeNotSupported(false);
             } else {
                 // MODE CRÉATION - Reset complet
                 setFormData({
@@ -306,14 +349,25 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                 setSiretInput('');
                 setEntrepriseData(null);
                 setFilteredCategories([]);
+                setSelectedFilters([]);
+                setAvailableFilters([]);
                 setManualGeoEdit(false);
-                // En création, on commence par l'onglet SIRET
-                setActiveTab('siret');
+                setApeNotSupported(false);
+                setCurrentStep(0);
             }
             setError(null);
             setGeoStatus(null);
         }
     }, [isOpen, fiche]);
+
+    // Charger les filtres quand la catégorie change
+    useEffect(() => {
+        if (formData.categoryId) {
+            loadFiltersByCategory(formData.categoryId);
+        } else {
+            setAvailableFilters([]);
+        }
+    }, [formData.categoryId]);
 
     const loadCategories = async () => {
         try {
@@ -326,26 +380,66 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         }
     };
 
-    // Charger les catégories filtrées par code APE
     const loadCategoriesByApe = async (codeApe) => {
         try {
+            console.log(`🔍 Chargement catégories pour APE: ${codeApe}`);
+
             const response = await fetch(`${import.meta.env.VITE_API_URL}/categories/for-ape/${encodeURIComponent(codeApe)}`);
             const result = await response.json();
 
-            if (result.success && result.data.categories) {
-                setFilteredCategories(result.data.categories);
-                console.log(`✅ ${result.data.categories.length} catégorie(s) disponible(s) pour APE ${codeApe}`);
+            console.log('📦 Réponse API:', result);
+
+            if (result.success && result.data) {
+                const { categories: cats, aucuneCategorie } = result.data;
+
+                if (aucuneCategorie || !cats || cats.length === 0) {
+                    console.log('❌ Aucune catégorie pour ce code APE');
+                    setFilteredCategories([]);
+                    setApeNotSupported(true);
+                } else {
+                    console.log(`✅ ${cats.length} catégorie(s) disponible(s)`);
+                    setFilteredCategories(cats);
+                    setApeNotSupported(false);
+                }
             } else {
-                // Fallback : toutes les catégories
-                setFilteredCategories(categories);
+                console.error('Erreur réponse API:', result);
+                setFilteredCategories([]);
+                setApeNotSupported(true);
             }
         } catch (error) {
             console.error('Erreur chargement catégories par APE:', error);
-            setFilteredCategories(categories);
+            setFilteredCategories([]);
+            setApeNotSupported(true);
         }
     };
 
-    // Validation du SIRET via API entreprise.data.gouv.fr (gratuite, sans CORS)
+    const loadFiltersByCategory = async (categoryId) => {
+        setLoadingFilters(true);
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/filtres/category/${categoryId}`);
+            const result = await response.json();
+            if (result.success) {
+                setAvailableFilters(result.data);
+            } else {
+                setAvailableFilters([]);
+            }
+        } catch (error) {
+            console.error('Erreur chargement filtres:', error);
+            setAvailableFilters([]);
+        } finally {
+            setLoadingFilters(false);
+        }
+    };
+
+    const toggleFilter = (filterId) => {
+        setSelectedFilters(prev =>
+            prev.includes(filterId)
+                ? prev.filter(id => id !== filterId)
+                : [...prev, filterId]
+        );
+    };
+
+    // Validation du SIRET
     const validateSiret = async () => {
         const siret = siretInput.replace(/\s/g, '');
 
@@ -361,9 +455,9 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
 
         setSiretLoading(true);
         setError(null);
+        setApeNotSupported(false);
 
         try {
-            // Utiliser l'API entreprise.data.gouv.fr (gratuite et sans restriction CORS)
             const response = await fetch(`https://recherche-entreprises.api.gouv.fr/search?q=${siret}&page=1&per_page=1`);
 
             if (!response.ok) {
@@ -377,8 +471,6 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
             }
 
             const result = data.results[0];
-
-            // Trouver l'établissement correspondant au SIRET
             const etablissement = result.matching_etablissements?.find(e => e.siret === siret)
                 || result.siege;
 
@@ -402,7 +494,6 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
             setEntrepriseData(entreprise);
             setSiretValidated(true);
 
-            // Mettre à jour le formData avec les infos entreprise
             setFormData(prev => ({
                 ...prev,
                 siret: entreprise.siret,
@@ -410,19 +501,14 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                 codeApe: entreprise.codeApe,
                 raisonSociale: entreprise.raisonSociale,
                 formeJuridique: entreprise.formeJuridique,
-                // Pré-remplir l'adresse si disponible et pas déjà remplie
                 adresse: prev.adresse || entreprise.adresse || '',
                 codePostal: prev.codePostal || entreprise.codePostal || '',
                 ville: prev.ville || entreprise.ville || ''
             }));
 
-            // Charger les catégories compatibles avec le code APE
             if (entreprise.codeApe) {
                 await loadCategoriesByApe(entreprise.codeApe);
             }
-
-            // Passer automatiquement à l'onglet suivant
-            setActiveTab('infos');
 
         } catch (error) {
             console.error('Erreur validation SIRET:', error);
@@ -432,12 +518,10 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         }
     };
 
-    // Formater le SIRET pendant la saisie
     const handleSiretChange = (e) => {
-        let value = e.target.value.replace(/\D/g, ''); // Garder seulement les chiffres
+        let value = e.target.value.replace(/\D/g, '');
         if (value.length > 14) value = value.slice(0, 14);
 
-        // Formater avec espaces : XXX XXX XXX XXXXX
         let formatted = '';
         for (let i = 0; i < value.length; i++) {
             if (i === 3 || i === 6 || i === 9) formatted += ' ';
@@ -445,6 +529,25 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         }
 
         setSiretInput(formatted);
+    };
+
+    const resetSiret = () => {
+        setSiretValidated(false);
+        setSiretInput('');
+        setEntrepriseData(null);
+        setFilteredCategories([]);
+        setApeNotSupported(false);
+        setSelectedFilters([]);
+        setAvailableFilters([]);
+        setFormData(prev => ({
+            ...prev,
+            siret: '',
+            siren: '',
+            codeApe: '',
+            raisonSociale: '',
+            formeJuridique: '',
+            categoryId: ''
+        }));
     };
 
     const handleChange = (e) => {
@@ -632,14 +735,9 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         }
     };
 
-    // Supprimer image principale
     const removeMainImage = async () => {
         const imageUrl = formData.imagePrincipale;
-
-        setFormData(prev => ({
-            ...prev,
-            imagePrincipale: ''
-        }));
+        setFormData(prev => ({ ...prev, imagePrincipale: '' }));
 
         if (fiche?.id && imageUrl) {
             try {
@@ -661,10 +759,8 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         }
     };
 
-    // Supprimer image galerie
     const removeGalleryImage = async (index) => {
         const imageUrl = formData.images[index];
-
         setFormData(prev => ({
             ...prev,
             images: prev.images.filter((_, i) => i !== index)
@@ -735,13 +831,126 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         setDragOverIndex(null);
     };
 
+    // ==================== NAVIGATION STEPPER ====================
+    const validateCurrentStep = () => {
+        const step = steps[currentStep];
+        setError(null);
+
+        switch (step.id) {
+            case 'siret':
+                if (!siretValidated) {
+                    setError('Veuillez valider votre SIRET');
+                    return false;
+                }
+                if (apeNotSupported) {
+                    setError('Votre code APE n\'est pas encore supporté');
+                    return false;
+                }
+                return true;
+
+            case 'infos':
+                if (!formData.nomCommerce.trim()) {
+                    setError('Le nom du commerce est requis');
+                    return false;
+                }
+                if (!formData.typeCommerce) {
+                    setError('Le type de commerce est requis');
+                    return false;
+                }
+                if (!formData.categoryId) {
+                    setError('Veuillez sélectionner une catégorie');
+                    return false;
+                }
+                return true;
+
+            case 'filtres':
+                return true; // Optionnel
+
+            case 'adresse':
+                if (!formData.adresse.trim()) {
+                    setError('L\'adresse est requise');
+                    return false;
+                }
+                if (!formData.codePostal || !/^\d{5}$/.test(formData.codePostal)) {
+                    setError('Code postal invalide (5 chiffres)');
+                    return false;
+                }
+                if (!formData.ville.trim()) {
+                    setError('La ville est requise');
+                    return false;
+                }
+                return true;
+
+            case 'photos':
+                return true; // Optionnel
+
+            case 'horaires':
+                return true; // Optionnel
+
+            default:
+                return true;
+        }
+    };
+
+    const goToStep = (index) => {
+        // On ne peut revenir en arrière que sur les étapes déjà complétées
+        if (index < currentStep) {
+            setCurrentStep(index);
+            setError(null);
+        }
+    };
+
+    const nextStep = () => {
+        if (validateCurrentStep()) {
+            if (currentStep < steps.length - 1) {
+                setCurrentStep(prev => prev + 1);
+            }
+        }
+    };
+
+    const prevStep = () => {
+        if (currentStep > 0) {
+            setCurrentStep(prev => prev - 1);
+            setError(null);
+        }
+    };
+
+    // ==================== SOUMISSION ====================
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Vérifier que le SIRET est validé
-        if (!siretValidated) {
+        const currentStepId = steps[currentStep]?.id;
+        console.log('📋 handleSubmit appelé:', {
+            currentStep,
+            stepsLength: steps.length,
+            currentStepId,
+            isEditMode,
+            fiche: fiche ? fiche.id : null
+        });
+
+        // Vérifier qu'on est bien à l'étape HORAIRES (dernière étape)
+        if (currentStepId !== 'horaires') {
+            console.log('⚠️ Pas à l\'étape horaires, navigation vers étape suivante');
+            nextStep();
+            return;
+        }
+
+        console.log('✅ Étape horaires, soumission du formulaire');
+
+        if (!validateCurrentStep()) return;
+
+        if (!siretValidated && !isEditMode) {
             setError('Veuillez d\'abord valider votre SIRET');
-            setActiveTab('siret');
+            return;
+        }
+
+        if (apeNotSupported) {
+            setError('Votre code APE n\'est pas supporté. Veuillez nous contacter.');
+            return;
+        }
+
+        if (!formData.categoryId) {
+            setError('Veuillez sélectionner une catégorie');
             return;
         }
 
@@ -766,6 +975,23 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
             }
 
             if (result.success) {
+                const prestataireId = fiche ? fiche.id : result.data.id;
+
+                // Sauvegarder les filtres (même si vide, pour supprimer les anciens)
+                try {
+                    await fetch(`${import.meta.env.VITE_API_URL}/filtres/prestataire/${prestataireId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify({ filtreIds: selectedFilters })
+                    });
+                    console.log('✅ Filtres sauvegardés:', selectedFilters);
+                } catch (filterError) {
+                    console.error('Erreur sauvegarde filtres:', filterError);
+                }
+
                 onSuccess();
             } else {
                 throw new Error(result.message);
@@ -777,21 +1003,17 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
         }
     };
 
-    // Obtenir l'image de la catégorie
     const getCategoryImage = (categoryName) => {
         return categoryImages[categoryName] || modeImg;
     };
 
-    // Ouvrir Google Maps pour trouver les coordonnées
     const openGoogleMapsForCoords = () => {
         const { adresse, codePostal, ville } = formData;
         const query = encodeURIComponent(`${adresse} ${codePostal} ${ville}`);
         window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
     };
 
-    // Obtenir le libellé du code APE
     const getApeLabel = (code) => {
-        // Mapping des codes APE les plus courants
         const apeLabels = {
             '56.10A': 'Restauration traditionnelle',
             '56.10B': 'Cafétérias et autres libres-services',
@@ -804,7 +1026,6 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
             '55.10Z': 'Hôtels et hébergement similaire',
             '93.13Z': 'Activités des centres de culture physique',
             '47.41Z': 'Commerce de détail d\'ordinateurs',
-            // Ajouter d'autres selon besoin
         };
         return apeLabels[code] || code;
     };
@@ -812,9 +1033,8 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
     if (!isOpen) return null;
 
     const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-
-    // Catégories à afficher (filtrées par APE si disponible, sinon toutes)
     const categoriesToShow = filteredCategories.length > 0 ? filteredCategories : categories;
+    const currentStepData = steps[currentStep];
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -825,38 +1045,36 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
 
                 <h2>{fiche ? 'Modifier la fiche' : 'Nouvelle fiche commerce'}</h2>
 
-                {/* Onglets */}
-                <div className="form-tabs">
-                    {!fiche && (
-                        <button
-                            className={`tab ${activeTab === 'siret' ? 'active' : ''} ${siretValidated ? 'validated' : ''}`}
-                            onClick={() => setActiveTab('siret')}
-                        >
-                            {siretValidated && <IonIcon icon={checkmarkCircleOutline} />}
-                            Entreprise
-                        </button>
-                    )}
-                    <button
-                        className={`tab ${activeTab === 'infos' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('infos')}
-                        disabled={!fiche && !siretValidated}
-                    >
-                        Informations
-                    </button>
-                    <button
-                        className={`tab ${activeTab === 'photos' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('photos')}
-                        disabled={!fiche && !siretValidated}
-                    >
-                        Photos
-                    </button>
-                    <button
-                        className={`tab ${activeTab === 'horaires' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('horaires')}
-                        disabled={!fiche && !siretValidated}
-                    >
-                        Horaires
-                    </button>
+                {/* ==================== STEPPER ==================== */}
+                <div className="stepper-container">
+                    <div className="stepper-progress">
+                        <div
+                            className="stepper-progress-bar"
+                            style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+                        />
+                    </div>
+
+                    <div className="stepper-info">
+                        <span className="stepper-count">Étape {currentStep + 1}/{steps.length}</span>
+                        <span className="stepper-title">{currentStepData.title}</span>
+                    </div>
+
+                    <div className="stepper-dots">
+                        {steps.map((step, index) => (
+                            <div
+                                key={step.id}
+                                className={`stepper-dot ${index === currentStep ? 'active' : ''} ${index < currentStep ? 'completed' : ''}`}
+                                onClick={() => goToStep(index)}
+                                title={step.title}
+                            >
+                                {index < currentStep ? (
+                                    <IonIcon icon={checkmarkOutline} />
+                                ) : (
+                                    <span>{index + 1}</span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 {error && (
@@ -866,166 +1084,179 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit}>
-                    {/* ONGLET SIRET (uniquement pour création) */}
-                    {activeTab === 'siret' && !fiche && (
-                        <div className="tab-content">
-                            <div className="siret-intro">
-                                <div className="siret-icon">
-                                    <IonIcon icon={businessOutline} />
-                                </div>
-                                <h3>Identifiez votre établissement</h3>
-                                <p>Entrez votre numéro SIRET pour récupérer automatiquement les informations de votre entreprise.</p>
-                            </div>
+                <div className="modal-content-scroll" ref={modalContentRef}>
+                    <form
+                        onSubmit={(e) => e.preventDefault()}
+                        onKeyDown={(e) => {
+                            // Intercepter la touche Entrée
+                            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                                e.preventDefault();
+                                if (currentStepData.id === 'horaires') {
+                                    handleSubmit({ preventDefault: () => { } });
+                                } else if (validateCurrentStep()) {
+                                    nextStep();
+                                }
+                            }
+                        }}
+                    >
 
-                            <div className="form-group siret-input-group">
-                                <label>Numéro SIRET *</label>
-                                <div className="siret-input-wrapper">
+                        {/* ==================== ÉTAPE SIRET ==================== */}
+                        {currentStepData.id === 'siret' && (
+                            <div className="tab-content">
+                                <div className="siret-intro">
+                                    <div className="siret-iconfiche">
+                                        <IonIcon icon={businessOutline} />
+                                    </div>
+                                    <h3>Identifiez votre établissement</h3>
+                                    <p>Entrez votre numéro SIRET pour récupérer automatiquement les informations de votre entreprise.</p>
+                                </div>
+
+                                <div className="form-group siret-input-group">
+                                    <label>Numéro SIRET *</label>
+                                    <div className="siret-input-wrapper">
+                                        <input
+                                            type="text"
+                                            value={siretInput}
+                                            onChange={handleSiretChange}
+                                            placeholder="XXX XXX XXX XXXXX"
+                                            maxLength={17}
+                                            disabled={siretValidated}
+                                        />
+                                        {siretValidated && (
+                                            <div className="siret-validated-icon">
+                                                <IonIcon icon={checkmarkCircleOutline} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <small className="help-text">14 chiffres - Trouvez-le sur vos documents officiels ou sur societe.com</small>
+                                </div>
+
+                                {!siretValidated ? (
+                                    <button
+                                        type="button"
+                                        className="btn-validate-siret"
+                                        onClick={validateSiret}
+                                        disabled={siretLoading || siretInput.replace(/\s/g, '').length !== 14}
+                                    >
+                                        {siretLoading ? (
+                                            <>
+                                                <div className="spinner-small"></div>
+                                                Vérification en cours...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <IonIcon icon={searchOutline} />
+                                                Valider le SIRET
+                                            </>
+                                        )}
+                                    </button>
+                                ) : (
+                                    <>
+                                        <div className="entreprise-data">
+                                            <div className="entreprise-header">
+                                                <IonIcon icon={checkmarkCircleOutline} />
+                                                <span>Établissement identifié</span>
+                                            </div>
+
+                                            <div className="entreprise-info-grid">
+                                                <div className="entreprise-info-item">
+                                                    <span className="label">Raison sociale</span>
+                                                    <span className="value">{entrepriseData?.raisonSociale || '-'}</span>
+                                                </div>
+                                                <div className="entreprise-info-item">
+                                                    <span className="label">SIREN</span>
+                                                    <span className="value">{entrepriseData?.siren || '-'}</span>
+                                                </div>
+                                                <div className="entreprise-info-item">
+                                                    <span className="label">Code APE</span>
+                                                    <span className="value">
+                                                        {entrepriseData?.codeApe || '-'}
+                                                        {entrepriseData?.codeApe && (
+                                                            <small className="ape-label">{getApeLabel(entrepriseData.codeApe)}</small>
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <div className="entreprise-info-item">
+                                                    <span className="label">Forme juridique</span>
+                                                    <span className="value">{entrepriseData?.formeJuridique || '-'}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="entreprise-lock-notice">
+                                                <IonIcon icon={lockClosedOutline} />
+                                                <span>Ces informations ne sont pas modifiables</span>
+                                            </div>
+                                        </div>
+
+                                        {apeNotSupported && (
+                                            <div className="ape-not-supported">
+                                                <div className="ape-not-supported-icon">
+                                                    <IonIcon icon={warningOutline} />
+                                                </div>
+                                                <h4>Code APE non pris en charge</h4>
+                                                <p>
+                                                    Votre code APE <strong>{entrepriseData?.codeApe}</strong> ne correspond à aucune
+                                                    de nos catégories actuelles.
+                                                </p>
+                                                <p>
+                                                    Si vous pensez que votre activité devrait être acceptée,
+                                                    n'hésitez pas à nous contacter :
+                                                </p>
+                                                <a
+                                                    href={`mailto:contact@applitwo.com?subject=Demande d'ajout code APE&body=Bonjour,%0A%0AJe souhaite créer une fiche commerce mais mon code APE n'est pas pris en charge.%0A%0ASIRET: ${entrepriseData?.siret}%0ACode APE: ${entrepriseData?.codeApe}%0ARaison sociale: ${entrepriseData?.raisonSociale}%0A%0AMerci de votre retour.`}
+                                                    className="btn-contact-email"
+                                                >
+                                                    <IonIcon icon={mailOutline} />
+                                                    Nous contacter par email
+                                                </a>
+                                                <small>contact@applitwo.com</small>
+                                            </div>
+                                        )}
+
+                                        <button
+                                            type="button"
+                                            className="btn-change-siret"
+                                            onClick={resetSiret}
+                                        >
+                                            Utiliser un autre SIRET
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        )}
+
+                        {/* ==================== ÉTAPE INFOS ==================== */}
+                        {currentStepData.id === 'infos' && (
+                            <div className="tab-content">
+                                {entrepriseData && (
+                                    <div className="entreprise-summary">
+                                        <div className="entreprise-summary-item">
+                                            <IonIcon icon={businessOutline} />
+                                            <span>{entrepriseData.raisonSociale}</span>
+                                        </div>
+                                        <div className="entreprise-summary-item">
+                                            <span className="ape-badge">{entrepriseData.codeApe}</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="form-group">
+                                    <label>Nom du commerce *</label>
                                     <input
                                         type="text"
-                                        value={siretInput}
-                                        onChange={handleSiretChange}
-                                        placeholder="XXX XXX XXX XXXXX"
-                                        maxLength={17}
-                                        disabled={siretValidated}
+                                        name="nomCommerce"
+                                        value={formData.nomCommerce}
+                                        onChange={handleChange}
+                                        placeholder="Ex: Boulangerie du Centre"
                                     />
-                                    {siretValidated && (
-                                        <div className="siret-validated-icon">
-                                            <IonIcon icon={checkmarkCircleOutline} />
-                                        </div>
-                                    )}
                                 </div>
-                                <small className="help-text">14 chiffres - Trouvez-le sur vos documents officiels ou sur societe.com</small>
-                            </div>
 
-                            {!siretValidated ? (
-                                <button
-                                    type="button"
-                                    className="btn-validate-siret"
-                                    onClick={validateSiret}
-                                    disabled={siretLoading || siretInput.replace(/\s/g, '').length !== 14}
-                                >
-                                    {siretLoading ? (
-                                        <>
-                                            <div className="spinner-small"></div>
-                                            Vérification en cours...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <IonIcon icon={searchOutline} />
-                                            Valider le SIRET
-                                        </>
-                                    )}
-                                </button>
-                            ) : (
-                                <>
-                                    {/* Affichage des données entreprise */}
-                                    <div className="entreprise-data">
-                                        <div className="entreprise-header">
-                                            <IonIcon icon={checkmarkCircleOutline} />
-                                            <span>Établissement identifié</span>
-                                        </div>
-
-                                        <div className="entreprise-info-grid">
-                                            <div className="entreprise-info-item">
-                                                <span className="label">Raison sociale</span>
-                                                <span className="value">{entrepriseData?.raisonSociale || '-'}</span>
-                                            </div>
-                                            <div className="entreprise-info-item">
-                                                <span className="label">SIREN</span>
-                                                <span className="value">{entrepriseData?.siren || '-'}</span>
-                                            </div>
-                                            <div className="entreprise-info-item">
-                                                <span className="label">Code APE</span>
-                                                <span className="value">
-                                                    {entrepriseData?.codeApe || '-'}
-                                                    {entrepriseData?.codeApe && (
-                                                        <small className="ape-label">{getApeLabel(entrepriseData.codeApe)}</small>
-                                                    )}
-                                                </span>
-                                            </div>
-                                            <div className="entreprise-info-item">
-                                                <span className="label">Forme juridique</span>
-                                                <span className="value">{entrepriseData?.formeJuridique || '-'}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="entreprise-lock-notice">
-                                            <IonIcon icon={lockClosedOutline} />
-                                            <span>Ces informations ne sont pas modifiables</span>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        className="btn-primary btn-continue"
-                                        onClick={() => setActiveTab('infos')}
-                                    >
-                                        Continuer
-                                        <IonIcon icon={arrowForwardOutline} />
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        className="btn-change-siret"
-                                        onClick={() => {
-                                            setSiretValidated(false);
-                                            setSiretInput('');
-                                            setEntrepriseData(null);
-                                            setFilteredCategories([]);
-                                            setFormData(prev => ({
-                                                ...prev,
-                                                siret: '',
-                                                siren: '',
-                                                codeApe: '',
-                                                raisonSociale: '',
-                                                formeJuridique: ''
-                                            }));
-                                        }}
-                                    >
-                                        Utiliser un autre SIRET
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    )}
-
-                    {/* ONGLET INFOS */}
-                    {activeTab === 'infos' && (
-                        <div className="tab-content">
-                            {/* Résumé entreprise en mode édition ou après validation */}
-                            {(fiche || siretValidated) && entrepriseData && (
-                                <div className="entreprise-summary">
-                                    <div className="entreprise-summary-item">
-                                        <IonIcon icon={businessOutline} />
-                                        <span>{entrepriseData.raisonSociale}</span>
-                                    </div>
-                                    <div className="entreprise-summary-item">
-                                        <span className="ape-badge">{entrepriseData.codeApe}</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="form-group">
-                                <label>Nom du commerce *</label>
-                                <input
-                                    type="text"
-                                    name="nomCommerce"
-                                    value={formData.nomCommerce}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Ex: Boulangerie du Centre"
-                                />
-                            </div>
-
-                            <div className="form-row">
                                 <div className="form-group">
                                     <label>Type *</label>
                                     <select
                                         name="typeCommerce"
                                         value={formData.typeCommerce}
                                         onChange={handleChange}
-                                        required
                                     >
                                         <option value="">Sélectionner...</option>
                                         {typesCommerce.map(type => (
@@ -1035,373 +1266,438 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                         ))}
                                     </select>
                                 </div>
-                            </div>
 
-                            {/* Sélection de catégorie avec images */}
-                            <div className="form-group">
-                                <label>
-                                    Catégorie *
-                                    {filteredCategories.length > 0 && filteredCategories.length < categories.length && (
-                                        <span className="category-filter-info">
-                                            ({filteredCategories.length} disponible{filteredCategories.length > 1 ? 's' : ''} pour votre activité)
-                                        </span>
-                                    )}
-                                </label>
-                                <div className="category-cards">
-                                    {categoriesToShow.map(cat => (
-                                        <div
-                                            key={cat.id}
-                                            className={`category-card-mini ${formData.categoryId === cat.id.toString() ? 'selected' : ''}`}
-                                            onClick={() => setFormData(prev => ({ ...prev, categoryId: cat.id.toString() }))}
-                                        >
-                                            <div
-                                                className="category-card-image"
-                                                style={{ backgroundImage: `url(${getCategoryImage(cat.nom)})` }}
-                                            />
-                                            <span className="category-card-name">{cat.nom}</span>
-                                            {formData.categoryId === cat.id.toString() && (
-                                                <div className="category-check">
-                                                    <IonIcon icon={checkmarkCircleOutline} />
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                                <select
-                                    name="categoryId"
-                                    value={formData.categoryId}
-                                    onChange={handleChange}
-                                    required
-                                    style={{ display: 'none' }}
-                                >
-                                    <option value="">Sélectionner...</option>
-                                    {categoriesToShow.map(cat => (
-                                        <option key={cat.id} value={cat.id}>
-                                            {cat.nom}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label>Description courte</label>
-                                <textarea
-                                    name="descriptionCourte"
-                                    value={formData.descriptionCourte}
-                                    onChange={handleChange}
-                                    rows={3}
-                                    placeholder="Décrivez votre commerce..."
-                                />
-                            </div>
-
-                            {/* NOUVEAU : Champ Website */}
-                            <div className="form-group">
-                                <label>
-                                    <IonIcon icon={globeOutline} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-                                    Site web
-                                </label>
-                                <input
-                                    type="url"
-                                    name="website"
-                                    value={formData.website}
-                                    onChange={handleChange}
-                                    placeholder="https://www.moncommerce.fr"
-                                />
-                                <small className="help-text">Optionnel - L'adresse de votre site internet</small>
-                            </div>
-
-                            <div className="form-section-title">Adresse</div>
-
-                            <div className="form-group">
-                                <label>Adresse *</label>
-                                <input
-                                    type="text"
-                                    name="adresse"
-                                    value={formData.adresse}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="123 Rue..."
-                                />
-                            </div>
-
-                            <div className="form-row">
                                 <div className="form-group">
-                                    <label>Code postal *</label>
-                                    <input
-                                        type="text"
-                                        name="codePostal"
-                                        value={formData.codePostal}
-                                        onChange={handleChange}
-                                        required
-                                        pattern="[0-9]{5}"
-                                        placeholder="75001"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Ville *</label>
-                                    <input
-                                        type="text"
-                                        name="ville"
-                                        value={formData.ville}
-                                        onChange={handleChange}
-                                        required
-                                        placeholder="Paris"
-                                    />
-                                </div>
-                            </div>
+                                    <label>
+                                        Catégorie *
+                                        {filteredCategories.length > 0 && filteredCategories.length < categories.length && (
+                                            <span className="category-filter-info">
+                                                ({filteredCategories.length} disponible{filteredCategories.length > 1 ? 's' : ''} pour votre activité)
+                                            </span>
+                                        )}
+                                    </label>
 
-                            {/* Section Géolocalisation */}
-                            <div className="form-section-title">
-                                <IonIcon icon={locationOutline} />
-                                Géolocalisation
-                            </div>
-
-                            <div className="geo-status">
-                                {geoLoading && (
-                                    <div className="geo-loading">
-                                        <div className="spinner-small"></div>
-                                        <span>Géolocalisation automatique en cours...</span>
-                                    </div>
-                                )}
-                                {geoStatus === 'success' && !manualGeoEdit && (
-                                    <div className="geo-success">
-                                        <IonIcon icon={checkmarkCircleOutline} />
-                                        <span>Coordonnées trouvées automatiquement</span>
-                                    </div>
-                                )}
-                                {geoStatus === 'error' && (
-                                    <div className="geo-error">
-                                        <IonIcon icon={alertCircleOutline} />
-                                        <span>Géolocalisation automatique échouée</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Latitude</label>
-                                    <input
-                                        type="text"
-                                        name="latitude"
-                                        value={formData.latitude}
-                                        onChange={handleChange}
-                                        placeholder="Ex: 48.856614"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Longitude</label>
-                                    <input
-                                        type="text"
-                                        name="longitude"
-                                        value={formData.longitude}
-                                        onChange={handleChange}
-                                        placeholder="Ex: 2.352222"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="geo-actions">
-                                <button
-                                    type="button"
-                                    className="btn-geo"
-                                    onClick={geocodeAddress}
-                                    disabled={geoLoading || !formData.adresse || !formData.ville}
-                                >
-                                    <IonIcon icon={refreshOutline} />
-                                    Recalculer automatiquement
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn-geo secondary"
-                                    onClick={openGoogleMapsForCoords}
-                                    disabled={!formData.adresse || !formData.ville}
-                                >
-                                    <IonIcon icon={locationOutline} />
-                                    Trouver sur Google Maps
-                                </button>
-                            </div>
-
-                            <small className="help-text geo-help">
-                                💡 Les coordonnées sont calculées automatiquement à partir de l'adresse.
-                                Si le résultat n'est pas précis, vous pouvez les modifier manuellement
-                                ou utiliser Google Maps pour trouver les coordonnées exactes.
-                            </small>
-
-                            <div className="form-group" style={{ marginTop: '15px' }}>
-                                <label>Google Place ID</label>
-                                <input
-                                    type="text"
-                                    name="googlePlaceId"
-                                    value={formData.googlePlaceId || ''}
-                                    onChange={handleChange}
-                                    placeholder="ChIJ..."
-                                />
-                                <small className="help-text">Optionnel - ID Google Maps pour les avis</small>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* ONGLET PHOTOS */}
-                    {activeTab === 'photos' && (
-                        <div className="tab-content">
-                            {/* Image principale */}
-                            <div className="form-group">
-                                <label>Image principale</label>
-                                <div className="image-upload-zone">
-                                    {formData.imagePrincipale ? (
-                                        <div className="image-preview-container">
-                                            <img
-                                                src={formData.imagePrincipale}
-                                                alt="Principale"
-                                                className="image-preview-main"
-                                            />
-                                            <button
-                                                type="button"
-                                                className="image-remove-btn"
-                                                onClick={removeMainImage}
-                                            >
-                                                <IonIcon icon={trashOutline} />
-                                            </button>
+                                    {apeNotSupported ? (
+                                        <div className="ape-not-supported-inline">
+                                            <IonIcon icon={warningOutline} />
+                                            <span>Aucune catégorie disponible pour votre code APE</span>
                                         </div>
                                     ) : (
-                                        <div
-                                            className="image-upload-placeholder"
-                                            onClick={() => mainImageInputRef.current?.click()}
-                                        >
-                                            {uploadingMain ? (
-                                                <div className="upload-loading">
-                                                    <div className="spinner-small"></div>
-                                                    <span>Upload en cours...</span>
+                                        <div className="category-cards">
+                                            {categoriesToShow.map(cat => (
+                                                <div
+                                                    key={cat.id}
+                                                    className={`category-card-mini ${formData.categoryId === cat.id.toString() ? 'selected' : ''}`}
+                                                    onClick={() => setFormData(prev => ({ ...prev, categoryId: cat.id.toString() }))}
+                                                >
+                                                    <div
+                                                        className="category-card-image"
+                                                        style={{ backgroundImage: `url(${getCategoryImage(cat.nom)})` }}
+                                                    />
+                                                    <span className="category-card-name">{cat.nom}</span>
+                                                    {formData.categoryId === cat.id.toString() && (
+                                                        <div className="category-check">
+                                                            <IonIcon icon={checkmarkCircleOutline} />
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            ) : (
-                                                <>
-                                                    <IonIcon icon={cloudUploadOutline} />
-                                                    <span>Cliquez pour ajouter une image</span>
-                                                    <small>JPG, PNG - Max 5 Mo</small>
-                                                </>
-                                            )}
+                                            ))}
                                         </div>
                                     )}
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Description courte</label>
+                                    <textarea
+                                        name="descriptionCourte"
+                                        value={formData.descriptionCourte}
+                                        onChange={handleChange}
+                                        rows={3}
+                                        placeholder="Décrivez votre commerce..."
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>
+                                        <IonIcon icon={globeOutline} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                                        Site web
+                                    </label>
                                     <input
-                                        ref={mainImageInputRef}
+                                        type="url"
+                                        name="website"
+                                        value={formData.website}
+                                        onChange={handleChange}
+                                        placeholder="https://www.moncommerce.fr"
+                                    />
+                                    <small className="help-text">Optionnel - L'adresse de votre site internet</small>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ==================== ÉTAPE FILTRES ==================== */}
+                        {currentStepData.id === 'filtres' && (
+                            <div className="tab-content">
+                                <div className="step-intro">
+                                    <div className="step-intro-icon">
+                                        <IonIcon icon={optionsOutline} />
+                                    </div>
+                                    <h3>Services et caractéristiques</h3>
+                                    <p>Sélectionnez les options qui correspondent à votre commerce pour aider les clients à vous trouver.</p>
+                                </div>
+
+                                {loadingFilters ? (
+                                    <div className="loading-filters">
+                                        <div className="spinner-small"></div>
+                                        <span>Chargement des filtres...</span>
+                                    </div>
+                                ) : availableFilters.length === 0 ? (
+                                    <div className="no-filters">
+                                        <IonIcon icon={optionsOutline} />
+                                        <p>Aucun filtre disponible pour cette catégorie.</p>
+                                        <span>Vous pouvez passer à l'étape suivante.</span>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="filters-count">
+                                            {selectedFilters.length} option{selectedFilters.length > 1 ? 's' : ''} sélectionnée{selectedFilters.length > 1 ? 's' : ''}
+                                        </div>
+
+                                        <div className="filters-grid">
+                                            {availableFilters.map(filtre => (
+                                                <div
+                                                    key={filtre.id}
+                                                    className={`filter-chip ${selectedFilters.includes(filtre.id) ? 'selected' : ''}`}
+                                                    onClick={() => toggleFilter(filtre.id)}
+                                                >
+                                                    {filtre.icon && <span className="filter-icon">{filtre.icon}</span>}
+                                                    <span className="filter-name">{filtre.nom}</span>
+                                                    {selectedFilters.includes(filtre.id) && (
+                                                        <IonIcon icon={checkmarkOutline} className="filter-check" />
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
+
+                        {/* ==================== ÉTAPE ADRESSE ==================== */}
+                        {currentStepData.id === 'adresse' && (
+                            <div className="tab-content">
+                                <div className="form-group">
+                                    <label>Adresse *</label>
+                                    <input
+                                        type="text"
+                                        name="adresse"
+                                        value={formData.adresse}
+                                        onChange={handleChange}
+                                        placeholder="123 Rue..."
+                                    />
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Code postal *</label>
+                                        <input
+                                            type="text"
+                                            name="codePostal"
+                                            value={formData.codePostal}
+                                            onChange={handleChange}
+                                            pattern="[0-9]{5}"
+                                            placeholder="75001"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Ville *</label>
+                                        <input
+                                            type="text"
+                                            name="ville"
+                                            value={formData.ville}
+                                            onChange={handleChange}
+                                            placeholder="Paris"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-section-title">
+                                    <IonIcon icon={locationOutline} />
+                                    Géolocalisation
+                                </div>
+
+                                <div className="geo-status">
+                                    {geoLoading && (
+                                        <div className="geo-loading">
+                                            <div className="spinner-small"></div>
+                                            <span>Géolocalisation automatique en cours...</span>
+                                        </div>
+                                    )}
+                                    {geoStatus === 'success' && !manualGeoEdit && (
+                                        <div className="geo-success">
+                                            <IonIcon icon={checkmarkCircleOutline} />
+                                            <span>Coordonnées trouvées automatiquement</span>
+                                        </div>
+                                    )}
+                                    {geoStatus === 'error' && (
+                                        <div className="geo-error">
+                                            <IonIcon icon={alertCircleOutline} />
+                                            <span>Géolocalisation automatique échouée</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Latitude</label>
+                                        <input
+                                            type="text"
+                                            name="latitude"
+                                            value={formData.latitude}
+                                            onChange={handleChange}
+                                            placeholder="Ex: 48.856614"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Longitude</label>
+                                        <input
+                                            type="text"
+                                            name="longitude"
+                                            value={formData.longitude}
+                                            onChange={handleChange}
+                                            placeholder="Ex: 2.352222"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="geo-actions">
+                                    <button
+                                        type="button"
+                                        className="btn-geo"
+                                        onClick={geocodeAddress}
+                                        disabled={geoLoading || !formData.adresse || !formData.ville}
+                                    >
+                                        <IonIcon icon={refreshOutline} />
+                                        Recalculer
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn-geo secondary"
+                                        onClick={openGoogleMapsForCoords}
+                                        disabled={!formData.adresse || !formData.ville}
+                                    >
+                                        <IonIcon icon={locationOutline} />
+                                        Google Maps
+                                    </button>
+                                </div>
+
+                                <small className="help-text geo-help">
+                                    💡 Les coordonnées sont calculées automatiquement à partir de l'adresse.
+                                    Si le résultat n'est pas précis, vous pouvez les modifier manuellement
+                                    ou utiliser Google Maps pour trouver les coordonnées exactes.
+                                </small>
+
+                                <div className="form-group" style={{ marginTop: '15px' }}>
+                                    <label>Google Place ID</label>
+                                    <input
+                                        type="text"
+                                        name="googlePlaceId"
+                                        value={formData.googlePlaceId || ''}
+                                        onChange={handleChange}
+                                        placeholder="ChIJ..."
+                                    />
+                                    <small className="help-text">Optionnel - ID Google Maps pour les avis</small>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ==================== ÉTAPE PHOTOS ==================== */}
+                        {currentStepData.id === 'photos' && (
+                            <div className="tab-content">
+                                <div className="form-group">
+                                    <label>Image principale</label>
+                                    <div className="image-upload-zone">
+                                        {formData.imagePrincipale ? (
+                                            <div className="image-preview-container">
+                                                <img
+                                                    src={formData.imagePrincipale}
+                                                    alt="Principale"
+                                                    className="image-preview-main"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="image-remove-btn"
+                                                    onClick={removeMainImage}
+                                                >
+                                                    <IonIcon icon={trashOutline} />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="image-upload-placeholder"
+                                                onClick={() => mainImageInputRef.current?.click()}
+                                            >
+                                                {uploadingMain ? (
+                                                    <div className="upload-loading">
+                                                        <div className="spinner-small"></div>
+                                                        <span>Upload en cours...</span>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <IonIcon icon={cloudUploadOutline} />
+                                                        <span>Cliquez pour ajouter une image</span>
+                                                        <small>JPG, PNG - Max 5 Mo</small>
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
+                                        <input
+                                            ref={mainImageInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleMainImageUpload}
+                                            style={{ display: 'none' }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Galerie ({formData.images.length}/5 images) <small style={{ fontWeight: 'normal', opacity: 0.6 }}>- Glissez pour réorganiser</small></label>
+                                    <div className="gallery-grid">
+                                        {formData.images.map((img, index) => (
+                                            <div
+                                                key={`${img}-${index}`}
+                                                className={`gallery-item ${draggedIndex === index ? 'dragging' : ''} ${dragOverIndex === index ? 'drag-over' : ''}`}
+                                                draggable
+                                                onDragStart={(e) => handleDragStart(e, index)}
+                                                onDragOver={(e) => handleDragOver(e, index)}
+                                                onDragLeave={handleDragLeave}
+                                                onDrop={(e) => handleDrop(e, index)}
+                                                onDragEnd={handleDragEnd}
+                                            >
+                                                <div className="gallery-item-drag-handle">
+                                                    <IonIcon icon={reorderThreeOutline} />
+                                                </div>
+                                                <img src={img} alt={`Galerie ${index + 1}`} />
+                                                <div className="gallery-item-number">{index + 1}</div>
+                                                <button
+                                                    type="button"
+                                                    className="gallery-remove-btn"
+                                                    onClick={() => removeGalleryImage(index)}
+                                                >
+                                                    <IonIcon icon={trashOutline} />
+                                                </button>
+                                            </div>
+                                        ))}
+
+                                        {formData.images.length < 5 && (
+                                            <div
+                                                className="gallery-add-item"
+                                                onClick={() => galleryInputRef.current?.click()}
+                                            >
+                                                {uploadingGallery ? (
+                                                    <div className="spinner-small"></div>
+                                                ) : (
+                                                    <>
+                                                        <IonIcon icon={addOutline} />
+                                                        <span>Ajouter</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <input
+                                        ref={galleryInputRef}
                                         type="file"
                                         accept="image/*"
-                                        onChange={handleMainImageUpload}
+                                        onChange={handleGalleryImageUpload}
                                         style={{ display: 'none' }}
                                     />
                                 </div>
                             </div>
+                        )}
 
-                            {/* Galerie */}
-                            <div className="form-group">
-                                <label>Galerie ({formData.images.length}/5 images) <small style={{ fontWeight: 'normal', opacity: 0.6 }}>- Glissez pour réorganiser</small></label>
-                                <div className="gallery-grid">
-                                    {formData.images.map((img, index) => (
-                                        <div
-                                            key={`${img}-${index}`}
-                                            className={`gallery-item ${draggedIndex === index ? 'dragging' : ''} ${dragOverIndex === index ? 'drag-over' : ''}`}
-                                            draggable
-                                            onDragStart={(e) => handleDragStart(e, index)}
-                                            onDragOver={(e) => handleDragOver(e, index)}
-                                            onDragLeave={handleDragLeave}
-                                            onDrop={(e) => handleDrop(e, index)}
-                                            onDragEnd={handleDragEnd}
-                                        >
-                                            <div className="gallery-item-drag-handle">
-                                                <IonIcon icon={reorderThreeOutline} />
-                                            </div>
-                                            <img src={img} alt={`Galerie ${index + 1}`} />
-                                            <div className="gallery-item-number">{index + 1}</div>
-                                            <button
-                                                type="button"
-                                                className="gallery-remove-btn"
-                                                onClick={() => removeGalleryImage(index)}
-                                            >
-                                                <IonIcon icon={trashOutline} />
-                                            </button>
-                                        </div>
-                                    ))}
+                        {/* ==================== ÉTAPE HORAIRES ==================== */}
+                        {currentStepData.id === 'horaires' && (
+                            <div className="tab-content">
+                                <div className="horaires-list">
+                                    {jours.map(jour => (
+                                        <div key={jour} className="horaire-row">
+                                            <label className="jour-label">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.horaires[jour]?.ouvert || false}
+                                                    onChange={(e) => handleHoraireChange(jour, 'ouvert', e.target.checked)}
+                                                />
+                                                <span>{jour.charAt(0).toUpperCase() + jour.slice(1)}</span>
+                                            </label>
 
-                                    {formData.images.length < 5 && (
-                                        <div
-                                            className="gallery-add-item"
-                                            onClick={() => galleryInputRef.current?.click()}
-                                        >
-                                            {uploadingGallery ? (
-                                                <div className="spinner-small"></div>
-                                            ) : (
-                                                <>
-                                                    <IonIcon icon={addOutline} />
-                                                    <span>Ajouter</span>
-                                                </>
+                                            {formData.horaires[jour]?.ouvert && (
+                                                <div className="horaire-times">
+                                                    <input
+                                                        type="time"
+                                                        value={formData.horaires[jour]?.debut || '09:00'}
+                                                        onChange={(e) => handleHoraireChange(jour, 'debut', e.target.value)}
+                                                    />
+                                                    <span>-</span>
+                                                    <input
+                                                        type="time"
+                                                        value={formData.horaires[jour]?.fin || '18:00'}
+                                                        onChange={(e) => handleHoraireChange(jour, 'fin', e.target.value)}
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {!formData.horaires[jour]?.ouvert && (
+                                                <span className="ferme-label">Fermé</span>
                                             )}
                                         </div>
-                                    )}
+                                    ))}
                                 </div>
-                                <input
-                                    ref={galleryInputRef}
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleGalleryImageUpload}
-                                    style={{ display: 'none' }}
-                                />
                             </div>
+                        )}
+
+                        {/* ==================== FOOTER NAVIGATION ==================== */}
+                        <div className="form-actions">
+                            {currentStep === 0 ? (
+                                <button type="button" className="btn-secondary" onClick={onClose}>
+                                    Annuler
+                                </button>
+                            ) : (
+                                <button type="button" className="btn-secondary" onClick={prevStep}>
+                                    <IonIcon icon={arrowBackOutline} />
+                                    Précédent
+                                </button>
+                            )}
+
+                            <button
+                                type="button"
+                                className="btn-primary"
+                                onClick={() => {
+                                    if (currentStepData.id === 'horaires') {
+                                        // Dernière étape: soumettre
+                                        handleSubmit({ preventDefault: () => { } });
+                                    } else {
+                                        // Pas dernière étape: naviguer
+                                        nextStep();
+                                    }
+                                }}
+                                disabled={
+                                    (currentStepData.id === 'siret' && (!siretValidated || apeNotSupported)) ||
+                                    (currentStepData.id === 'horaires' && (loading || apeNotSupported))
+                                }
+                            >
+                                {currentStepData.id === 'horaires' ? (
+                                    loading ? 'Enregistrement...' : (fiche ? 'Modifier' : 'Créer la fiche')
+                                ) : (
+                                    <>
+                                        Suivant
+                                        <IonIcon icon={arrowForwardOutline} />
+                                    </>
+                                )}
+                            </button>
                         </div>
-                    )}
-
-                    {/* ONGLET HORAIRES */}
-                    {activeTab === 'horaires' && (
-                        <div className="tab-content">
-                            <div className="horaires-list">
-                                {jours.map(jour => (
-                                    <div key={jour} className="horaire-row">
-                                        <label className="jour-label">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.horaires[jour]?.ouvert || false}
-                                                onChange={(e) => handleHoraireChange(jour, 'ouvert', e.target.checked)}
-                                            />
-                                            <span>{jour.charAt(0).toUpperCase() + jour.slice(1)}</span>
-                                        </label>
-
-                                        {formData.horaires[jour]?.ouvert && (
-                                            <div className="horaire-times">
-                                                <input
-                                                    type="time"
-                                                    value={formData.horaires[jour]?.debut || '09:00'}
-                                                    onChange={(e) => handleHoraireChange(jour, 'debut', e.target.value)}
-                                                />
-                                                <span>-</span>
-                                                <input
-                                                    type="time"
-                                                    value={formData.horaires[jour]?.fin || '18:00'}
-                                                    onChange={(e) => handleHoraireChange(jour, 'fin', e.target.value)}
-                                                />
-                                            </div>
-                                        )}
-
-                                        {!formData.horaires[jour]?.ouvert && (
-                                            <span className="ferme-label">Fermé</span>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="form-actions">
-                        <button type="button" className="btn-secondary" onClick={onClose}>
-                            Annuler
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn-primary"
-                            disabled={loading || (!fiche && !siretValidated)}
-                        >
-                            {loading ? 'Enregistrement...' : (fiche ? 'Modifier' : 'Créer')}
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     );

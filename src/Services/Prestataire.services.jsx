@@ -234,13 +234,78 @@ const PrestataireService = {
      */
     reactivateFiche: async (ficheId) => {
         try {
-            const response = await Caller.post(`/prestataires/me/fiches/${ficheId}/reactivate`);
+            const response = await Caller.put(`/prestataires/${ficheId}/reactivate`);
             return response.data;
         } catch (error) {
             console.error('Erreur reactivateFiche:', error);
             return {
                 success: false,
                 message: error.response?.data?.message || 'Erreur lors de la réactivation'
+            };
+        }
+    },
+
+    // ==========================================
+    // GESTION DES SOUSCRIPTIONS SUR LES FICHES (NOUVEAU)
+    // ==========================================
+
+    /**
+     * Récupère les souscriptions disponibles avec des slots libres
+     * Pour activer une fiche, l'utilisateur doit choisir une souscription
+     * @returns {Promise}
+     */
+    getSouscriptionsDisponibles: async () => {
+        try {
+            const response = await Caller.get('/prestataires/me/souscriptions-disponibles');
+            return response.data;
+        } catch (error) {
+            console.error('Erreur getSouscriptionsDisponibles:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Erreur lors de la récupération des abonnements',
+                data: []
+            };
+        }
+    },
+
+    /**
+     * Active une fiche avec une souscription spécifique
+     * ⚠️ Cette action est DÉFINITIVE - le choix ne peut pas être modifié
+     * 
+     * @param {number} ficheId - ID de la fiche à activer
+     * @param {number} souscriptionId - ID de la souscription à utiliser
+     * @returns {Promise}
+     */
+    activerFicheAvecSouscription: async (ficheId, souscriptionId) => {
+        try {
+            const response = await Caller.post(`/prestataires/me/fiches/${ficheId}/activer`, {
+                souscriptionId
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Erreur activerFicheAvecSouscription:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Erreur lors de l\'activation de la fiche'
+            };
+        }
+    },
+
+    /**
+     * Récupère les infos de souscription d'une fiche
+     * 
+     * @param {number} ficheId - ID de la fiche
+     * @returns {Promise}
+     */
+    getFicheSouscriptionInfo: async (ficheId) => {
+        try {
+            const response = await Caller.get(`/prestataires/me/fiches/${ficheId}/souscription-info`);
+            return response.data;
+        } catch (error) {
+            console.error('Erreur getFicheSouscriptionInfo:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Erreur lors de la récupération des infos'
             };
         }
     },
@@ -480,6 +545,11 @@ const PrestataireService = {
             };
         }
     },
+
+    /**
+     * Enregistrer une visite sur une fiche
+     * @param {number} id - ID du prestataire
+     */
     trackVisit: async (id) => {
         try {
             await Caller.post(`/prestataires/${id}/visit`);

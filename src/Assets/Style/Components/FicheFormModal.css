@@ -1,7 +1,7 @@
 /* ============================================
    FICHE FORM MODAL - CSS
    Modal de création/édition de fiche commerce
-   MISE À JOUR: Styles pour validation SIRET
+   AVEC STEPPER + FILTRES
    ============================================ */
 
 /* ===== MODAL OVERLAY ===== */
@@ -39,11 +39,13 @@
     width: 100%;
     max-width: 550px;
     max-height: 85vh;
-    overflow-y: auto;
+    overflow: hidden;
     position: relative;
     animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
 }
 
 @keyframes slideUp {
@@ -65,6 +67,7 @@
     margin: 0;
     padding: 24px 24px 0;
     text-align: center;
+    flex-shrink: 0;
 }
 
 /* ===== CLOSE BUTTON ===== */
@@ -94,54 +97,106 @@
     font-size: 22px;
 }
 
-/* ===== TABS ===== */
-.form-tabs {
-    display: flex;
-    gap: 8px;
+/* ============================================
+   STEPPER - NOUVEAU
+   ============================================ */
+.stepper-container {
     padding: 20px 24px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
 }
 
-.form-tabs .tab {
-    flex: 1;
-    padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 13px;
+.stepper-progress {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+
+.stepper-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #fe7e4f, #f3a285);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.stepper-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.stepper-count {
+    background: rgba(254, 126, 79, 0.15);
+    color: #fe7e4f;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.stepper-title {
+    color: #fff;
+    font-size: 16px;
     font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
+}
+
+.stepper-dots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.stepper-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-}
-
-.form-tabs .tab:hover:not(:disabled) {
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
     background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.4);
+    border: 2px solid transparent;
 }
 
-.form-tabs .tab:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.form-tabs .tab.active {
-    background: linear-gradient(135deg, rgba(254, 126, 79, 0.2) 0%, rgba(243, 162, 133, 0.1) 100%);
-    border-color: rgba(254, 126, 79, 0.4);
-    color: #fe7e4f;
-}
-
-.form-tabs .tab.validated {
-    border-color: rgba(100, 255, 150, 0.4);
-}
-
-.form-tabs .tab.validated ion-icon {
+.stepper-dot.completed {
+    background: rgba(100, 255, 150, 0.15);
     color: #64ff96;
+    border-color: rgba(100, 255, 150, 0.4);
+    cursor: pointer;
+}
+
+.stepper-dot.active {
+    background: rgba(254, 126, 79, 0.2);
+    color: #fe7e4f;
+    border-color: #fe7e4f;
+    transform: scale(1.1);
+}
+
+.stepper-dot:not(.active):not(.completed) {
+    cursor: default;
+}
+
+.stepper-dot.completed:hover {
+    transform: scale(1.05);
+    background: rgba(100, 255, 150, 0.25);
+}
+
+.stepper-dot ion-icon {
     font-size: 16px;
+}
+
+/* ===== SCROLLABLE CONTENT ===== */
+.modal-content-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* ===== ERROR MESSAGE ===== */
@@ -156,6 +211,7 @@
     border-radius: 12px;
     color: #ff6b6b;
     font-size: 14px;
+    flex-shrink: 0;
 }
 
 .error-message ion-icon {
@@ -169,15 +225,143 @@
 }
 
 /* ============================================
+   STEP INTRO - Pour étape filtres
+   ============================================ */
+.step-intro {
+    text-align: center;
+    padding: 10px 0 25px;
+}
+
+.step-intro-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 18px;
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.2) 0%, rgba(243, 162, 133, 0.1) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-intro-icon ion-icon {
+    font-size: 32px;
+    color: #fe7e4f;
+}
+
+.step-intro h3 {
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0 0 10px;
+}
+
+.step-intro p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ============================================
+   FILTRES - NOUVEAU
+   ============================================ */
+.loading-filters {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 50px 20px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.no-filters {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 50px 20px;
+    text-align: center;
+}
+
+.no-filters ion-icon {
+    font-size: 50px;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.no-filters p {
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    font-size: 15px;
+}
+
+.no-filters span {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 13px;
+}
+
+.filters-count {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    margin-bottom: 18px;
+    text-align: center;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.filter-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-chip:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.filter-chip.selected {
+    background: rgba(254, 126, 79, 0.15);
+    border-color: #fe7e4f;
+}
+
+.filter-icon {
+    font-size: 20px;
+}
+
+.filter-name {
+    flex: 1;
+    color: #fff;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.filter-check {
+    color: #fe7e4f;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+/* ============================================
    SIRET TAB STYLES
    ============================================ */
-
 .siret-intro {
     text-align: center;
     padding: 20px 0 30px;
 }
 
-.siret-icon {
+.siret-iconfiche {
     width: 80px;
     height: 80px;
     margin: 0 auto 20px;
@@ -373,17 +557,18 @@
 .btn-change-siret {
     width: 100%;
     padding: 12px;
-    background: transparent;
+    background: #242424db;
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 10px;
     color: rgba(255, 255, 255, 0.6);
     font-size: 13px;
     cursor: pointer;
     transition: all 0.2s ease;
+    margin-top: 15px;
 }
 
 .btn-change-siret:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: #24242492;
     border-color: rgba(255, 255, 255, 0.25);
     color: rgba(255, 255, 255, 0.8);
 }
@@ -438,7 +623,6 @@
 /* ============================================
    FORM ELEMENTS
    ============================================ */
-
 .form-group {
     margin-bottom: 18px;
 }
@@ -576,22 +760,6 @@
 
 .geo-error ion-icon {
     font-size: 18px;
-}
-
-.btn-retry {
-    margin-left: auto;
-    padding: 6px 12px;
-    background: rgba(255, 100, 100, 0.2);
-    border: none;
-    border-radius: 6px;
-    color: #ff6b6b;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-retry:hover {
-    background: rgba(255, 100, 100, 0.3);
 }
 
 /* ===== GEO ACTIONS ===== */
@@ -1004,6 +1172,7 @@
     gap: 12px;
     padding: 20px 24px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .btn-secondary,
@@ -1016,6 +1185,10 @@
     cursor: pointer;
     transition: all 0.2s ease;
     border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .btn-secondary {
@@ -1028,14 +1201,14 @@
     background: rgba(255, 255, 255, 0.15);
 }
 
+.btn-secondary ion-icon {
+    font-size: 18px;
+}
+
 .btn-primary {
     background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
     color: #fff;
     box-shadow: 0 4px 15px rgba(254, 126, 79, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -1047,6 +1220,10 @@
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+}
+
+.btn-primary ion-icon {
+    font-size: 18px;
 }
 
 /* ===== SPINNERS ===== */
@@ -1065,6 +1242,97 @@
     }
 }
 
+/* ===== APE NON SUPPORTÉ ===== */
+.ape-not-supported {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border: 2px solid #fe7e4f;
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.ape-not-supported-icon {
+    width: 60px;
+    height: 60px;
+    background: #fe7e4f;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+}
+
+.ape-not-supported-icon ion-icon {
+    font-size: 32px;
+    color: white;
+}
+
+.ape-not-supported h4 {
+    color: #fe7e4f;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.ape-not-supported p {
+    color: #5d4037;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.ape-not-supported strong {
+    color: #fe7e4f;
+    font-weight: 600;
+}
+
+.btn-contact-email {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fe7e4f;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 500;
+    margin: 15px 0;
+    transition: all 0.3s ease;
+}
+
+.btn-contact-email:hover {
+    background: #f68961;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+}
+
+.btn-contact-email ion-icon {
+    font-size: 18px;
+}
+
+.ape-not-supported small {
+    display: block;
+    color: #8d6e63;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* Version inline pour l'onglet infos */
+.ape-not-supported-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff3e0;
+    border: 1px solid #ff9800;
+    border-radius: 8px;
+    padding: 15px;
+    color: #e65100;
+}
+
+.ape-not-supported-inline ion-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
     .fiche-form-modal {
@@ -1072,14 +1340,18 @@
         border-radius: 20px 20px 0 0;
     }
 
-    .form-tabs {
+    .stepper-container {
         padding: 16px;
-        gap: 6px;
     }
 
-    .form-tabs .tab {
-        padding: 10px 8px;
-        font-size: 11px;
+    .stepper-dots {
+        gap: 8px;
+    }
+
+    .stepper-dot {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
     }
 
     .tab-content {
@@ -1114,5 +1386,15 @@
     .siret-input-wrapper input {
         font-size: 16px;
         letter-spacing: 1px;
+    }
+
+    .filters-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .horaire-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
     }
 }

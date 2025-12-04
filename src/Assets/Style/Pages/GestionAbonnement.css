@@ -1,0 +1,1066 @@
+/**
+ * STYLES - Page Gestion Abonnement
+ * Couleurs : Orange #fe7e4f avec touches de gradient
+ */
+
+/* Variables locales à cette page */
+.gestion-abonnement-page {
+    --ga-bg-primary: #1a1a1a;
+    --ga-bg-secondary: #2d2d2d;
+    --ga-bg-tertiary: #3a3a3a;
+    --ga-bg-card: linear-gradient(135deg, #2d2d2d, #252525);
+    --ga-text-primary: #f3f4f6;
+    --ga-text-secondary: #9ca3af;
+    --ga-text-muted: #6b7280;
+    --ga-accent: #fe7e4f;
+    --ga-accent-light: #f3a285;
+    --ga-success: #22c55e;
+    --ga-warning: #fbbf24;
+    --ga-error: #ef4444;
+    --ga-border: rgba(255, 255, 255, 0.05);
+    --ga-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Page container */
+.gestion-abonnement-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--ga-bg-primary) 0%, var(--ga-bg-secondary) 50%, var(--ga-bg-primary) 100%);
+}
+
+/* Scroll container */
+.gestion-abonnement-page .gestion-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 40px;
+}
+
+.gestion-abonnement-page .gestion-content {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Header */
+.gestion-abonnement-page .page-header {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    background: transparent;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: all 0.3s ease;
+}
+
+.gestion-abonnement-page .page-header.scrolled {
+    background: rgba(26, 26, 26, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--ga-border);
+}
+
+.gestion-abonnement-page .header-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--ga-bg-tertiary);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.gestion-abonnement-page .header-btn ion-icon {
+    font-size: 22px;
+    color: var(--ga-text-primary);
+}
+
+.gestion-abonnement-page .header-btn:active {
+    transform: scale(0.95);
+}
+
+.gestion-abonnement-page .page-title {
+    flex: 1;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ga-text-primary);
+    margin: 0;
+    margin-right: 40px;
+}
+
+/* Loading */
+.gestion-abonnement-page .gestion-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    gap: 16px;
+    color: var(--ga-text-secondary);
+}
+
+.gestion-abonnement-page .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--ga-accent);
+    border-radius: 50%;
+    animation: ga-spin 1s linear infinite;
+}
+
+.gestion-abonnement-page .loading-spinner.small {
+    width: 18px;
+    height: 18px;
+    border-width: 2px;
+}
+
+@keyframes ga-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Messages */
+.gestion-abonnement-page .message-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.gestion-abonnement-page .message-banner.error {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.gestion-abonnement-page .message-banner.success {
+    background: rgba(34, 197, 94, 0.15);
+    color: #86efac;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.gestion-abonnement-page .message-banner ion-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.gestion-abonnement-page .message-banner span {
+    flex: 1;
+}
+
+.gestion-abonnement-page .message-banner button {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    opacity: 0.6;
+    color: inherit;
+}
+
+/* No subscription */
+.gestion-abonnement-page .no-subscription {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.gestion-abonnement-page .no-sub-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--ga-bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    box-shadow: var(--ga-shadow);
+}
+
+.gestion-abonnement-page .no-sub-icon ion-icon {
+    font-size: 36px;
+    color: var(--ga-text-muted);
+}
+
+.gestion-abonnement-page .no-subscription h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ga-text-primary);
+    margin: 0 0 8px 0;
+}
+
+.gestion-abonnement-page .no-subscription p {
+    color: var(--ga-text-secondary);
+    font-size: 15px;
+    margin: 0 0 24px 0;
+    max-width: 280px;
+}
+
+/* Bouton principal avec gradient */
+.gestion-abonnement-page .subscribe-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(254, 126, 79, 0.4);
+    transition: all 0.3s ease;
+}
+
+.gestion-abonnement-page .subscribe-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(254, 126, 79, 0.5);
+}
+
+/* Summary Section */
+.gestion-abonnement-page .summary-section {
+    margin-bottom: 24px;
+}
+
+.gestion-abonnement-page .summary-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: var(--ga-bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--ga-shadow);
+    border: 1px solid var(--ga-border);
+}
+
+.gestion-abonnement-page .summary-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.gestion-abonnement-page .summary-item>ion-icon {
+    font-size: 28px;
+    color: var(--ga-accent);
+}
+
+.gestion-abonnement-page .summary-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.gestion-abonnement-page .summary-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ga-text-primary);
+}
+
+.gestion-abonnement-page .summary-label {
+    font-size: 12px;
+    color: var(--ga-text-secondary);
+}
+
+.gestion-abonnement-page .summary-divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Subscription Card - Style demandé */
+.gestion-abonnement-page .subscription-card {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 20px;
+    padding: 20px;
+    color: white;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 25px rgba(254, 126, 79, 0.3);
+    transition: all 0.3s ease;
+}
+
+.gestion-abonnement-page .subscription-card:last-of-type {
+    margin-bottom: 24px;
+}
+
+.gestion-abonnement-page .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.gestion-abonnement-page .card-header.clickable {
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.gestion-abonnement-page .card-header.clickable:hover {
+    opacity: 0.9;
+}
+
+.gestion-abonnement-page .expand-icon {
+    font-size: 20px;
+    color: var(--ga-text-secondary);
+    margin-left: 8px;
+    transition: transform 0.3s ease;
+}
+
+.gestion-abonnement-page .card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(254, 126, 79, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gestion-abonnement-page .card-icon ion-icon {
+    font-size: 24px;
+    color: var(--ga-accent);
+}
+
+.gestion-abonnement-page .card-title {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.gestion-abonnement-page .card-title .label {
+    font-size: 12px;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.gestion-abonnement-page .card-title .name {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.gestion-abonnement-page .status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.gestion-abonnement-page .status-badge.active {
+    background: rgba(254, 126, 79, 0.2);
+    color: var(--ga-accent);
+}
+
+.gestion-abonnement-page .status-badge.warning {
+    background: var(--ga-warning);
+    color: #78350f;
+}
+
+.gestion-abonnement-page .status-badge.expired {
+    background: var(--ga-error);
+    color: white;
+}
+
+.gestion-abonnement-page .card-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.gestion-abonnement-page .stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gestion-abonnement-page .stat ion-icon {
+    font-size: 20px;
+    color: var(--ga-accent);
+    opacity: 0.8;
+}
+
+.gestion-abonnement-page .stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.gestion-abonnement-page .stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+}
+
+.gestion-abonnement-page .stat-value.warning {
+    color: var(--ga-warning);
+}
+
+.gestion-abonnement-page .stat-label {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.gestion-abonnement-page .stat-divider {
+    width: 1px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.gestion-abonnement-page .card-tip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(254, 126, 79, 0.1);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    border: 1px solid rgba(254, 126, 79, 0.2);
+}
+
+.gestion-abonnement-page .card-tip ion-icon {
+    font-size: 18px;
+    color: var(--ga-accent);
+}
+
+/* Card Expanded Content */
+.gestion-abonnement-page .card-expanded {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    animation: ga-slideDown 0.3s ease;
+}
+
+@keyframes ga-slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.gestion-abonnement-page .card-expanded .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.gestion-abonnement-page .card-expanded .info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.gestion-abonnement-page .card-expanded .info-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(254, 126, 79, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.gestion-abonnement-page .card-expanded .info-icon ion-icon {
+    font-size: 18px;
+    color: var(--ga-accent);
+}
+
+.gestion-abonnement-page .card-expanded .info-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.gestion-abonnement-page .card-expanded .info-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.gestion-abonnement-page .card-expanded .info-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+}
+
+.gestion-abonnement-page .card-expanded .renew-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.gestion-abonnement-page .card-expanded .renew-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gestion-abonnement-page .card-expanded .renew-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.gestion-abonnement-page .card-expanded .renew-icon ion-icon {
+    font-size: 20px;
+    color: var(--ga-text-muted);
+    transition: all 0.3s ease;
+}
+
+.gestion-abonnement-page .card-expanded .renew-icon.active {
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+    box-shadow: 0 4px 12px rgba(254, 126, 79, 0.4);
+}
+
+.gestion-abonnement-page .card-expanded .renew-icon.active ion-icon {
+    color: white;
+}
+
+.gestion-abonnement-page .card-expanded .renew-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.gestion-abonnement-page .card-expanded .renew-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+}
+
+.gestion-abonnement-page .card-expanded .renew-description {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    max-width: 160px;
+}
+
+.gestion-abonnement-page .card-expanded .renew-toggle {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.gestion-abonnement-page .card-expanded .renew-toggle.active {
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+}
+
+.gestion-abonnement-page .card-expanded .toggle-switch {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+}
+
+.gestion-abonnement-page .card-expanded .toggle-knob {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.gestion-abonnement-page .card-expanded .renew-toggle.active .toggle-knob {
+    left: calc(100% - 22px);
+}
+
+.gestion-abonnement-page .card-expanded .renew-notice,
+.gestion-abonnement-page .card-expanded .renew-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.gestion-abonnement-page .card-expanded .renew-notice {
+    background: rgba(254, 126, 79, 0.1);
+    color: var(--ga-accent-light);
+    border: 1px solid rgba(254, 126, 79, 0.2);
+}
+
+.gestion-abonnement-page .card-expanded .renew-warning {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fcd34d;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.gestion-abonnement-page .card-expanded .renew-notice ion-icon,
+.gestion-abonnement-page .card-expanded .renew-warning ion-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* Info Section */
+.gestion-abonnement-page .info-section {
+    background: var(--ga-bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--ga-shadow);
+    border: 1px solid var(--ga-border);
+}
+
+.gestion-abonnement-page .info-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ga-text-primary);
+    margin: 0 0 16px 0;
+}
+
+.gestion-abonnement-page .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.gestion-abonnement-page .info-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.gestion-abonnement-page .info-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--ga-bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.gestion-abonnement-page .info-icon ion-icon {
+    font-size: 20px;
+    color: var(--ga-accent);
+}
+
+.gestion-abonnement-page .info-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.gestion-abonnement-page .info-label {
+    font-size: 12px;
+    color: var(--ga-text-muted);
+}
+
+.gestion-abonnement-page .info-value {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ga-text-primary);
+}
+
+.gestion-abonnement-page .info-value.warning {
+    color: var(--ga-warning);
+}
+
+/* Renew Section */
+.gestion-abonnement-page .renew-section {
+    background: var(--ga-bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--ga-shadow);
+    border: 1px solid var(--ga-border);
+}
+
+.gestion-abonnement-page .renew-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ga-text-primary);
+    margin: 0 0 16px 0;
+}
+
+.gestion-abonnement-page .renew-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: var(--ga-bg-tertiary);
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.gestion-abonnement-page .renew-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.gestion-abonnement-page .renew-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.gestion-abonnement-page .renew-icon ion-icon {
+    font-size: 22px;
+    color: var(--ga-text-muted);
+    transition: all 0.3s ease;
+}
+
+/* Icône active avec gradient */
+.gestion-abonnement-page .renew-icon.active {
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+    box-shadow: 0 4px 15px rgba(254, 126, 79, 0.4);
+}
+
+.gestion-abonnement-page .renew-icon.active ion-icon {
+    color: white;
+}
+
+.gestion-abonnement-page .renew-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.gestion-abonnement-page .renew-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ga-text-primary);
+}
+
+.gestion-abonnement-page .renew-description {
+    font-size: 12px;
+    color: var(--ga-text-secondary);
+    max-width: 180px;
+}
+
+.gestion-abonnement-page .renew-toggle {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+/* Toggle actif avec gradient */
+.gestion-abonnement-page .renew-toggle.active {
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+}
+
+.gestion-abonnement-page .toggle-switch {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+}
+
+.gestion-abonnement-page .toggle-knob {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.gestion-abonnement-page .renew-toggle.active .toggle-knob {
+    left: calc(100% - 24px);
+}
+
+.gestion-abonnement-page .renew-notice,
+.gestion-abonnement-page .renew-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.gestion-abonnement-page .renew-notice {
+    background: rgba(254, 126, 79, 0.1);
+    color: var(--ga-accent-light);
+    border: 1px solid rgba(254, 126, 79, 0.2);
+}
+
+.gestion-abonnement-page .renew-warning {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fcd34d;
+    border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.gestion-abonnement-page .renew-notice ion-icon,
+.gestion-abonnement-page .renew-warning ion-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* Payment Section */
+.gestion-abonnement-page .payment-section {
+    background: var(--ga-bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--ga-shadow);
+    border: 1px solid var(--ga-border);
+}
+
+.gestion-abonnement-page .payment-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ga-text-primary);
+    margin: 0 0 16px 0;
+}
+
+.gestion-abonnement-page .payment-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: var(--ga-bg-primary);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gestion-abonnement-page .payment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.gestion-abonnement-page .card-visual {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gestion-abonnement-page .card-brand {
+    font-size: 14px;
+}
+
+.gestion-abonnement-page .card-number {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ga-text-primary);
+    letter-spacing: 1px;
+}
+
+.gestion-abonnement-page .card-expiry {
+    font-size: 12px;
+    color: var(--ga-text-secondary);
+}
+
+.gestion-abonnement-page .update-card-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: rgba(254, 126, 79, 0.1);
+    border: 1px solid rgba(254, 126, 79, 0.3);
+    border-radius: 8px;
+    color: var(--ga-accent);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.gestion-abonnement-page .update-card-btn:hover {
+    background: rgba(254, 126, 79, 0.2);
+}
+
+.gestion-abonnement-page .update-card-btn ion-icon {
+    font-size: 16px;
+}
+
+.gestion-abonnement-page .no-payment {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    background: var(--ga-bg-tertiary);
+    border-radius: 12px;
+    border: 2px dashed rgba(254, 126, 79, 0.2);
+    margin-bottom: 12px;
+}
+
+.gestion-abonnement-page .no-payment-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(254, 126, 79, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.gestion-abonnement-page .no-payment-icon ion-icon {
+    font-size: 24px;
+    color: var(--ga-accent);
+}
+
+.gestion-abonnement-page .no-payment p {
+    color: var(--ga-text-secondary);
+    font-size: 14px;
+    margin: 0 0 16px 0;
+}
+
+/* Bouton ajouter carte avec gradient */
+.gestion-abonnement-page .add-card-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.gestion-abonnement-page .add-card-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(254, 126, 79, 0.4);
+}
+
+.gestion-abonnement-page .add-card-btn ion-icon {
+    font-size: 18px;
+}
+
+.gestion-abonnement-page .payment-secure {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--ga-text-muted);
+    font-size: 12px;
+}
+
+.gestion-abonnement-page .payment-secure ion-icon {
+    color: var(--ga-success);
+    font-size: 16px;
+}
+
+/* Actions Section */
+.gestion-abonnement-page .actions-section {
+    margin-bottom: 20px;
+}
+
+.gestion-abonnement-page .action-btn {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 16px 20px;
+    background: var(--ga-bg-card);
+    border: 1px solid var(--ga-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--ga-shadow);
+}
+
+.gestion-abonnement-page .action-btn ion-icon:first-child {
+    font-size: 22px;
+    margin-right: 14px;
+}
+
+.gestion-abonnement-page .action-btn span {
+    flex: 1;
+    text-align: left;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ga-text-primary);
+}
+
+.gestion-abonnement-page .action-btn .chevron {
+    font-size: 20px;
+    color: var(--ga-text-muted);
+}
+
+.gestion-abonnement-page .action-btn.primary ion-icon:first-child {
+    color: var(--ga-accent);
+}
+
+.gestion-abonnement-page .action-btn:hover {
+    background: var(--ga-bg-tertiary);
+    transform: translateY(-1px);
+    border-color: rgba(254, 126, 79, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+    .gestion-abonnement-page .card-stats {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .gestion-abonnement-page .stat-divider {
+        display: none;
+    }
+
+    .gestion-abonnement-page .renew-description {
+        max-width: 140px;
+    }
+
+    .gestion-abonnement-page .renew-card {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .gestion-abonnement-page .renew-toggle {
+        margin-left: auto;
+    }
+}

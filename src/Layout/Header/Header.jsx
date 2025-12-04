@@ -349,7 +349,16 @@ const Header = () => {
                                     onClick={() => handleNavigation('/auth/abonnement')}
                                 >
                                     <CreditCardOutlined className="menu-icon" />
-                                    <span>Mon Abonnement</span>
+                                    <span>Nos offres</span>
+                                </button>
+
+                                {/* Gestion Abonnement */}
+                                <button
+                                    className="drawer-menu-item prestataire"
+                                    onClick={() => handleNavigation('/auth/gestion-abonnement')}
+                                >
+                                    <CreditCardOutlined className="menu-icon" />
+                                    <span>Mes abonnements</span>
                                 </button>
                             </>
                         )}

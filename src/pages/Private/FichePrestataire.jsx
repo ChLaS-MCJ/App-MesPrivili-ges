@@ -16,7 +16,9 @@ import {
     chevronBackOutline,
     chevronForwardOutline,
     giftOutline,
-    ticketOutline
+    ticketOutline,
+    globeOutline,
+    eyeOutline
 } from 'ionicons/icons';
 import PrestataireService from '../../Services/Prestataire.services';
 import FavorisService from '../../Services/Favoris.services';
@@ -35,6 +37,10 @@ const FichePrestataire = () => {
     const [favoriteLoading, setFavoriteLoading] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [visitors, setVisitors] = useState([]);
+
+    // État pour l'aperçu propriétaire
+    const [isOwnerPreview, setIsOwnerPreview] = useState(false);
+    const [needsActivation, setNeedsActivation] = useState(false);
 
     // Promotions
     const [promotions, setPromotions] = useState([]);
@@ -58,13 +64,14 @@ const FichePrestataire = () => {
 
     // ============================================
     // ENREGISTRER LA VISITE UNE SEULE FOIS
+    // (seulement si ce n'est pas un aperçu propriétaire)
     // ============================================
     useEffect(() => {
-        if (id && !visitTracked.current) {
+        if (id && !visitTracked.current && !isOwnerPreview) {
             visitTracked.current = true;
             PrestataireService.trackVisit(id);
         }
-    }, [id]);
+    }, [id, isOwnerPreview]);
 
     // Charger les promotions
     useEffect(() => {
@@ -238,9 +245,18 @@ const FichePrestataire = () => {
                 if (result.success) {
                     setPrestataire(result.data);
 
-                    const favResult = await FavorisService.checkFavori(id);
-                    if (favResult.success) {
-                        setIsFavorite(favResult.data.isFavori);
+                    // Vérifier si c'est un aperçu propriétaire
+                    if (result.isOwnerPreview || result.data?.isOwnerPreview) {
+                        setIsOwnerPreview(true);
+                        setNeedsActivation(result.data?.needsActivation || false);
+                    }
+
+                    // Ne pas charger les favoris si c'est un aperçu
+                    if (!result.isOwnerPreview && !result.data?.isOwnerPreview) {
+                        const favResult = await FavorisService.checkFavori(id);
+                        if (favResult.success) {
+                            setIsFavorite(favResult.data.isFavori);
+                        }
                     }
                 }
             } catch (error) {
@@ -256,6 +272,11 @@ const FichePrestataire = () => {
 
     const handleBack = () => {
         navigate(-1);
+    };
+
+    // Aller à la page de gestion des abonnements
+    const handleGoToAbonnement = () => {
+        navigate('/auth/mon-commerce');
     };
 
     const getDisplayAvatars = () => {
@@ -296,7 +317,7 @@ const FichePrestataire = () => {
     };
 
     const toggleFavorite = async () => {
-        if (favoriteLoading) return;
+        if (favoriteLoading || isOwnerPreview) return;
 
         setFavoriteLoading(true);
         try {
@@ -334,6 +355,17 @@ const FichePrestataire = () => {
     const handleNavigate = () => {
         if (prestataire?.latitude && prestataire?.longitude) {
             const url = `https://www.google.com/maps/dir/?api=1&destination=${prestataire.latitude},${prestataire.longitude}`;
+            window.open(url, '_blank');
+        }
+    };
+
+    const handleOpenWebsite = () => {
+        if (prestataire?.website) {
+            let url = prestataire.website;
+            // Ajouter https:// si pas de protocole
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
             window.open(url, '_blank');
         }
     };
@@ -396,11 +428,15 @@ const FichePrestataire = () => {
             allImages.push(prestataire.imagePrincipale);
         }
 
-        let secondaryImages = prestataire?.images || prestataire?.imagesSecondaires || prestataire?.galerie || [];
+        let secondaryImages = prestataire?.images || [];
 
         if (typeof secondaryImages === 'string') {
             try {
                 secondaryImages = JSON.parse(secondaryImages);
+                // Si c'est encore une string après parsing (double encodage)
+                if (typeof secondaryImages === 'string') {
+                    secondaryImages = JSON.parse(secondaryImages);
+                }
             } catch (e) {
                 console.error('Erreur parsing images:', e);
                 secondaryImages = [];
@@ -502,9 +538,27 @@ const FichePrestataire = () => {
 
     return (
         <div className="fiche-prestataire-page">
+            {/* Bandeau Aperçu Propriétaire */}
+            {isOwnerPreview && (
+                <div className="owner-preview-banner">
+                    <div className="owner-preview-content">
+                        <IonIcon icon={eyeOutline} className="owner-preview-icon" />
+                        <div className="owner-preview-text">
+                            <strong>Aperçu propriétaire</strong>
+                            <span>Cette fiche n'est pas visible publiquement</span>
+                        </div>
+                    </div>
+                    {needsActivation && (
+                        <button className="owner-preview-btn" onClick={handleGoToAbonnement}>
+                            Activer ma fiche
+                        </button>
+                    )}
+                </div>
+            )}
+
             {/* Image de fond en plein écran avec gestion du swipe */}
             <div
-                className="fiche-hero-image"
+                className={`fiche-hero-image ${isOwnerPreview ? 'with-preview-banner' : ''}`}
                 style={{ backgroundImage: `url(${images[currentImageIndex]})` }}
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
@@ -519,13 +573,15 @@ const FichePrestataire = () => {
                         <button className="fiche-header-btn" onClick={handleShare}>
                             <IonIcon icon={shareOutline} />
                         </button>
-                        <button
-                            className={`fiche-header-btn ${isFavorite ? 'favorite-active' : ''} ${favoriteLoading ? 'loading' : ''}`}
-                            onClick={toggleFavorite}
-                            disabled={favoriteLoading}
-                        >
-                            <IonIcon icon={isFavorite ? heart : heartOutline} />
-                        </button>
+                        {!isOwnerPreview && (
+                            <button
+                                className={`fiche-header-btn ${isFavorite ? 'favorite-active' : ''} ${favoriteLoading ? 'loading' : ''}`}
+                                onClick={toggleFavorite}
+                                disabled={favoriteLoading}
+                            >
+                                <IonIcon icon={isFavorite ? heart : heartOutline} />
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -643,6 +699,12 @@ const FichePrestataire = () => {
                             <IonIcon icon={navigateOutline} />
                             <span>Itinéraire</span>
                         </button>
+                        {prestataire.website && (
+                            <button className="fiche-action-btn" onClick={handleOpenWebsite}>
+                                <IonIcon icon={globeOutline} />
+                                <span>Site web</span>
+                            </button>
+                        )}
                         <button className="fiche-action-btn fiche-action-btn-small" onClick={() => setShowHorairesModal(true)}>
                             <IonIcon icon={calendarOutline} />
                         </button>

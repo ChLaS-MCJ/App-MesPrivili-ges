@@ -12,7 +12,11 @@ import {
     warningOutline,
     locationOutline,
     calendarOutline,
-    closeOutline
+    closeOutline,
+    timeOutline,
+    flashOutline,
+    checkmarkCircleOutline,
+    lockClosedOutline
 } from 'ionicons/icons';
 import PrestataireService from '../../Services/Prestataire.services';
 import FicheFormModal from '../../components/Forms/FicheFormModal';
@@ -37,6 +41,12 @@ const MonCommerce = () => {
     const [deleteModal, setDeleteModal] = useState({ isOpen: false, fiche: null });
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
     const [deleteLoading, setDeleteLoading] = useState(false);
+
+    // Modal activation (NOUVEAU)
+    const [activationModal, setActivationModal] = useState({ isOpen: false, fiche: null });
+    const [souscriptionsDisponibles, setSouscriptionsDisponibles] = useState([]);
+    const [activationLoading, setActivationLoading] = useState(false);
+    const [loadingSouscriptions, setLoadingSouscriptions] = useState(false);
 
     useEffect(() => {
         loadFiches();
@@ -109,6 +119,63 @@ const MonCommerce = () => {
         setDeleteConfirmText('');
     };
 
+    // ==========================================
+    // GESTION ACTIVATION FICHE (NOUVEAU)
+    // ==========================================
+
+    // Ouvrir la modal d'activation
+    const handleActivate = async (fiche) => {
+        setActivationModal({ isOpen: true, fiche });
+        setLoadingSouscriptions(true);
+
+        try {
+            const result = await PrestataireService.getSouscriptionsDisponibles();
+            if (result.success) {
+                setSouscriptionsDisponibles(result.data || []);
+            } else {
+                setError(result.message || 'Erreur lors du chargement des abonnements');
+                setActivationModal({ isOpen: false, fiche: null });
+            }
+        } catch (err) {
+            setError('Erreur lors du chargement des abonnements disponibles');
+            setActivationModal({ isOpen: false, fiche: null });
+        } finally {
+            setLoadingSouscriptions(false);
+        }
+    };
+
+    // Confirmer l'activation avec une souscription
+    const confirmActivation = async (souscriptionId) => {
+        setActivationLoading(true);
+
+        try {
+            const result = await PrestataireService.activerFicheAvecSouscription(
+                activationModal.fiche.id,
+                souscriptionId
+            );
+
+            if (result.success) {
+                setSuccess(result.message || 'Fiche activée avec succès !');
+                setActivationModal({ isOpen: false, fiche: null });
+                setSouscriptionsDisponibles([]);
+                loadFiches();
+            } else {
+                setError(result.message || 'Erreur lors de l\'activation');
+            }
+        } catch (err) {
+            setError('Erreur lors de l\'activation de la fiche');
+        } finally {
+            setActivationLoading(false);
+        }
+    };
+
+    // Fermer la modal d'activation
+    const closeActivationModal = () => {
+        if (activationLoading) return;
+        setActivationModal({ isOpen: false, fiche: null });
+        setSouscriptionsDisponibles([]);
+    };
+
     const handleReactivate = async (fiche) => {
         try {
             const result = await PrestataireService.reactivateFiche(fiche.id);
@@ -126,13 +193,17 @@ const MonCommerce = () => {
     const handleModalSuccess = () => {
         setIsModalOpen(false);
         setEditingFiche(null);
-        setSuccess(editingFiche ? 'Fiche modifiée avec succès' : 'Fiche créée avec succès');
+        setSuccess(editingFiche ? 'Fiche modifiée avec succès' : 'Fiche créée avec succès. Pensez à l\'activer !');
         loadFiches();
     };
 
+    // Badge de statut (Active/Inactive/Expirée/Bloquée/En attente)
     const getStatusBadge = (fiche) => {
         if (fiche.estBlackliste) {
             return <span className="status-badge blacklisted">Bloquée</span>;
+        }
+        if (fiche.needsActivation) {
+            return <span className="status-badge pending">En attente</span>;
         }
         if (fiche.isExpired) {
             return <span className="status-badge expired">Expirée</span>;
@@ -140,14 +211,59 @@ const MonCommerce = () => {
         if (!fiche.estActif) {
             return <span className="status-badge inactive">Inactive</span>;
         }
-        if (fiche.joursRestants <= 7) {
-            return <span className="status-badge warning">{fiche.joursRestants}j restants</span>;
-        }
         return <span className="status-badge active">Active</span>;
     };
 
+    // Badge des jours restants (séparé du statut)
+    const getDaysRemainingBadge = (fiche) => {
+        // Ne pas afficher si en attente d'activation, expirée, inactive ou blacklistée
+        if (fiche.needsActivation || fiche.isExpired || !fiche.estActif || fiche.estBlackliste) {
+            return null;
+        }
+
+        const jours = fiche.joursRestants;
+
+        if (jours === null || jours === undefined) {
+            return null;
+        }
+
+        // Déterminer la classe CSS selon le nombre de jours
+        let className = 'days-badge';
+        if (jours <= 7) {
+            className += ' critical'; // Rouge - urgent
+        } else if (jours <= 30) {
+            className += ' warning'; // Orange - attention
+        } else if (jours <= 90) {
+            className += ' info'; // Bleu - info
+        } else {
+            className += ' normal'; // Vert - ok
+        }
+
+        return (
+            <span className={className}>
+                <IonIcon icon={timeOutline} />
+                {jours}j restants
+            </span>
+        );
+    };
+
+    // Badge durée abonnement (6 ou 12 mois)
+    const getAbonnementBadge = (fiche) => {
+        if (fiche.needsActivation || !fiche.abonnementInfo) {
+            return null;
+        }
+
+        const duree = fiche.abonnementInfo.dureeEnMois;
+        return (
+            <span className="abonnement-badge">
+                <IonIcon icon={lockClosedOutline} />
+                {duree} mois
+            </span>
+        );
+    };
+
     const formatDate = (dateStr) => {
-        if (!dateStr) return '';
+        if (!dateStr) return '—';
         return new Date(dateStr).toLocaleDateString('fr-FR');
     };
 
@@ -225,7 +341,7 @@ const MonCommerce = () => {
                     {fiches.map(fiche => (
                         <div
                             key={fiche.id}
-                            className={`fiche-card ${!fiche.isValid ? 'invalid' : ''}`}
+                            className={`fiche-card ${!fiche.isValid ? 'invalid' : ''} ${fiche.needsActivation ? 'needs-activation' : ''}`}
                         >
                             <div className="fiche-image">
                                 {fiche.imagePrincipale ? (
@@ -235,7 +351,12 @@ const MonCommerce = () => {
                                         <IonIcon icon={storefrontOutline} />
                                     </div>
                                 )}
-                                {getStatusBadge(fiche)}
+                                {/* Conteneur pour les badges */}
+                                <div className="fiche-badges">
+                                    {getStatusBadge(fiche)}
+                                    {getDaysRemainingBadge(fiche)}
+                                    {getAbonnementBadge(fiche)}
+                                </div>
                             </div>
 
                             <div className="fiche-infos">
@@ -247,12 +368,15 @@ const MonCommerce = () => {
                                     <span>{fiche.ville}</span>
                                 </div>
 
-                                <div className="fiche-dates">
-                                    <IonIcon icon={calendarOutline} />
-                                    <span>{formatDate(fiche.dateDebut)} → {formatDate(fiche.dateFin)}</span>
-                                </div>
+                                {/* Afficher les dates seulement si activée */}
+                                {!fiche.needsActivation && (
+                                    <div className="fiche-dates">
+                                        <IonIcon icon={calendarOutline} />
+                                        <span>{formatDate(fiche.dateDebut)} → {formatDate(fiche.dateFin)}</span>
+                                    </div>
+                                )}
 
-                                {fiche.noteGlobale && (
+                                {fiche.noteGlobale > 0 && (
                                     <div className="fiche-stats">
                                         <span>⭐ {parseFloat(fiche.noteGlobale).toFixed(1)}</span>
                                         <span>{fiche.nombreAvis || 0} avis</span>
@@ -260,11 +384,35 @@ const MonCommerce = () => {
                                 )}
                             </div>
 
+                            {/* Banner d'activation pour les fiches en attente */}
+                            {fiche.needsActivation && (
+                                <div className="activation-banner">
+                                    <div className="activation-banner-content">
+                                        <IonIcon icon={flashOutline} />
+                                        <div>
+                                            <strong>Activation requise</strong>
+                                            <span>Choisissez votre formule 6 ou 12 mois</span>
+                                        </div>
+                                    </div>
+                                    <button
+                                        className="btn-activate"
+                                        onClick={() => handleActivate(fiche)}
+                                    >
+                                        Activer
+                                    </button>
+                                </div>
+                            )}
+
                             {/* Warning si proche expiration */}
-                            {fiche.isValid && fiche.joursRestants <= 30 && fiche.joursRestants > 0 && (
-                                <div className="expiration-warning">
+                            {!fiche.needsActivation && fiche.isValid && fiche.joursRestants <= 30 && fiche.joursRestants > 0 && (
+                                <div className={`expiration-warning ${fiche.joursRestants <= 7 ? 'critical' : ''}`}>
                                     <IonIcon icon={warningOutline} />
-                                    <span>Expire dans {fiche.joursRestants} jour(s)</span>
+                                    <span>
+                                        {fiche.joursRestants <= 7
+                                            ? `⚠️ Expire dans ${fiche.joursRestants} jour(s) !`
+                                            : `Expire dans ${fiche.joursRestants} jour(s)`
+                                        }
+                                    </span>
                                 </div>
                             )}
 
@@ -283,7 +431,17 @@ const MonCommerce = () => {
                                 >
                                     <IonIcon icon={createOutline} />
                                 </button>
-                                {!fiche.estActif && !fiche.isExpired && (
+                                {/* Bouton Activer pour les fiches en attente */}
+                                {fiche.needsActivation && (
+                                    <button
+                                        className="action-btn activate"
+                                        onClick={() => handleActivate(fiche)}
+                                        title="Activer"
+                                    >
+                                        <IonIcon icon={flashOutline} />
+                                    </button>
+                                )}
+                                {!fiche.estActif && !fiche.isExpired && !fiche.needsActivation && (
                                     <button
                                         className="action-btn reactivate"
                                         onClick={() => handleReactivate(fiche)}
@@ -375,6 +533,109 @@ const MonCommerce = () => {
                                         Supprimer définitivement
                                     </>
                                 )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal activation (NOUVEAU) */}
+            {activationModal.isOpen && (
+                <div className="activation-modal-overlay" onClick={closeActivationModal}>
+                    <div className="activation-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="activation-modal-header">
+                            <div className="activation-modal-icon-wrapper">
+                                <IonIcon icon={flashOutline} className="activation-modal-icon" />
+                            </div>
+                            <h2>Activer votre fiche</h2>
+                            <p className="activation-modal-fiche-name">"{activationModal.fiche?.nomCommerce}"</p>
+                        </div>
+
+                        <div className="activation-modal-content">
+                            <div className="activation-modal-warning">
+                                <IonIcon icon={lockClosedOutline} />
+                                <span>Ce choix est <strong>définitif</strong> et ne pourra pas être modifié.</span>
+                            </div>
+
+                            {loadingSouscriptions ? (
+                                <div className="activation-loading">
+                                    <div className="spinner"></div>
+                                    <p>Chargement des abonnements...</p>
+                                </div>
+                            ) : souscriptionsDisponibles.length === 0 ? (
+                                <div className="activation-no-souscription">
+                                    <IonIcon icon={warningOutline} />
+                                    <h3>Aucun abonnement disponible</h3>
+                                    <p>Vous devez d'abord acheter un abonnement pour activer cette fiche.</p>
+                                    <button
+                                        className="btn-primary"
+                                        onClick={() => {
+                                            closeActivationModal();
+                                            navigate('/auth/abonnements');
+                                        }}
+                                    >
+                                        Voir les abonnements
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="souscriptions-list">
+                                    <p className="souscriptions-list-title">Choisissez l'abonnement à utiliser :</p>
+
+                                    {souscriptionsDisponibles.map(souscription => (
+                                        <div
+                                            key={souscription.id}
+                                            className={`souscription-card ${souscription.dureeEnMois === 12 ? 'popular' : ''}`}
+                                        >
+                                            <div className="souscription-card-header">
+                                                <span className="souscription-duree">
+                                                    {souscription.dureeEnMois} mois
+                                                </span>
+                                            </div>
+
+                                            <div className="souscription-card-body">
+                                                <div className="souscription-info">
+                                                    <div className="souscription-slots">
+                                                        <span className="slots-available">{souscription.slotsDisponibles}</span>
+                                                        <span className="slots-label">slot{souscription.slotsDisponibles > 1 ? 's' : ''} disponible{souscription.slotsDisponibles > 1 ? 's' : ''}</span>
+                                                    </div>
+                                                    <div className="souscription-dates">
+                                                        <IonIcon icon={calendarOutline} />
+                                                        <span>Expire le {formatDate(souscription.dateFin)}</span>
+                                                    </div>
+                                                    <div className="souscription-remaining">
+                                                        <IonIcon icon={timeOutline} />
+                                                        <span>{souscription.joursRestants} jours restants</span>
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    className="btn-select-souscription"
+                                                    onClick={() => confirmActivation(souscription.id)}
+                                                    disabled={activationLoading}
+                                                >
+                                                    {activationLoading ? (
+                                                        <div className="btn-spinner"></div>
+                                                    ) : (
+                                                        <>
+                                                            <IonIcon icon={checkmarkCircleOutline} />
+                                                            Utiliser
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="activation-modal-actions">
+                            <button
+                                className="activation-modal-btn cancel"
+                                onClick={closeActivationModal}
+                                disabled={activationLoading}
+                            >
+                                Annuler
                             </button>
                         </div>
                     </div>

@@ -20,9 +20,13 @@ import MesStatistiques from '../pages/Private/MesStatistiques';
 
 import Favoris from '../pages/Private/Favoris';
 
-// Ajouter l'import
+// Pages Abonnement
 import Abonnement from '../pages/Private/Abonnement';
 import AbonnementSuccess from '../pages/Private/AbonnementSuccess';
+import GestionAbonnement from '../pages/Private/GestionAbonnement';
+
+// Page de test système (Admin)
+import SystemTest from '../pages/Admin/SystemTest';
 
 const PrivateRouter = () => {
     const { isAuthenticated, loading } = useAuth();
@@ -60,10 +64,13 @@ const PrivateRouter = () => {
                 <Route path="mes-statistiques" element={<MesStatistiques />} />
                 <Route path="favoris" element={<Favoris />} />
 
-
                 {/* Routes Abonnement */}
                 <Route path="abonnement" element={<Abonnement />} />
                 <Route path="abonnement/success" element={<AbonnementSuccess />} />
+                <Route path="gestion-abonnement" element={<GestionAbonnement />} />
+
+                {/* Route Admin - Test Système */}
+                <Route path="admin/system-test" element={<SystemTest />} />
             </Route>
 
         </Routes>

@@ -382,7 +382,7 @@ const Register = () => {
                             </IonSegmentButton>
                             <IonSegmentButton value="prestataire">
                                 <IonIcon icon={businessOutline} />
-                                <IonLabel>Prestataire</IonLabel>
+                                <IonLabel>Professionnel</IonLabel>
                             </IonSegmentButton>
                         </IonSegment>
                     </div>
