@@ -398,7 +398,7 @@ const MonCommerce = () => {
                                     <IonIcon icon={warningOutline} />
                                     <span>
                                         {fiche.joursRestants <= 7
-                                            ? `⚠️ Expire dans ${fiche.joursRestants} jour(s) !`
+                                            ? `Expire dans ${fiche.joursRestants} jour(s) !`
                                             : `Expire dans ${fiche.joursRestants} jour(s)`
                                         }
                                     </span>
