@@ -8,7 +8,6 @@ import {
     eyeOutline,
     createOutline,
     trashOutline,
-    refreshOutline,
     warningOutline,
     locationOutline,
     calendarOutline,
@@ -42,8 +41,8 @@ const MonCommerce = () => {
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
     const [deleteLoading, setDeleteLoading] = useState(false);
 
-    // Modal activation (NOUVEAU)
-    const [activationModal, setActivationModal] = useState({ isOpen: false, fiche: null });
+    // Modal activation/réactivation
+    const [activationModal, setActivationModal] = useState({ isOpen: false, fiche: null, isReactivation: false });
     const [souscriptionsDisponibles, setSouscriptionsDisponibles] = useState([]);
     const [activationLoading, setActivationLoading] = useState(false);
     const [loadingSouscriptions, setLoadingSouscriptions] = useState(false);
@@ -84,13 +83,11 @@ const MonCommerce = () => {
         navigate(`/auth/prestataire/${fiche.id}`);
     };
 
-    // Ouvrir la modal de suppression
     const handleDelete = (fiche) => {
         setDeleteModal({ isOpen: true, fiche });
         setDeleteConfirmText('');
     };
 
-    // Confirmer la suppression
     const confirmDelete = async () => {
         if (deleteConfirmText.toLowerCase() !== 'supprimer') return;
 
@@ -112,7 +109,6 @@ const MonCommerce = () => {
         }
     };
 
-    // Fermer la modal de suppression
     const closeDeleteModal = () => {
         if (deleteLoading) return;
         setDeleteModal({ isOpen: false, fiche: null });
@@ -120,12 +116,11 @@ const MonCommerce = () => {
     };
 
     // ==========================================
-    // GESTION ACTIVATION FICHE (NOUVEAU)
+    // GESTION ACTIVATION / RÉACTIVATION
     // ==========================================
 
-    // Ouvrir la modal d'activation
-    const handleActivate = async (fiche) => {
-        setActivationModal({ isOpen: true, fiche });
+    const handleActivate = async (fiche, isReactivation = false) => {
+        setActivationModal({ isOpen: true, fiche, isReactivation });
         setLoadingSouscriptions(true);
 
         try {
@@ -134,17 +129,16 @@ const MonCommerce = () => {
                 setSouscriptionsDisponibles(result.data || []);
             } else {
                 setError(result.message || 'Erreur lors du chargement des abonnements');
-                setActivationModal({ isOpen: false, fiche: null });
+                setActivationModal({ isOpen: false, fiche: null, isReactivation: false });
             }
         } catch (err) {
             setError('Erreur lors du chargement des abonnements disponibles');
-            setActivationModal({ isOpen: false, fiche: null });
+            setActivationModal({ isOpen: false, fiche: null, isReactivation: false });
         } finally {
             setLoadingSouscriptions(false);
         }
     };
 
-    // Confirmer l'activation avec une souscription
     const confirmActivation = async (souscriptionId) => {
         setActivationLoading(true);
 
@@ -155,8 +149,8 @@ const MonCommerce = () => {
             );
 
             if (result.success) {
-                setSuccess(result.message || 'Fiche activée avec succès !');
-                setActivationModal({ isOpen: false, fiche: null });
+                setSuccess(result.message || (activationModal.isReactivation ? 'Fiche réactivée avec succès !' : 'Fiche activée avec succès !'));
+                setActivationModal({ isOpen: false, fiche: null, isReactivation: false });
                 setSouscriptionsDisponibles([]);
                 loadFiches();
             } else {
@@ -169,25 +163,10 @@ const MonCommerce = () => {
         }
     };
 
-    // Fermer la modal d'activation
     const closeActivationModal = () => {
         if (activationLoading) return;
-        setActivationModal({ isOpen: false, fiche: null });
+        setActivationModal({ isOpen: false, fiche: null, isReactivation: false });
         setSouscriptionsDisponibles([]);
-    };
-
-    const handleReactivate = async (fiche) => {
-        try {
-            const result = await PrestataireService.reactivateFiche(fiche.id);
-            if (result.success) {
-                setSuccess('Fiche réactivée avec succès');
-                loadFiches();
-            } else {
-                setError(result.message);
-            }
-        } catch (err) {
-            setError('Erreur lors de la réactivation');
-        }
     };
 
     const handleModalSuccess = () => {
@@ -197,7 +176,12 @@ const MonCommerce = () => {
         loadFiches();
     };
 
-    // Badge de statut (Active/Inactive/Expirée/Bloquée/En attente)
+    // Vérifie si la fiche peut être réactivée
+    const canReactivate = (fiche) => {
+        // Peut réactiver si : inactive OU expirée, mais pas blacklistée ni en attente d'activation
+        return !fiche.estBlackliste && !fiche.needsActivation && (!fiche.estActif || fiche.isExpired);
+    };
+
     const getStatusBadge = (fiche) => {
         if (fiche.estBlackliste) {
             return <span className="status-badge blacklisted">Bloquée</span>;
@@ -214,29 +198,23 @@ const MonCommerce = () => {
         return <span className="status-badge active">Active</span>;
     };
 
-    // Badge des jours restants (séparé du statut)
     const getDaysRemainingBadge = (fiche) => {
-        // Ne pas afficher si en attente d'activation, expirée, inactive ou blacklistée
         if (fiche.needsActivation || fiche.isExpired || !fiche.estActif || fiche.estBlackliste) {
             return null;
         }
 
         const jours = fiche.joursRestants;
+        if (jours === null || jours === undefined) return null;
 
-        if (jours === null || jours === undefined) {
-            return null;
-        }
-
-        // Déterminer la classe CSS selon le nombre de jours
         let className = 'days-badge';
         if (jours <= 7) {
-            className += ' critical'; // Rouge - urgent
+            className += ' critical';
         } else if (jours <= 30) {
-            className += ' warning'; // Orange - attention
+            className += ' warning';
         } else if (jours <= 90) {
-            className += ' info'; // Bleu - info
+            className += ' info';
         } else {
-            className += ' normal'; // Vert - ok
+            className += ' normal';
         }
 
         return (
@@ -247,11 +225,8 @@ const MonCommerce = () => {
         );
     };
 
-    // Badge durée abonnement (6 ou 12 mois)
     const getAbonnementBadge = (fiche) => {
-        if (fiche.needsActivation || !fiche.abonnementInfo) {
-            return null;
-        }
+        if (fiche.needsActivation || !fiche.abonnementInfo) return null;
 
         const duree = fiche.abonnementInfo.dureeEnMois;
         return (
@@ -295,7 +270,6 @@ const MonCommerce = () => {
                 </button>
             </div>
 
-            {/* Indicateur de limite */}
             <div className="fiches-limit-info">
                 <span>{fiches.length} / {maxFiches} fiche(s)</span>
                 {!peutCreer && (
@@ -303,7 +277,6 @@ const MonCommerce = () => {
                 )}
             </div>
 
-            {/* Messages */}
             {error && (
                 <div className="message-banner error">
                     <IonIcon icon={warningOutline} />
@@ -323,7 +296,6 @@ const MonCommerce = () => {
                 </div>
             )}
 
-            {/* Liste des fiches */}
             {fiches.length === 0 ? (
                 <div className="no-fiches">
                     <IonIcon icon={storefrontOutline} />
@@ -341,7 +313,7 @@ const MonCommerce = () => {
                     {fiches.map(fiche => (
                         <div
                             key={fiche.id}
-                            className={`fiche-card ${!fiche.isValid ? 'invalid' : ''} ${fiche.needsActivation ? 'needs-activation' : ''}`}
+                            className={`fiche-card ${!fiche.isValid ? 'invalid' : ''} ${fiche.needsActivation ? 'needs-activation' : ''} ${fiche.isExpired ? 'expired' : ''}`}
                         >
                             <div className="fiche-image">
                                 {fiche.imagePrincipale ? (
@@ -351,7 +323,6 @@ const MonCommerce = () => {
                                         <IonIcon icon={storefrontOutline} />
                                     </div>
                                 )}
-                                {/* Conteneur pour les badges */}
                                 <div className="fiche-badges">
                                     {getStatusBadge(fiche)}
                                     {getDaysRemainingBadge(fiche)}
@@ -368,8 +339,7 @@ const MonCommerce = () => {
                                     <span>{fiche.ville}</span>
                                 </div>
 
-                                {/* Afficher les dates seulement si activée */}
-                                {!fiche.needsActivation && (
+                                {!fiche.needsActivation && !fiche.isExpired && fiche.estActif && (
                                     <div className="fiche-dates">
                                         <IonIcon icon={calendarOutline} />
                                         <span>{formatDate(fiche.dateDebut)} → {formatDate(fiche.dateFin)}</span>
@@ -384,27 +354,46 @@ const MonCommerce = () => {
                                 )}
                             </div>
 
-                            {/* Banner d'activation pour les fiches en attente */}
+                            {/* Banner pour fiche en attente d'activation */}
                             {fiche.needsActivation && (
                                 <div className="activation-banner">
                                     <div className="activation-banner-content">
                                         <IonIcon icon={flashOutline} />
                                         <div>
                                             <strong>Activation requise</strong>
-                                            <span>Choisissez votre formule 6 ou 12 mois</span>
+                                            <span>Choisissez un abonnement pour activer</span>
                                         </div>
                                     </div>
                                     <button
                                         className="btn-activate"
-                                        onClick={() => handleActivate(fiche)}
+                                        onClick={() => handleActivate(fiche, false)}
                                     >
                                         Activer
                                     </button>
                                 </div>
                             )}
 
+                            {/* Banner pour fiche expirée ou inactive */}
+                            {canReactivate(fiche) && (
+                                <div className="activation-banner expired">
+                                    <div className="activation-banner-content">
+                                        <IonIcon icon={warningOutline} />
+                                        <div>
+                                            <strong>{fiche.isExpired ? 'Abonnement expiré' : 'Fiche inactive'}</strong>
+                                            <span>Renouvelez pour réactiver votre fiche</span>
+                                        </div>
+                                    </div>
+                                    <button
+                                        className="btn-activate"
+                                        onClick={() => handleActivate(fiche, true)}
+                                    >
+                                        Réactiver
+                                    </button>
+                                </div>
+                            )}
+
                             {/* Warning si proche expiration */}
-                            {!fiche.needsActivation && fiche.isValid && fiche.joursRestants <= 30 && fiche.joursRestants > 0 && (
+                            {!fiche.needsActivation && !fiche.isExpired && fiche.estActif && fiche.joursRestants <= 30 && fiche.joursRestants > 0 && (
                                 <div className={`expiration-warning ${fiche.joursRestants <= 7 ? 'critical' : ''}`}>
                                     <IonIcon icon={warningOutline} />
                                     <span>
@@ -435,19 +424,20 @@ const MonCommerce = () => {
                                 {fiche.needsActivation && (
                                     <button
                                         className="action-btn activate"
-                                        onClick={() => handleActivate(fiche)}
+                                        onClick={() => handleActivate(fiche, false)}
                                         title="Activer"
                                     >
                                         <IonIcon icon={flashOutline} />
                                     </button>
                                 )}
-                                {!fiche.estActif && !fiche.isExpired && !fiche.needsActivation && (
+                                {/* Bouton Réactiver pour les fiches expirées/inactives */}
+                                {canReactivate(fiche) && (
                                     <button
                                         className="action-btn reactivate"
-                                        onClick={() => handleReactivate(fiche)}
+                                        onClick={() => handleActivate(fiche, true)}
                                         title="Réactiver"
                                     >
-                                        <IonIcon icon={refreshOutline} />
+                                        <IonIcon icon={flashOutline} />
                                     </button>
                                 )}
                                 <button
@@ -539,7 +529,7 @@ const MonCommerce = () => {
                 </div>
             )}
 
-            {/* Modal activation (NOUVEAU) */}
+            {/* Modal activation / réactivation */}
             {activationModal.isOpen && (
                 <div className="activation-modal-overlay" onClick={closeActivationModal}>
                     <div className="activation-modal" onClick={(e) => e.stopPropagation()}>
@@ -547,16 +537,11 @@ const MonCommerce = () => {
                             <div className="activation-modal-icon-wrapper">
                                 <IonIcon icon={flashOutline} className="activation-modal-icon" />
                             </div>
-                            <h2>Activer votre fiche</h2>
+                            <h2>{activationModal.isReactivation ? 'Réactiver votre fiche' : 'Activer votre fiche'}</h2>
                             <p className="activation-modal-fiche-name">"{activationModal.fiche?.nomCommerce}"</p>
                         </div>
 
                         <div className="activation-modal-content">
-                            <div className="activation-modal-warning">
-                                <IonIcon icon={lockClosedOutline} />
-                                <span>Ce choix est <strong>définitif</strong> et ne pourra pas être modifié.</span>
-                            </div>
-
                             {loadingSouscriptions ? (
                                 <div className="activation-loading">
                                     <div className="spinner"></div>
@@ -566,20 +551,30 @@ const MonCommerce = () => {
                                 <div className="activation-no-souscription">
                                     <IonIcon icon={warningOutline} />
                                     <h3>Aucun abonnement disponible</h3>
-                                    <p>Vous devez d'abord acheter un abonnement pour activer cette fiche.</p>
+                                    <p>
+                                        {activationModal.isReactivation
+                                            ? 'Votre abonnement a expiré. Achetez un nouvel abonnement pour réactiver votre fiche.'
+                                            : 'Vous devez d\'abord acheter un abonnement pour activer cette fiche.'
+                                        }
+                                    </p>
                                     <button
                                         className="btn-primary"
                                         onClick={() => {
                                             closeActivationModal();
-                                            navigate('/auth/abonnements');
+                                            navigate('/auth/abonnement');
                                         }}
                                     >
-                                        Voir les abonnements
+                                        Voir les offres
                                     </button>
                                 </div>
                             ) : (
                                 <div className="souscriptions-list">
-                                    <p className="souscriptions-list-title">Choisissez l'abonnement à utiliser :</p>
+                                    <p className="souscriptions-list-title">
+                                        {activationModal.isReactivation
+                                            ? 'Choisissez l\'abonnement pour réactiver :'
+                                            : 'Choisissez l\'abonnement à utiliser :'
+                                        }
+                                    </p>
 
                                     {souscriptionsDisponibles.map(souscription => (
                                         <div
