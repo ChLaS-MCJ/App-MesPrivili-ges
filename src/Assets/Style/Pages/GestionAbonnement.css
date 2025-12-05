@@ -1064,3 +1064,56 @@
         margin-left: auto;
     }
 }
+
+/* Carte info code promo */
+.promo-info-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.1), rgba(254, 126, 79, 0.05));
+    border: 1px solid rgba(254, 126, 79, 0.2);
+    border-radius: 12px;
+    margin-top: 16px;
+}
+
+.promo-info-card .promo-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #fe7e4f, #ff9a6c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.promo-info-card .promo-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.promo-info-card .promo-title {
+    font-weight: 600;
+    color: #fe7e4f;
+    font-size: 14px;
+}
+
+.promo-info-card .promo-description {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
+}
+
+/* Dark mode */
+[data-theme="dark"] .promo-info-card {
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.15), rgba(254, 126, 79, 0.08));
+    border-color: rgba(254, 126, 79, 0.3);
+}
+
+[data-theme="dark"] .promo-info-card .promo-description {
+    color: #aaa;
+}

@@ -10,9 +10,12 @@ import Prestataires from '../pages/Private/Prestataires';
 import FichePrestataire from '../pages/Private/FichePrestataire';
 import AccountSettings from '../pages/Private/AccountSettings';
 import History from '../pages/Private/History';
-import LegalMentions from '../pages/Private/LegalMentions';
-import TermsOfService from '../pages/Private/TermsOfService';
 
+//Legals
+import LegalMentions from '../pages/Private/Legals/LegalMentions';
+import TermsOfService from '../pages/Private/Legals/TermsOfService';
+import TermsOfSale from '../pages/Private/Legals/TermsOfSale';
+import PrivacyPolicy from '../pages/Private/Legals/PrivacyPolicy';
 // Pages Prestataire
 import MonCommerce from '../pages/Private/MonCommerce';
 import MesPromotions from '../pages/Private/MesPromotions';
@@ -56,6 +59,10 @@ const PrivateRouter = () => {
                 <Route path="history" element={<History />} />
                 <Route path="legal-mentions" element={<LegalMentions />} />
                 <Route path="terms-of-service" element={<TermsOfService />} />
+
+                <Route path="privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="terms-of-sale" element={<TermsOfSale />} />
+
                 <Route path="prestataire/:id" element={<FichePrestataire />} />
 
                 {/* Routes Prestataire */}

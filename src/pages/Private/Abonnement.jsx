@@ -20,9 +20,13 @@ import {
     chevronDownOutline,
     chevronUpOutline,
     refreshOutline,
-    informationCircleOutline
+    informationCircleOutline,
+    ticketOutline,
+    checkmarkOutline,
+    closeCircleOutline
 } from 'ionicons/icons';
 import AbonnementService from '../../Services/Abonnement.services';
+import CodePromoService from '../../Services/CodePromo.services';
 import { useAuth } from '../../Utils/AuthContext';
 
 const Abonnement = () => {
@@ -37,6 +41,7 @@ const Abonnement = () => {
     const [loading, setLoading] = useState(true);
     const [checkoutLoading, setCheckoutLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
 
     const [selectedDuration, setSelectedDuration] = useState(null);
     const [nombreFiches, setNombreFiches] = useState(1);
@@ -48,6 +53,14 @@ const Abonnement = () => {
 
     // État pour détecter le scroll
     const [isScrolled, setIsScrolled] = useState(false);
+
+    // ========== ÉTATS CODE PROMO ==========
+    const [showCodePromo, setShowCodePromo] = useState(false);
+    const [codePromo, setCodePromo] = useState('');
+    const [codePromoLoading, setCodePromoLoading] = useState(false);
+    const [codePromoValid, setCodePromoValid] = useState(null); // null, true, false
+    const [codePromoInfo, setCodePromoInfo] = useState(null);
+    const [codePromoError, setCodePromoError] = useState(null);
 
     const MAX_FICHES = 10;
     const MIN_FICHES = 1;
@@ -116,7 +129,6 @@ const Abonnement = () => {
         setError(null);
 
         try {
-            // Passer l'option renouvellementAuto au service
             const result = await AbonnementService.createCheckout(
                 selectedDuration,
                 nombreFiches,
@@ -134,6 +146,85 @@ const Abonnement = () => {
         } finally {
             setCheckoutLoading(false);
         }
+    };
+
+    // ========== FONCTIONS CODE PROMO ==========
+
+    /**
+     * Valider le code promo entré
+     */
+    const handleValidateCodePromo = async () => {
+        if (!codePromo.trim()) {
+            setCodePromoError('Veuillez entrer un code promo');
+            return;
+        }
+
+        setCodePromoLoading(true);
+        setCodePromoError(null);
+        setCodePromoValid(null);
+        setCodePromoInfo(null);
+
+        try {
+            const result = await CodePromoService.validateCode(codePromo);
+
+            if (result.success) {
+                setCodePromoValid(true);
+                setCodePromoInfo(result.data);
+            } else {
+                setCodePromoValid(false);
+                setCodePromoError(result.message);
+            }
+        } catch (err) {
+            console.error('Erreur validation code promo:', err);
+            setCodePromoValid(false);
+            setCodePromoError('Erreur lors de la validation du code');
+        } finally {
+            setCodePromoLoading(false);
+        }
+    };
+
+    /**
+     * Appliquer le code promo et créer la souscription gratuite
+     */
+    const handleApplyCodePromo = async () => {
+        if (!codePromoValid || !codePromoInfo) return;
+
+        setCodePromoLoading(true);
+        setCodePromoError(null);
+
+        try {
+            const result = await CodePromoService.applyCode(codePromo);
+
+            if (result.success) {
+                setSuccessMessage(result.message);
+                // Rediriger vers la page de gestion ou mon commerce après 2s
+                setTimeout(() => {
+                    navigate('/auth/mon-commerce', {
+                        state: {
+                            codePromoApplied: true,
+                            message: result.message
+                        }
+                    });
+                }, 2000);
+            } else {
+                setCodePromoError(result.message);
+            }
+        } catch (err) {
+            console.error('Erreur application code promo:', err);
+            setCodePromoError('Erreur lors de l\'application du code promo');
+        } finally {
+            setCodePromoLoading(false);
+        }
+    };
+
+    /**
+     * Reset le formulaire code promo
+     */
+    const resetCodePromo = () => {
+        setCodePromo('');
+        setCodePromoValid(null);
+        setCodePromoInfo(null);
+        setCodePromoError(null);
     };
 
     const formatPrice = (price) => {
@@ -185,6 +276,14 @@ const Abonnement = () => {
 
             {/* Contenu scrollable */}
             <div className="abonnement-scroll" onScroll={handleScroll}>
+                {/* Message de succès */}
+                {successMessage && (
+                    <div className="success-banner">
+                        <IonIcon icon={checkmarkCircle} />
+                        <span>{successMessage}</span>
+                    </div>
+                )}
+
                 {/* Message d'erreur */}
                 {error && (
                     <div className="error-banner">
@@ -197,12 +296,23 @@ const Abonnement = () => {
                 )}
 
                 <div className="abonnement-content">
+                    {/* Hero Section */}
+                    <section className="hero-section">
+                        <div className="hero-icon">
+                            <IonIcon icon={sparklesOutline} />
+                        </div>
+                        <h2 className="hero-title">Boostez votre visibilité</h2>
+                        <p className="hero-subtitle">Rejoignez les commerces qui attirent plus de clients grâce à leurs promotions</p>
+                    </section>
+
                     {/* Section 1: Nombre de fiches */}
                     <section className="selection-section">
                         <div className="section-header">
-                            <div className="section-number">1</div>
+                            <div className="section-icon">
+                                <IonIcon icon={storefrontOutline} />
+                            </div>
                             <div className="section-title">
-                                <h2>Nombre de fiches</h2>
+                                <h2>Vos établissements</h2>
                                 <p>Combien de commerces souhaitez-vous référencer ?</p>
                             </div>
                         </div>
@@ -244,10 +354,12 @@ const Abonnement = () => {
                     {/* Section 2: Durée d'engagement */}
                     <section className="selection-section">
                         <div className="section-header">
-                            <div className="section-number">2</div>
+                            <div className="section-icon">
+                                <IonIcon icon={timeOutline} />
+                            </div>
                             <div className="section-title">
                                 <h2>Durée d'engagement</h2>
-                                <p>Choisissez la durée de votre abonnement</p>
+                                <p>Plus c'est long, plus c'est avantageux !</p>
                             </div>
                         </div>
 
@@ -306,87 +418,223 @@ const Abonnement = () => {
                         )}
                     </section>
 
-                    {/* Section 3: Renouvellement automatique */}
-                    <section className="selection-section">
-                        <div className="section-header">
-                            <div className="section-number">3</div>
-                            <div className="section-title">
-                                <h2>Renouvellement automatique</h2>
-                                <p>Choisissez si vous souhaitez un renouvellement automatique</p>
+                    {/* ========== SECTION CODE PROMO ========== */}
+                    <section className="selection-section code-promo-section">
+                        <button
+                            className="code-promo-toggle"
+                            onClick={() => {
+                                setShowCodePromo(!showCodePromo);
+                                if (!showCodePromo) resetCodePromo();
+                            }}
+                        >
+                            <div className="toggle-content">
+                                <IonIcon icon={ticketOutline} />
+                                <span>J'ai un code promo</span>
                             </div>
-                        </div>
+                            <IonIcon icon={showCodePromo ? chevronUpOutline : chevronDownOutline} />
+                        </button>
 
-                        <div className="auto-renew-option">
-                            <label className="auto-renew-checkbox">
-                                <input
-                                    type="checkbox"
-                                    checked={renouvellementAuto}
-                                    onChange={(e) => setRenouvellementAuto(e.target.checked)}
-                                />
-                                <span className="checkbox-custom">
-                                    {renouvellementAuto && <IonIcon icon={checkmarkCircle} />}
-                                </span>
-                                <div className="checkbox-content">
-                                    <span className="checkbox-label">
-                                        <IonIcon icon={refreshOutline} />
-                                        Activer le renouvellement automatique
-                                    </span>
-                                    <span className="checkbox-description">
-                                        Votre abonnement sera renouvelé automatiquement à chaque échéance
-                                    </span>
+                        {showCodePromo && (
+                            <div className="code-promo-content">
+                                <div className="code-promo-input-group">
+                                    <div className={`code-promo-input-wrapper ${codePromoValid === true ? 'valid' : ''} ${codePromoValid === false ? 'invalid' : ''}`}>
+                                        <input
+                                            type="text"
+                                            placeholder="Entrez votre code"
+                                            value={codePromo}
+                                            onChange={(e) => {
+                                                setCodePromo(e.target.value.toUpperCase());
+                                                setCodePromoValid(null);
+                                                setCodePromoError(null);
+                                                setCodePromoInfo(null);
+                                            }}
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter') handleValidateCodePromo();
+                                            }}
+                                            disabled={codePromoLoading || codePromoValid === true}
+                                        />
+                                        {codePromoValid === true && (
+                                            <IonIcon icon={checkmarkCircle} className="input-status valid" />
+                                        )}
+                                        {codePromoValid === false && (
+                                            <IonIcon icon={closeCircleOutline} className="input-status invalid" />
+                                        )}
+                                    </div>
+
+                                    {codePromoValid !== true ? (
+                                        <button
+                                            className="code-promo-validate-btn"
+                                            onClick={handleValidateCodePromo}
+                                            disabled={codePromoLoading || !codePromo.trim()}
+                                        >
+                                            {codePromoLoading ? (
+                                                <span className="loading-dots"></span>
+                                            ) : (
+                                                'Vérifier'
+                                            )}
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="code-promo-reset-btn"
+                                            onClick={resetCodePromo}
+                                        >
+                                            <IonIcon icon={closeOutline} />
+                                        </button>
+                                    )}
                                 </div>
-                            </label>
 
-                            <button
-                                className="info-toggle"
-                                onClick={() => setShowAutoRenewInfo(!showAutoRenewInfo)}
-                            >
-                                <IonIcon icon={informationCircleOutline} />
-                                <span>En savoir plus</span>
-                                <IonIcon icon={showAutoRenewInfo ? chevronUpOutline : chevronDownOutline} />
-                            </button>
+                                {/* Erreur code promo */}
+                                {codePromoError && (
+                                    <div className="code-promo-error">
+                                        <IonIcon icon={alertCircleOutline} />
+                                        <span>{codePromoError}</span>
+                                    </div>
+                                )}
 
-                            {showAutoRenewInfo && (
-                                <div className="auto-renew-info">
-                                    <div className="info-item">
-                                        <IonIcon icon={checkmarkCircle} />
-                                        <span>Vous serez prélevé de <strong>{formatPrice(totals.ttc)}</strong> à chaque renouvellement</span>
-                                    </div>
-                                    <div className="info-item">
-                                        <IonIcon icon={checkmarkCircle} />
-                                        <span>Un email de rappel sera envoyé <strong>30 jours</strong> et <strong>7 jours</strong> avant le prélèvement</span>
-                                    </div>
-                                    <div className="info-item">
-                                        <IonIcon icon={checkmarkCircle} />
-                                        <span>Vous pouvez <strong>désactiver</strong> le renouvellement à tout moment depuis votre espace</span>
-                                    </div>
-                                    <div className="info-item">
-                                        <IonIcon icon={checkmarkCircle} />
-                                        <span>Votre carte sera <strong>sauvegardée de manière sécurisée</strong> par Stripe</span>
-                                    </div>
-                                </div>
-                            )}
+                                {/* Code promo valide - Afficher les infos */}
+                                {codePromoValid && codePromoInfo && (
+                                    <div className="code-promo-success">
+                                        <div className="code-promo-info">
+                                            <div className="code-promo-badge">
+                                                <IonIcon icon={giftOutline} />
+                                                <span>{codePromoInfo.nom}</span>
+                                            </div>
+                                            <div className="code-promo-details">
+                                                <div className="detail-item">
+                                                    <IonIcon icon={checkmarkOutline} />
+                                                    <span><strong>{codePromoInfo.dureeEnMois} mois</strong> d'abonnement gratuit</span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <IonIcon icon={checkmarkOutline} />
+                                                    <span>Aucun paiement requis</span>
+                                                </div>
+                                                {codePromoInfo.hasRestriction && codePromoInfo.restrictedCategory && (
+                                                    <div className="detail-item restriction">
+                                                        <IonIcon icon={informationCircleOutline} />
+                                                        <span>Réservé à la catégorie <strong>{codePromoInfo.restrictedCategory.nom}</strong></span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
 
-                            {renouvellementAuto && (
-                                <div className="auto-renew-summary">
-                                    <IonIcon icon={refreshOutline} />
-                                    <span>
-                                        Prochain prélèvement prévu : <strong>{formatPrice(totals.ttc)}</strong> dans <strong>{totals.duree} mois</strong>
-                                    </span>
-                                </div>
-                            )}
-                        </div>
+                                        <button
+                                            className="code-promo-apply-btn"
+                                            onClick={handleApplyCodePromo}
+                                            disabled={codePromoLoading}
+                                        >
+                                            {codePromoLoading ? (
+                                                <span className="loading-text">
+                                                    <span className="loading-dots"></span>
+                                                    Application...
+                                                </span>
+                                            ) : (
+                                                <>
+                                                    <IonIcon icon={giftOutline} />
+                                                    <span>Utiliser ce code</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </section>
+
+                    {/* Séparateur "ou" si code promo n'est pas appliqué */}
+                    {!codePromoValid && (
+                        <div className="section-separator">
+                            <span>ou payer par carte</span>
+                        </div>
+                    )}
+
+                    {/* Section 3: Renouvellement automatique - Masquer si code promo validé */}
+                    {!codePromoValid && (
+                        <section className="selection-section">
+                            <div className="section-header">
+                                <div className="section-icon">
+                                    <IonIcon icon={refreshOutline} />
+                                </div>
+                                <div className="section-title">
+                                    <h2>Tranquillité assurée</h2>
+                                    <p>Ne vous souciez plus des dates d'expiration</p>
+                                </div>
+                            </div>
+
+                            <div className="auto-renew-option">
+                                <label className="auto-renew-checkbox">
+                                    <input
+                                        type="checkbox"
+                                        checked={renouvellementAuto}
+                                        onChange={(e) => setRenouvellementAuto(e.target.checked)}
+                                    />
+                                    <span className="checkbox-custom">
+                                        {renouvellementAuto && <IonIcon icon={checkmarkCircle} />}
+                                    </span>
+                                    <div className="checkbox-content">
+                                        <span className="checkbox-label">
+                                            <IonIcon icon={refreshOutline} />
+                                            Activer le renouvellement automatique
+                                        </span>
+                                        <span className="checkbox-description">
+                                            Votre abonnement sera renouvelé automatiquement à chaque échéance
+                                        </span>
+                                    </div>
+                                </label>
+
+                                <button
+                                    className="info-toggle"
+                                    onClick={() => setShowAutoRenewInfo(!showAutoRenewInfo)}
+                                >
+                                    <IonIcon icon={informationCircleOutline} />
+                                    <span>En savoir plus</span>
+                                    <IonIcon icon={showAutoRenewInfo ? chevronUpOutline : chevronDownOutline} />
+                                </button>
+
+                                {showAutoRenewInfo && (
+                                    <div className="auto-renew-info">
+                                        <div className="info-item">
+                                            <IonIcon icon={checkmarkCircle} />
+                                            <span>Vous serez prélevé de <strong>{formatPrice(totals.ttc)}</strong> à chaque renouvellement</span>
+                                        </div>
+                                        <div className="info-item">
+                                            <IonIcon icon={checkmarkCircle} />
+                                            <span>Un email de rappel sera envoyé <strong>30 jours</strong> et <strong>7 jours</strong> avant le prélèvement</span>
+                                        </div>
+                                        <div className="info-item">
+                                            <IonIcon icon={checkmarkCircle} />
+                                            <span>Vous pouvez <strong>désactiver</strong> le renouvellement à tout moment depuis votre espace</span>
+                                        </div>
+                                        <div className="info-item">
+                                            <IonIcon icon={checkmarkCircle} />
+                                            <span>Votre carte sera <strong>sauvegardée de manière sécurisée</strong> par Stripe</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {renouvellementAuto && (
+                                    <div className="auto-renew-summary">
+                                        <IonIcon icon={refreshOutline} />
+                                        <span>
+                                            Prochain prélèvement prévu : <strong>{formatPrice(totals.ttc)}</strong> dans <strong>{totals.duree} mois</strong>
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+                    )}
 
                     {/* Section 4: Ce qui est inclus */}
                     <section className="features-section">
-                        <h3>Ce qui est inclus</h3>
+                        <div className="features-header">
+                            <IonIcon icon={giftOutline} />
+                            <h3>Tout est inclus</h3>
+                        </div>
                         <div className="features-grid">
                             <div className="feature-item">
                                 <div className="feature-icon">
                                     <IonIcon icon={storefrontOutline} />
                                 </div>
-                                <span>{nombreFiches} fiche{nombreFiches > 1 ? 's' : ''} commerce</span>
+                                <span>{codePromoValid ? '1' : nombreFiches} fiche{(!codePromoValid && nombreFiches > 1) ? 's' : ''} commerce</span>
                             </div>
                             <div className="feature-item">
                                 <div className="feature-icon">
@@ -420,6 +668,14 @@ const Abonnement = () => {
                                     <p>Le paiement est sécurisé par Stripe. Vous payez le montant total en une seule fois pour la durée choisie.</p>
                                 </div>
                                 <div className="faq-item">
+                                    <h4>J'ai un code promo, comment l'utiliser ?</h4>
+                                    <p>Cliquez sur "J'ai un code promo" et entrez votre code. Si le code est valide, vous pourrez bénéficier d'un abonnement gratuit sans paiement.</p>
+                                </div>
+                                <div className="faq-item">
+                                    <h4>Que se passe-t-il après un abonnement offert par code promo ?</h4>
+                                    <p>À la fin de la période offerte, votre fiche sera désactivée. Vous pourrez alors souscrire un abonnement payant pour continuer.</p>
+                                </div>
+                                <div className="faq-item">
                                     <h4>Comment fonctionne le renouvellement automatique ?</h4>
                                     <p>Si vous l'activez, votre carte sera prélevée automatiquement à l'échéance. Vous recevrez un rappel par email 30 jours et 7 jours avant. Vous pouvez désactiver cette option à tout moment.</p>
                                 </div>
@@ -445,50 +701,52 @@ const Abonnement = () => {
                 </div>
             </div>
 
-            {/* Footer fixe */}
-            <div className="checkout-footer">
-                <div className="checkout-summary">
-                    <div className="summary-details">
-                        <div className="summary-line">
-                            <span>{nombreFiches} fiche{nombreFiches > 1 ? 's' : ''} × {totals.duree} mois</span>
-                            <span>{formatPrice(totals.ht)} HT</span>
-                        </div>
-                        {renouvellementAuto && (
-                            <div className="summary-line auto-renew">
-                                <IonIcon icon={refreshOutline} />
-                                <span>Renouvellement auto activé</span>
+            {/* Footer fixe - Masquer si code promo appliqué */}
+            {!codePromoValid && (
+                <div className="checkout-footer">
+                    <div className="checkout-summary">
+                        <div className="summary-details">
+                            <div className="summary-line">
+                                <span>{nombreFiches} fiche{nombreFiches > 1 ? 's' : ''} × {totals.duree} mois</span>
+                                <span>{formatPrice(totals.ht)} HT</span>
                             </div>
-                        )}
-                        <div className="summary-total">
-                            <span>Total TTC</span>
-                            <span className="total-amount">{formatPrice(totals.ttc)}</span>
+                            {renouvellementAuto && (
+                                <div className="summary-line auto-renew">
+                                    <IonIcon icon={refreshOutline} />
+                                    <span>Renouvellement auto activé</span>
+                                </div>
+                            )}
+                            <div className="summary-total">
+                                <span>Total TTC</span>
+                                <span className="total-amount">{formatPrice(totals.ttc)}</span>
+                            </div>
                         </div>
+
+                        <button
+                            className="checkout-button"
+                            onClick={handleCheckout}
+                            disabled={checkoutLoading || !selectedDuration}
+                        >
+                            {checkoutLoading ? (
+                                <span className="loading-text">
+                                    <span className="loading-dots"></span>
+                                    Redirection...
+                                </span>
+                            ) : (
+                                <>
+                                    <IonIcon icon={cardOutline} />
+                                    <span>Payer {formatPrice(totals.ttc)}</span>
+                                </>
+                            )}
+                        </button>
                     </div>
 
-                    <button
-                        className="checkout-button"
-                        onClick={handleCheckout}
-                        disabled={checkoutLoading || !selectedDuration}
-                    >
-                        {checkoutLoading ? (
-                            <span className="loading-text">
-                                <span className="loading-dots"></span>
-                                Redirection...
-                            </span>
-                        ) : (
-                            <>
-                                <IonIcon icon={cardOutline} />
-                                <span>Payer {formatPrice(totals.ttc)}</span>
-                            </>
-                        )}
-                    </button>
+                    <div className="secure-badge">
+                        <IonIcon icon={shieldCheckmarkOutline} />
+                        <span>Paiement sécurisé par Stripe</span>
+                    </div>
                 </div>
-
-                <div className="secure-badge">
-                    <IonIcon icon={shieldCheckmarkOutline} />
-                    <span>Paiement sécurisé par Stripe</span>
-                </div>
-            </div>
+            )}
         </div>
     );
 };

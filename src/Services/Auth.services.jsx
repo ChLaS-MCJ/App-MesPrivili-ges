@@ -76,7 +76,8 @@ const AuthService = {
                     success: true,
                     data: {
                         user: response.data.data.user,
-                        token: response.data.data.token
+                        token: response.data.data.token,
+                        prestataire: response.data.data.prestataire || null
                     }
                 };
             }
@@ -165,6 +166,43 @@ const AuthService = {
         }
     },
 
+    /**
+ * Inscription prestataire (SIRET)
+ * POST /api/prestataires/register
+ */
+    async registerPrestataire(data) {
+        try {
+            const response = await axiosInstance.post('/prestataires/register', data);
+
+            if (response.data.success && response.data.data.token) {
+                await this.setToken(response.data.data.token);
+                await this.setRefreshToken(response.data.data.refreshToken);
+                await this.setUser(response.data.data.user);
+                await this.setRememberMe(true);
+
+                return {
+                    success: true,
+                    message: response.data.message,
+                    data: {
+                        user: response.data.data.user,
+                        entreprise: response.data.data.entreprise,
+                        token: response.data.data.token,
+                        nextStep: response.data.data.nextStep
+                    }
+                };
+            }
+
+            throw new Error(response.data.message || 'Erreur lors de l\'inscription');
+        } catch (error) {
+            console.error('❌ Erreur registerPrestataire:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || error.message || 'Erreur lors de l\'inscription prestataire',
+                errors: error.response?.data?.errors || null
+            };
+        }
+    },
+
     // ========================================
     // 🚪 DÉCONNEXION
     // ========================================
@@ -220,7 +258,6 @@ const AuthService = {
             throw error;
         }
     },
-
 
     // ========================================
     // 👤 PROFIL UTILISATEUR

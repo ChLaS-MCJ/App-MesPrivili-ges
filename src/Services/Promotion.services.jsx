@@ -1,54 +1,17 @@
 import Caller from './Caller.services';
 
+/**
+ * 🎁 PromotionService
+ * Service pour la gestion des promotions
+ */
 const PromotionService = {
-    /**
-     * Récupérer toutes les promotions actives
-     * @param {object} params - ville, categoryId (optionnel)
-     * @returns {Promise}
-     */
-    getAll: async (params = {}) => {
-        try {
-            const queryParams = new URLSearchParams();
-            if (params.ville) queryParams.append('ville', params.ville);
-            if (params.categoryId) queryParams.append('categoryId', params.categoryId);
-
-            const queryString = queryParams.toString();
-            const url = `/promotions${queryString ? '?' + queryString : ''}`;
-
-            const response = await Caller.get(url);
-            return response.data;
-        } catch (error) {
-            console.error('Erreur getAll promotions:', error);
-            return {
-                success: false,
-                message: error.response?.data?.message || 'Erreur lors de la récupération',
-                data: []
-            };
-        }
-    },
-
-    /**
-     * Récupérer une promotion par ID
-     * @param {number} id - ID de la promotion
-     * @returns {Promise}
-     */
-    getById: async (id) => {
-        try {
-            const response = await Caller.get(`/promotions/${id}`);
-            return response.data;
-        } catch (error) {
-            console.error('Erreur getById promotion:', error);
-            return {
-                success: false,
-                message: error.response?.data?.message || 'Erreur lors de la récupération'
-            };
-        }
-    },
+    // ==========================================
+    // 🔍 CONSULTATION PUBLIQUE
+    // ==========================================
 
     /**
      * Récupérer les promotions d'un prestataire (public)
-     * @param {number} prestataireId - ID du prestataire
-     * @returns {Promise}
+     * GET /api/promotions/prestataire/:prestataireId
      */
     getByPrestataireId: async (prestataireId) => {
         try {
@@ -64,28 +27,13 @@ const PromotionService = {
         }
     },
 
-    /**
-     * Récupérer mes promotions (prestataire connecté) - toutes les fiches
-     * @returns {Promise}
-     */
-    getMine: async () => {
-        try {
-            const response = await Caller.get('/promotions/me/list');
-            return response.data;
-        } catch (error) {
-            console.error('Erreur getMine promotions:', error);
-            return {
-                success: false,
-                message: error.response?.data?.message || 'Erreur lors de la récupération',
-                data: []
-            };
-        }
-    },
+    // ==========================================
+    // 🏪 GESTION MES PROMOTIONS (Prestataire connecté)
+    // ==========================================
 
     /**
      * Récupérer mes promotions pour une fiche spécifique
-     * @param {number} prestataireId - ID de la fiche
-     * @returns {Promise}
+     * GET /api/promotions/me/fiche/:prestataireId
      */
     getMyPromotions: async (prestataireId) => {
         try {
@@ -103,8 +51,7 @@ const PromotionService = {
 
     /**
      * Créer une promotion
-     * @param {object} data - titre, description, etiquette, dateDebut, dateFin, prestataireId
-     * @returns {Promise}
+     * POST /api/promotions
      */
     create: async (data) => {
         try {
@@ -121,9 +68,7 @@ const PromotionService = {
 
     /**
      * Modifier une promotion
-     * @param {number} id - ID de la promotion
-     * @param {object} data - Données à mettre à jour
-     * @returns {Promise}
+     * PUT /api/promotions/:id
      */
     update: async (id, data) => {
         try {
@@ -140,9 +85,7 @@ const PromotionService = {
 
     /**
      * Activer/Désactiver une promotion
-     * @param {number} id - ID de la promotion
-     * @param {boolean} estActive - Nouvel état
-     * @returns {Promise}
+     * PUT /api/promotions/:id/toggle
      */
     toggleActive: async (id, estActive) => {
         try {
@@ -159,8 +102,7 @@ const PromotionService = {
 
     /**
      * Supprimer une promotion
-     * @param {number} id - ID de la promotion
-     * @returns {Promise}
+     * DELETE /api/promotions/:id
      */
     delete: async (id) => {
         try {
@@ -174,25 +116,6 @@ const PromotionService = {
             };
         }
     },
-
-    /**
-     * Utiliser une promotion (lors d'un scan)
-     * @param {number} id - ID de la promotion
-     * @param {boolean} nouveauClient - Si c'est un nouveau client
-     * @returns {Promise}
-     */
-    usePromotion: async (id, nouveauClient = false) => {
-        try {
-            const response = await Caller.post(`/promotions/${id}/use`, { nouveauClient });
-            return response.data;
-        } catch (error) {
-            console.error('Erreur usePromotion:', error);
-            return {
-                success: false,
-                message: error.response?.data?.message || 'Erreur lors de l\'utilisation'
-            };
-        }
-    }
 };
 
 export default PromotionService;

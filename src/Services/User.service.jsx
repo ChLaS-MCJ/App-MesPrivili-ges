@@ -1,12 +1,18 @@
 import axiosInstance from './Caller.services';
+import AuthService from './Auth.services';
 
 /**
  * 👤 UserService
- * Service pour gérer les données utilisateur et l'historique
+ * Service pour gérer les données utilisateur
+ * - Profil (get, update, delete)
+ * - Statistiques
+ * - Historique scans
+ * - Avis
+ * - QR Code
  */
 const UserService = {
     // ========================================
-    // 📊 PROFIL & STATISTIQUES
+    // 📊 PROFIL
     // ========================================
 
     /**
@@ -16,6 +22,12 @@ const UserService = {
     async getProfile() {
         try {
             const response = await axiosInstance.get('/users/me');
+
+            if (response.data.success) {
+                // Mettre à jour le storage local
+                await AuthService.setUser(response.data.data);
+            }
+
             return {
                 success: true,
                 data: response.data.data
@@ -30,35 +42,31 @@ const UserService = {
     },
 
     /**
-     * Récupérer les statistiques de l'utilisateur
-     * GET /api/users/me/stats
-     */
-    async getStats() {
-        try {
-            const response = await axiosInstance.get('/users/me/stats');
-            return {
-                success: true,
-                data: response.data.data
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: error.response?.data?.message || 'Erreur lors de la récupération des stats',
-                status: error.response?.status
-            };
-        }
-    },
-
-    /**
      * Mettre à jour le profil
      * PUT /api/users/me
      */
     async updateProfile(data) {
         try {
             const response = await axiosInstance.put('/users/me', data);
+
+            if (response.data.success) {
+                // Fusionner avec les données existantes
+                const currentUser = await AuthService.getUser();
+                const updatedUser = {
+                    ...currentUser,
+                    ...response.data.data,
+                    client: {
+                        ...currentUser?.client,
+                        ...response.data.data.client
+                    }
+                };
+                await AuthService.setUser(updatedUser);
+            }
+
             return {
                 success: true,
-                data: response.data.data
+                data: response.data.data,
+                message: response.data.message
             };
         } catch (error) {
             return {
@@ -70,8 +78,9 @@ const UserService = {
     },
 
     /**
-    * Uploader l'image de profil
-    */
+     * Uploader l'image de profil
+     * POST /api/users/me/profile-image
+     */
     async uploadProfileImage(file) {
         try {
             const formData = new FormData();
@@ -127,6 +136,11 @@ const UserService = {
     async deleteAccount() {
         try {
             const response = await axiosInstance.delete('/users/me');
+
+            if (response.data.success) {
+                await AuthService.clearStorage();
+            }
+
             return {
                 success: true,
                 message: response.data.message
@@ -141,15 +155,36 @@ const UserService = {
     },
 
     // ========================================
+    // 📈 STATISTIQUES
+    // ========================================
+
+    /**
+     * Récupérer les statistiques de l'utilisateur
+     * GET /api/users/me/stats
+     */
+    async getStats() {
+        try {
+            const response = await axiosInstance.get('/users/me/stats');
+            return {
+                success: true,
+                data: response.data.data
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Erreur lors de la récupération des stats',
+                status: error.response?.status
+            };
+        }
+    },
+
+    // ========================================
     // 📜 HISTORIQUE DES SCANS
     // ========================================
 
     /**
      * Récupérer l'historique des scans du client
      * GET /api/scans/me
-     * 
-     * @param {number} page - Numéro de page (défaut: 1)
-     * @param {number} limit - Nombre de résultats par page (défaut: 20)
      */
     async getMyScans(page = 1, limit = 20) {
         try {

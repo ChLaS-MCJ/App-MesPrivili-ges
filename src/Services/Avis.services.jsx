@@ -2,17 +2,14 @@ import Caller from './Caller.services';
 
 /**
  * ⭐ AvisService
- * Service pour gérer les avis/notes
+ * Service pour la gestion des avis
  */
 const AvisService = {
     /**
      * Créer un avis après un scan
      * POST /api/avis
-     * 
-     * @param {number} scanId - ID du scan
-     * @param {number} note - Note de 1 à 5
      */
-    async create(scanId, note) {
+    create: async (scanId, note) => {
         try {
             const response = await Caller.post('/avis', {
                 scanId,
@@ -23,88 +20,46 @@ const AvisService = {
             console.error('Erreur create avis:', error);
             return {
                 success: false,
-                message: error.response?.data?.message || 'Erreur lors de l\'envoi de l\'avis'
+                message: error.response?.data?.message || 'Erreur lors de la création de l\'avis'
             };
         }
     },
 
     /**
-     * Récupérer les avis d'un prestataire
-     * GET /api/avis/prestataire/:prestataireId
-     * 
-     * @param {number} prestataireId - ID du prestataire
-     * @param {number} page - Numéro de page (défaut: 1)
-     * @param {number} limit - Nombre par page (défaut: 20)
-     */
-    async getByPrestataire(prestataireId, page = 1, limit = 20) {
-        try {
-            const response = await Caller.get(`/avis/prestataire/${prestataireId}`, {
-                params: { page, limit }
-            });
-            return response.data;
-        } catch (error) {
-            console.error('Erreur getByPrestataire:', error);
-            return {
-                success: false,
-                message: error.response?.data?.message || 'Erreur lors de la récupération des avis',
-                data: { avis: [], pagination: {} }
-            };
-        }
-    },
-
-    /**
-     * Récupérer mes avis (client connecté)
+     * Récupérer mes avis
      * GET /api/avis/me
      */
-    async getMine() {
+    getMine: async () => {
         try {
             const response = await Caller.get('/avis/me');
             return response.data;
         } catch (error) {
-            console.error('Erreur getMine:', error);
+            console.error('Erreur getMine avis:', error);
             return {
                 success: false,
-                message: error.response?.data?.message || 'Erreur lors de la récupération de vos avis',
+                message: error.response?.data?.message || 'Erreur lors de la récupération',
                 data: []
             };
         }
     },
 
     /**
-     * Vérifier si l'utilisateur peut noter un prestataire
-     * (basé sur s'il a un scan non noté)
-     * 
-     * @param {number} prestataireId - ID du prestataire
+     * Vérifier si j'ai déjà visité un prestataire (pour savoir si je peux noter)
+     * GET /api/scans/me/prestataire/:prestataireId
      */
-    async canRate(prestataireId) {
+    checkCanRate: async (prestataireId) => {
         try {
-            // On récupère les scans du user pour ce prestataire
             const response = await Caller.get(`/scans/me/prestataire/${prestataireId}`);
-
-            if (response.data.success && response.data.data) {
-                // Chercher un scan non noté
-                const scanNonNote = response.data.data.find(scan => !scan.aEteNote);
-                return {
-                    success: true,
-                    canRate: !!scanNonNote,
-                    scanId: scanNonNote?.id || null
-                };
-            }
-
-            return {
-                success: true,
-                canRate: false,
-                scanId: null
-            };
+            return response.data;
         } catch (error) {
-            console.error('Erreur canRate:', error);
+            console.error('Erreur checkCanRate:', error);
             return {
                 success: false,
-                canRate: false,
-                scanId: null
+                message: error.response?.data?.message || 'Erreur lors de la vérification',
+                data: { canRate: false, scans: [] }
             };
         }
-    }
+    },
 };
 
 export default AvisService;

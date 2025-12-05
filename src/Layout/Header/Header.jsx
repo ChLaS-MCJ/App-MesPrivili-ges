@@ -15,7 +15,9 @@ import {
     GiftOutlined,
     BarChartOutlined,
     HeartOutlined,
-    CreditCardOutlined
+    CreditCardOutlined,
+    LockOutlined,
+    FileDoneOutlined
 } from '@ant-design/icons';
 
 const Header = () => {
@@ -380,6 +382,25 @@ const Header = () => {
                             <SafetyOutlined className="menu-icon" />
                             <span>Conditions d'utilisation</span>
                         </button>
+
+                        <button
+                            className="drawer-menu-item secondary"
+                            onClick={() => handleNavigation('/auth/privacy-policy')}
+                        >
+                            <LockOutlined className="menu-icon" />
+                            <span>Politique de confidentialité</span>
+                        </button>
+
+                        {/* CGV - uniquement pour les prestataires */}
+                        {isPrestataire && (
+                            <button
+                                className="drawer-menu-item secondary"
+                                onClick={() => handleNavigation('/auth/terms-of-sale')}
+                            >
+                                <FileDoneOutlined className="menu-icon" />
+                                <span>Conditions de vente</span>
+                            </button>
+                        )}
 
                         <div className="drawer-divider"></div>
 

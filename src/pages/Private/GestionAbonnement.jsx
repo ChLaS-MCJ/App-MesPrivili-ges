@@ -66,6 +66,7 @@ const GestionAbonnement = () => {
         try {
             // Charger TOUTES les souscriptions
             const souscriptionsResult = await AbonnementService.getMesSouscriptions();
+
             if (souscriptionsResult.success && Array.isArray(souscriptionsResult.data)) {
                 // Filtrer pour garder seulement les actives
                 const actives = souscriptionsResult.data.filter(s => s.statut === 'active');
@@ -394,45 +395,60 @@ const GestionAbonnement = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* Renouvellement automatique */}
-                                                <div className="renew-card">
-                                                    <div className="renew-status">
-                                                        <div className={`renew-icon ${souscription.renouvellementAuto ? 'active' : ''}`}>
-                                                            <IonIcon icon={refreshOutline} />
+                                                {/* Renouvellement automatique - SEULEMENT si pas code promo */}
+                                                {souscription.methodePaiement !== 'code_promo' ? (
+                                                    <div className="renew-card">
+                                                        <div className="renew-status">
+                                                            <div className={`renew-icon ${souscription.renouvellementAuto ? 'active' : ''}`}>
+                                                                <IonIcon icon={refreshOutline} />
+                                                            </div>
+                                                            <div className="renew-info">
+                                                                <span className="renew-title">
+                                                                    Renouvellement {souscription.renouvellementAuto ? 'activé' : 'désactivé'}
+                                                                </span>
+                                                                <span className="renew-description">
+                                                                    {souscription.renouvellementAuto
+                                                                        ? `Prochain prélèvement le ${formatDateShort(souscription.dateFin)}`
+                                                                        : 'Ne sera pas renouvelé automatiquement'
+                                                                    }
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                        <div className="renew-info">
-                                                            <span className="renew-title">
-                                                                Renouvellement {souscription.renouvellementAuto ? 'activé' : 'désactivé'}
-                                                            </span>
-                                                            <span className="renew-description">
-                                                                {souscription.renouvellementAuto
-                                                                    ? `Prochain prélèvement le ${formatDateShort(souscription.dateFin)}`
-                                                                    : 'Ne sera pas renouvelé automatiquement'
-                                                                }
+
+                                                        <button
+                                                            className={`renew-toggle ${souscription.renouvellementAuto ? 'active' : ''}`}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleToggleAutoRenew(souscription.id);
+                                                            }}
+                                                            disabled={isToggleLoading}
+                                                        >
+                                                            {isToggleLoading ? (
+                                                                <span className="loading-spinner small"></span>
+                                                            ) : (
+                                                                <span className="toggle-switch">
+                                                                    <span className="toggle-knob"></span>
+                                                                </span>
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    /* Abonnement code promo - pas de renouvellement */
+                                                    <div className="promo-info-card">
+                                                        <div className="promo-icon">
+                                                            <IonIcon icon={sparklesOutline} />
+                                                        </div>
+                                                        <div className="promo-info">
+                                                            <span className="promo-title">Abonnement offert</span>
+                                                            <span className="promo-description">
+                                                                Cet abonnement a été activé via un code promo et ne sera pas renouvelé automatiquement.
                                                             </span>
                                                         </div>
                                                     </div>
+                                                )}
 
-                                                    <button
-                                                        className={`renew-toggle ${souscription.renouvellementAuto ? 'active' : ''}`}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleToggleAutoRenew(souscription.id);
-                                                        }}
-                                                        disabled={isToggleLoading}
-                                                    >
-                                                        {isToggleLoading ? (
-                                                            <span className="loading-spinner small"></span>
-                                                        ) : (
-                                                            <span className="toggle-switch">
-                                                                <span className="toggle-knob"></span>
-                                                            </span>
-                                                        )}
-                                                    </button>
-                                                </div>
-
-                                                {/* Avertissements */}
-                                                {!souscription.renouvellementAuto && isExpiring && (
+                                                {/* Avertissements - SEULEMENT si pas code promo */}
+                                                {souscription.methodePaiement !== 'code_promo' && !souscription.renouvellementAuto && isExpiring && (
                                                     <div className="renew-warning">
                                                         <IonIcon icon={warningOutline} />
                                                         <span>
@@ -442,11 +458,21 @@ const GestionAbonnement = () => {
                                                     </div>
                                                 )}
 
-                                                {souscription.renouvellementAuto && (
+                                                {souscription.methodePaiement !== 'code_promo' && souscription.renouvellementAuto && (
                                                     <div className="renew-notice">
                                                         <IonIcon icon={informationCircleOutline} />
                                                         <span>
                                                             Rappel envoyé 30 jours et 7 jours avant le prélèvement.
+                                                        </span>
+                                                    </div>
+                                                )}
+
+                                                {/* Avertissement expiration code promo */}
+                                                {souscription.methodePaiement === 'code_promo' && isExpiring && (
+                                                    <div className="renew-warning">
+                                                        <IonIcon icon={warningOutline} />
+                                                        <span>
+                                                            Expire dans {joursRestants} jours. Souscrivez à un abonnement payant pour continuer.
                                                         </span>
                                                     </div>
                                                 )}

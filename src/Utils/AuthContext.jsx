@@ -22,9 +22,7 @@ export const useAuth = () => {
 
         // Si c'est un chemin local, construire l'URL complète
         const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8100';
-
         const cleanPath = profileImage.replace('/api', '');
-
         const timestamp = new Date().getTime();
         const fullUrl = `${baseURL}${cleanPath}?t=${timestamp}`;
 
@@ -53,16 +51,12 @@ export const AuthProvider = ({ children }) => {
             const storedToken = await AuthService.getToken();
             const storedUser = await AuthService.getUser();
 
-            // Si pas de token ou pas d'utilisateur stocké, pas authentifié
             if (!storedToken || !storedUser) {
-                // Nettoyer le storage au cas où il y a des données corrompues
                 await AuthService.clearStorage();
                 setLoading(false);
                 return;
             }
 
-            // On a un token et un user stocké, on considère authentifié
-            // même si le getProfile échoue (offline, erreur réseau, etc.)
             setToken(storedToken);
             setUser(storedUser);
             setIsAuthenticated(true);
@@ -81,11 +75,11 @@ export const AuthProvider = ({ children }) => {
             }
 
             // Essayer de rafraîchir le profil en background (non bloquant)
+            // ✅ Utilise UserService au lieu de AuthService
             try {
-                const result = await AuthService.getProfile();
+                const result = await UserService.getProfile();
 
                 if (result.success) {
-                    // Fusionner les données du backend avec les données stockées localement
                     const mergedUser = {
                         ...storedUser,
                         ...result.data,
@@ -98,25 +92,16 @@ export const AuthProvider = ({ children }) => {
                     setUser(mergedUser);
                     await AuthService.setUser(mergedUser);
                 } else {
-                    // ============================================================
-                    // ⚠️ Le getProfile a échoué mais on garde l'utilisateur connecté
-                    // avec les données locales. On ne déconnecte que si c'est une
-                    // erreur d'authentification claire (401 après refresh échoué)
-                    // ============================================================
                     console.warn('⚠️ getProfile échoué, utilisation des données locales');
 
-                    // Vérifier si c'est une vraie erreur d'auth (token invalide)
-                    // Dans ce cas, le message contiendra généralement "401" ou "unauthorized"
                     const isAuthError = result.message?.toLowerCase().includes('401') ||
                         result.message?.toLowerCase().includes('unauthorized') ||
                         result.message?.toLowerCase().includes('token');
 
                     if (isAuthError) {
-                        // Essayer de refresh le token une fois
                         try {
                             await AuthService.refreshToken();
-                            // Si ça marche, réessayer getProfile
-                            const retryResult = await AuthService.getProfile();
+                            const retryResult = await UserService.getProfile();
                             if (retryResult.success) {
                                 const mergedUser = {
                                     ...storedUser,
@@ -138,10 +123,8 @@ export const AuthProvider = ({ children }) => {
                             setIsAuthenticated(false);
                         }
                     }
-                    // Si ce n'est pas une erreur d'auth, on garde les données locales
                 }
             } catch (error) {
-                // Erreur réseau ou autre, on garde les données locales
                 console.warn('⚠️ Erreur lors du refresh profil:', error.message);
             }
 
@@ -157,11 +140,11 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // ✅ Utilise UserService
     const refreshUserData = async () => {
         try {
             const result = await UserService.getProfile();
             if (result.success) {
-                // Fusionner avec l'user existant au lieu d'écraser
                 setUser(prevUser => {
                     const updatedUser = {
                         ...prevUser,
@@ -171,7 +154,6 @@ export const AuthProvider = ({ children }) => {
                             ...result.data.client
                         }
                     };
-                    // Sauvegarder dans localStorage
                     AuthService.setUser(updatedUser);
                     return updatedUser;
                 });
@@ -181,13 +163,10 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    /**
-     * Rafraîchir les données utilisateur après un paiement/achat
-     * Utilisé notamment après AbonnementSuccess
-     */
+    // ✅ Utilise UserService
     const refreshUser = async () => {
         try {
-            const result = await AuthService.getProfile();
+            const result = await UserService.getProfile();
             if (result.success) {
                 const storedUser = await AuthService.getUser();
                 const mergedUser = {
@@ -218,7 +197,6 @@ export const AuthProvider = ({ children }) => {
                 setToken(result.data.token);
                 setIsAuthenticated(true);
 
-                // Si c'est un prestataire, stocker ses données
                 if (result.data.user?.role?.name === 'prestataire' && result.data.prestataire) {
                     setPrestataire(result.data.prestataire);
                     localStorage.setItem('prestataire', JSON.stringify(result.data.prestataire));
@@ -232,9 +210,9 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (userData) => {
+    const register = async (data) => {
         try {
-            const result = await AuthService.register(userData);
+            const result = await AuthService.register(data);
 
             if (result.success) {
                 setUser(result.data.user);
@@ -249,159 +227,22 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // ==========================================
-    // INSCRIPTION PRESTATAIRE
-    // ==========================================
-
-    /**
-     * Inscription prestataire avec validation SIRET/APE
-     */
-    const registerPrestataire = async (userData) => {
+    const registerPrestataire = async (data) => {
         try {
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8100';
-
-            const response = await fetch(`${API_URL}/prestataires/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(userData),
-            });
-
-            const result = await response.json();
+            const result = await AuthService.registerPrestataire(data);
 
             if (result.success) {
-                // Stocker les tokens
-                localStorage.setItem('token', result.data.token);
-                localStorage.setItem('refreshToken', result.data.refreshToken);
-
-                // Mettre à jour l'état utilisateur
                 setUser(result.data.user);
                 setToken(result.data.token);
                 setIsAuthenticated(true);
-
-                // Stocker les données prestataire
-                setPrestataire(result.data.prestataire);
-                localStorage.setItem('prestataire', JSON.stringify(result.data.prestataire));
-
-                // Sauvegarder l'utilisateur
-                await AuthService.setUser(result.data.user);
-
-                return {
-                    success: true,
-                    message: result.message,
-                    data: result.data,
-                    nextStep: result.data.nextStep // 'COMPLETER_FICHE' si la fiche n'est pas complète
-                };
-            } else {
-                return {
-                    success: false,
-                    message: result.message,
-                    error: result.error
-                };
             }
+
+            return result;
         } catch (error) {
-            console.error('Erreur inscription prestataire:', error);
-            return {
-                success: false,
-                message: 'Une erreur est survenue lors de l\'inscription'
-            };
+            console.error('Erreur registerPrestataire:', error);
+            return { success: false, message: error.message };
         }
     };
-
-    /**
-     * Inscription prestataire via Google OAuth + SIRET
-     */
-    const registerPrestataireGoogle = async (userData) => {
-        try {
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8100';
-
-            const response = await fetch(`${API_URL}/prestataires/register/google`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(userData),
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                localStorage.setItem('token', result.data.token);
-                localStorage.setItem('refreshToken', result.data.refreshToken);
-
-                setUser(result.data.user);
-                setToken(result.data.token);
-                setIsAuthenticated(true);
-
-                setPrestataire(result.data.prestataire);
-                localStorage.setItem('prestataire', JSON.stringify(result.data.prestataire));
-
-                await AuthService.setUser(result.data.user);
-
-                return {
-                    success: true,
-                    message: result.message,
-                    data: result.data,
-                    nextStep: result.data.nextStep
-                };
-            } else {
-                return {
-                    success: false,
-                    message: result.message,
-                    error: result.error
-                };
-            }
-        } catch (error) {
-            console.error('Erreur inscription prestataire Google:', error);
-            return {
-                success: false,
-                message: 'Une erreur est survenue lors de l\'inscription Google'
-            };
-        }
-    };
-
-    /**
-     * Vérifier un SIRET avant inscription (pour pré-validation)
-     */
-    const verifySiret = async (siret) => {
-        try {
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8100';
-            const siretClean = siret.replace(/[\s-]/g, '');
-
-            const response = await fetch(`${API_URL}/prestataires/verify-siret/${siretClean}`);
-            return await response.json();
-        } catch (error) {
-            console.error('Erreur vérification SIRET:', error);
-            return {
-                success: false,
-                message: 'Erreur de vérification du SIRET'
-            };
-        }
-    };
-
-    /**
-     * Vérifier SIRET et Code APE
-     */
-    const verifySiretAndApe = async (siret, codeApe) => {
-        try {
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8100';
-            const siretClean = siret.replace(/[\s-]/g, '');
-
-            const response = await fetch(`${API_URL}/prestataires/verify-siret-ape/${siretClean}/${codeApe}`);
-            return await response.json();
-        } catch (error) {
-            console.error('Erreur vérification SIRET/APE:', error);
-            return {
-                success: false,
-                message: 'Erreur de vérification'
-            };
-        }
-    };
-
-    // ==========================================
-    // FIN INSCRIPTION PRESTATAIRE
-    // ==========================================
 
     const loginWithGoogle = async (googleData) => {
         try {
@@ -456,12 +297,12 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // ✅ Utilise UserService
     const updateProfile = async (data) => {
         try {
-            const result = await AuthService.updateProfile(data);
+            const result = await UserService.updateProfile(data);
 
             if (result.success) {
-                // Fusionner les nouvelles données avec l'user existant
                 setUser(prevUser => ({
                     ...prevUser,
                     ...result.data,
@@ -479,18 +320,20 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // ✅ Utilise UserService
     const changePassword = async (currentPassword, newPassword) => {
         try {
-            return await AuthService.changePassword(currentPassword, newPassword);
+            return await UserService.changePassword(currentPassword, newPassword);
         } catch (error) {
             console.error('Erreur changePassword:', error);
             return { success: false, message: error.message };
         }
     };
 
+    // ✅ Utilise UserService
     const deleteAccount = async () => {
         try {
-            const result = await AuthService.deleteAccount();
+            const result = await UserService.deleteAccount();
 
             if (result.success) {
                 setUser(null);
@@ -507,9 +350,10 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // ✅ Utilise UserService
     const getStats = async () => {
         try {
-            return await AuthService.getStats();
+            return await UserService.getStats();
         } catch (error) {
             console.error('Erreur getStats:', error);
             return { success: false, message: error.message };
@@ -517,24 +361,56 @@ export const AuthProvider = ({ children }) => {
     };
 
     /**
-     * Vérifie si l'utilisateur est un prestataire
+     * Vérifier si l'utilisateur est un prestataire
      */
     const isPrestataire = () => {
         return user?.role?.name === 'prestataire' || user?.role === 'prestataire';
     };
 
     /**
-     * Vérifie si l'utilisateur est un client
+     * Vérifier si l'utilisateur est un client
      */
     const isClient = () => {
         return user?.role?.name === 'client' || user?.role === 'client';
     };
 
     /**
-     * Vérifie si l'utilisateur est admin
+     * Vérifier si l'utilisateur est admin
      */
     const isAdmin = () => {
         return user?.role?.name === 'admin' || user?.role === 'admin';
+    };
+
+    /**
+     * Vérifier un SIRET avant inscription
+     */
+    const verifySiret = async (siret) => {
+        try {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8100';
+            const siretClean = siret.replace(/[\s-]/g, '');
+
+            const response = await fetch(`${API_URL}/prestataires/verify-siret/${siretClean}`);
+            return await response.json();
+        } catch (error) {
+            console.error('Erreur vérification SIRET:', error);
+            return { success: false, message: 'Erreur de vérification du SIRET' };
+        }
+    };
+
+    /**
+     * Vérifier SIRET et Code APE
+     */
+    const verifySiretAndApe = async (siret, codeApe) => {
+        try {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8100';
+            const siretClean = siret.replace(/[\s-]/g, '');
+
+            const response = await fetch(`${API_URL}/prestataires/verify-siret-ape/${siretClean}/${codeApe}`);
+            return await response.json();
+        } catch (error) {
+            console.error('Erreur vérification SIRET/APE:', error);
+            return { success: false, message: 'Erreur de vérification' };
+        }
     };
 
     const value = {
@@ -546,6 +422,7 @@ export const AuthProvider = ({ children }) => {
         // Auth basique
         login,
         register,
+        registerPrestataire,
         loginWithGoogle,
         loginWithApple,
         logout,
@@ -557,9 +434,7 @@ export const AuthProvider = ({ children }) => {
         getStats,
         refreshUserData,
         refreshUser,
-        // Inscription prestataire
-        registerPrestataire,
-        registerPrestataireGoogle,
+        // Vérification SIRET
         verifySiret,
         verifySiretAndApe,
         // Helpers
