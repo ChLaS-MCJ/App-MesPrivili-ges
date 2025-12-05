@@ -283,7 +283,7 @@
     padding: 20px;
     color: white;
     margin-bottom: 16px;
-    box-shadow: 0 8px 25px rgba(254, 126, 79, 0.3);
+    box-shadow: 0 8px 25px rgba(254, 126, 79, 0.08);
     transition: all 0.3s ease;
 }
 

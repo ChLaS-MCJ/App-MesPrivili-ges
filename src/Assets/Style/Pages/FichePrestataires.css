@@ -206,7 +206,7 @@
 .fiche-promo-side-tab {
     position: absolute;
     right: 0;
-    top: 45%;
+    top: 20%;
     transform: translateY(-50%);
     background: linear-gradient(180deg, rgb(68 66 66 / 95%) 0%, rgb(28 28 28 / 98%) 100%);
     backdrop-filter: blur(10px);
