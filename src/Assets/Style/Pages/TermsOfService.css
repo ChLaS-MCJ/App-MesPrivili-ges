@@ -24,6 +24,7 @@
    HEADER
    ======================================== */
 .legal-header {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
     position: sticky;
     top: 0;
     background: rgba(44, 44, 44, 0.95);
@@ -80,7 +81,7 @@
 .legal-content {
     max-width: 900px;
     margin: 0 auto;
-    padding: 30px 20px 100px;
+    padding: 30px 20px calc(env(safe-area-inset-bottom, 0px) + 100px);
 }
 
 /* ========================================
@@ -204,6 +205,7 @@
 
 @media (max-width: 480px) {
     .legal-header {
+        padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
         padding: 16px;
     }
 

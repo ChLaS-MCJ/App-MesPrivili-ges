@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     IonContent,
     IonPage,
@@ -13,6 +13,7 @@ import { logoGoogle, logoApple, eyeOutline, eyeOffOutline } from 'ionicons/icons
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../Utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -26,6 +27,26 @@ const Login = () => {
     const navigate = useNavigate();
 
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isNative = Capacitor.isNativePlatform();
+
+    // Initialiser Google Auth pour les plateformes natives
+    useEffect(() => {
+        const initGoogleAuth = async () => {
+            if (isNative) {
+                try {
+                    const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+                    await GoogleAuth.initialize({
+                        clientId: "172246921916-dv3japmohouikebh4ugfaum5s6t7vdg1.apps.googleusercontent.com",
+                        scopes: ['profile', 'email'],
+                        grantOfflineAccess: false,
+                    });
+                } catch (error) {
+                    // Silencieux en prod
+                }
+            }
+        };
+        initGoogleAuth();
+    }, []);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -62,7 +83,8 @@ const Login = () => {
         }
     };
 
-    const handleGoogleLogin = useGoogleLogin({
+    // Google Login pour le WEB (popup)
+    const handleGoogleLoginWeb = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             setLoading(true);
 
@@ -100,7 +122,6 @@ const Login = () => {
                     });
                 }
             } catch (error) {
-                console.error('Erreur lors de la récupération des infos Google:', error);
                 setToast({
                     show: true,
                     message: 'Erreur de connexion Google',
@@ -111,7 +132,6 @@ const Login = () => {
             }
         },
         onError: () => {
-            console.error('Erreur Google Login');
             setToast({
                 show: true,
                 message: 'Échec de la connexion Google',
@@ -119,6 +139,58 @@ const Login = () => {
             });
         },
     });
+
+    // Google Login pour ANDROID/IOS (natif)
+    const handleGoogleLoginNative = async () => {
+        setLoading(true);
+
+        try {
+            const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+            const googleUser = await GoogleAuth.signIn();
+
+            const result = await loginWithGoogle({
+                googleId: googleUser.id,
+                email: googleUser.email,
+                prenom: googleUser.givenName,
+                nom: googleUser.familyName,
+            });
+
+            if (result.success) {
+                setToast({
+                    show: true,
+                    message: 'Connexion Google réussie !',
+                    color: 'success',
+                });
+
+                setTimeout(() => {
+                    navigate('/auth/maps');
+                }, 500);
+            } else {
+                setToast({
+                    show: true,
+                    message: result.message || 'Erreur de connexion Google',
+                    color: 'danger',
+                });
+            }
+        } catch (error) {
+            setToast({
+                show: true,
+                message: 'Échec de la connexion Google',
+                color: 'danger',
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Choisir la bonne méthode selon la plateforme
+    const handleGoogleLogin = () => {
+        if (isNative) {
+            handleGoogleLoginNative();
+        } else {
+            handleGoogleLoginWeb();
+        }
+    };
 
     const handleAppleLogin = async () => {
         setLoading(true);
@@ -225,7 +297,7 @@ const Login = () => {
                             expand="block"
                             fill="outline"
                             className="google-button"
-                            onClick={() => handleGoogleLogin()}
+                            onClick={handleGoogleLogin}
                             disabled={loading}
                         >
                             <IonIcon icon={logoGoogle} slot="start" />

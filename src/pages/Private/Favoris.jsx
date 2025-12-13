@@ -140,7 +140,7 @@ const Favoris = () => {
         total: favoris.length,
         withPromos: favoris.filter(f => f.promotionsActives > 0).length,
         avgRating: favoris.length > 0
-            ? (favoris.reduce((acc, f) => acc + (f.noteGlobale || 0), 0) / favoris.length).toFixed(1)
+            ? (favoris.reduce((acc, f) => acc + (parseFloat(f.noteGlobale) || 0), 0) / favoris.length).toFixed(1)
             : 0,
         cities: [...new Set(favoris.map(f => f.ville).filter(Boolean))].length
     };

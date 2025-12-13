@@ -16,7 +16,7 @@ import {
 } from '@ant-design/icons';
 
 const AccountSettings = () => {
-    const { user, updateProfile, changePassword, getProfileImageUrl } = useAuth();
+    const { user, updateProfile, changePassword, getProfileImageUrl, refreshUser } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const previousPath = location.state?.previousPath || '/auth/maps';
@@ -107,7 +107,7 @@ const AccountSettings = () => {
             if (result.success) {
 
                 showToast('Photo mise à jour', 'success');
-
+                await refreshUser();
                 const newProfileImage = result.data?.client?.profileImage;
 
 

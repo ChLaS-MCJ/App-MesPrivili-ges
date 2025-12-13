@@ -20,11 +20,9 @@ export const useAuth = () => {
             return profileImage;
         }
 
-        // Si c'est un chemin local, construire l'URL complète
         const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8100';
-        const cleanPath = profileImage.replace('/api', '');
         const timestamp = new Date().getTime();
-        const fullUrl = `${baseURL}${cleanPath}?t=${timestamp}`;
+        const fullUrl = `${baseURL}${profileImage}?t=${timestamp}`;
 
         return fullUrl;
     };

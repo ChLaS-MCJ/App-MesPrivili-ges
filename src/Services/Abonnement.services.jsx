@@ -98,21 +98,29 @@ class AbonnementService {
   }
 
   /**
-   * Créer une session de paiement Stripe
-   * @param {string} abonnementCode - Code de l'abonnement
-   * @param {number} nombreFiches - Nombre de fiches à acheter
-   * @param {boolean} renouvellementAuto - Activer le renouvellement auto
-   */
-  static async createCheckout(abonnementCode, nombreFiches = 1, renouvellementAuto = false) {
+ * Créer une session de paiement Stripe
+ * @param {string} abonnementCode - Code de l'abonnement
+ * @param {number} nombreFiches - Nombre de fiches à acheter
+ * @param {boolean} renouvellementAuto - Activer le renouvellement auto
+ * @param {string|null} codePromo - Code promo de réduction (optionnel) ← NOUVEAU
+ */
+  static async createCheckout(abonnementCode, nombreFiches = 1, renouvellementAuto = false, codePromo = null) {
     try {
+      const payload = {
+        abonnementCode,
+        nombreFiches,
+        renouvellementAuto
+      };
+
+      // Ajouter le code promo s'il est fourni
+      if (codePromo) {
+        payload.codePromo = codePromo;
+      }
+
       const response = await fetch(`${API_URL}/abonnements/checkout`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          abonnementCode,
-          nombreFiches,
-          renouvellementAuto
-        })
+        body: JSON.stringify(payload)
       });
       return await response.json();
     } catch (error) {

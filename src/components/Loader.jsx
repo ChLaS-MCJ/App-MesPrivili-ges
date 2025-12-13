@@ -1,43 +1,55 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 
-const ModernLoader = ({ onFinish }) => {
-    const [isVisible, setIsVisible] = useState(true);
+const ModernLoader = ({ onFinish, delayBeforeFade = 500 }) => {
     const [fadeOut, setFadeOut] = useState(false);
+    const [shouldRender, setShouldRender] = useState(true);
+    const videoRef = useRef(null);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
+        const video = videoRef.current;
 
-            setFadeOut(true);
-
+        const handleVideoEnd = () => {
+            // Attend X millisecondes avant de lancer l'animation
             setTimeout(() => {
-                setIsVisible(false);
-                if (onFinish) onFinish();
-            }, 500);
-        }, 2500);
+                setFadeOut(true);
+            }, delayBeforeFade);
+        };
 
-        return () => clearTimeout(timer);
-    }, [onFinish]);
+        if (video) {
+            video.addEventListener('ended', handleVideoEnd);
+        }
 
-    if (!isVisible) return null;
+        return () => {
+            if (video) {
+                video.removeEventListener('ended', handleVideoEnd);
+            }
+        };
+    }, [delayBeforeFade]);
+
+    const handleAnimationEnd = () => {
+        if (fadeOut) {
+            setShouldRender(false);
+            if (onFinish) onFinish();
+        }
+    };
+
+    if (!shouldRender) return null;
 
     return (
-        <div className={`modern-loader ${fadeOut ? 'fade-out' : ''}`}>
-
-            <div className="loader-content">
-
-                <div className="loader-dots">
-                    <div className="loader-dot"></div>
-                    <div className="loader-dot"></div>
-                    <div className="loader-dot"></div>
-                </div>
-
-
-                <h1 className="loader-title">Mes Privilèges</h1>
-
-
-                <p className="loader-tagline">Chargement...</p>
-            </div>
+        <div
+            className={`modern-loader ${fadeOut ? 'fade-out' : ''}`}
+            onTransitionEnd={handleAnimationEnd}
+        >
+            <video
+                ref={videoRef}
+                autoPlay
+                muted
+                playsInline
+                className="loader-video"
+            >
+                <source src="/assets/videos/logo-animation.mp4" type="video/mp4" />
+            </video>
         </div>
     );
 };

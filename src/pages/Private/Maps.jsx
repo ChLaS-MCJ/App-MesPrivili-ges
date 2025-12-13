@@ -9,17 +9,29 @@ const DEFAULT_CENTER = [46.603354, 1.888334];
 const DEFAULT_ZOOM = 6;
 const USER_ZOOM = 12;
 
+// Détecter si c'est un appareil tactile
+const isTouchDevice = () => {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+};
+
+// Détecter si c'est un mobile (pour réduire les animations)
+const isMobile = () => {
+    return window.innerWidth <= 768 || isTouchDevice();
+};
+
 const Maps = () => {
     const navigate = useNavigate();
     const mapRef = useRef(null);
     const mapInstanceRef = useRef(null);
     const markersRef = useRef([]);
+    const userMarkerRef = useRef(null);
 
     const [prestataires, setPrestataires] = useState([]);
     const [loading, setLoading] = useState(true);
     const [userLocation, setUserLocation] = useState(null);
     const [mapReady, setMapReady] = useState(false);
     const [isZooming, setIsZooming] = useState(false);
+    const [markersVersion, setMarkersVersion] = useState(0);
 
     // Charger les prestataires
     useEffect(() => {
@@ -57,13 +69,11 @@ const Maps = () => {
         }
     }, []);
 
-    // Grouper les prestataires par ville (nom normalisé)
-    // Utilise la MOYENNE des coordonnées pour chaque ville
+    // Grouper les prestataires par ville
     const groupByVille = useCallback((prestataires) => {
         const groups = {};
 
         prestataires.forEach(p => {
-            // Normaliser le nom de ville (minuscule, sans accents, trim)
             const villeNormalisee = p.ville
                 .toLowerCase()
                 .trim()
@@ -72,7 +82,7 @@ const Maps = () => {
 
             if (!groups[villeNormalisee]) {
                 groups[villeNormalisee] = {
-                    ville: p.ville, // Garder le nom original pour l'affichage
+                    ville: p.ville,
                     villeNormalisee: villeNormalisee,
                     latitudes: [],
                     longitudes: [],
@@ -80,7 +90,6 @@ const Maps = () => {
                 };
             }
 
-            // Ajouter les coordonnées pour calculer la moyenne
             if (p.latitude && p.longitude) {
                 groups[villeNormalisee].latitudes.push(parseFloat(p.latitude));
                 groups[villeNormalisee].longitudes.push(parseFloat(p.longitude));
@@ -88,7 +97,6 @@ const Maps = () => {
             groups[villeNormalisee].prestataires.push(p);
         });
 
-        // Calculer les coordonnées moyennes pour chaque ville
         return Object.values(groups).map(group => {
             const lat = group.latitudes.length > 0
                 ? group.latitudes.reduce((a, b) => a + b, 0) / group.latitudes.length
@@ -103,10 +111,10 @@ const Maps = () => {
                 lng: lng,
                 prestataires: group.prestataires
             };
-        }).filter(g => g.lat !== 0 && g.lng !== 0); // Exclure les villes sans coordonnées
+        }).filter(g => g.lat !== 0 && g.lng !== 0);
     }, []);
 
-    // Calculer les clusters visuels basés sur le zoom
+    // Calculer les clusters
     const calculateClusters = useCallback((villeGroups, zoom) => {
         if (zoom >= 10) {
             return villeGroups.map(g => ({
@@ -159,7 +167,7 @@ const Maps = () => {
         return clusters;
     }, []);
 
-    // Créer l'icône du marker
+    // Créer l'icône du marker (simplifié pour mobile)
     const createMarkerIcon = useCallback((count, isSingleVille, isHovered = false) => {
         const size = isSingleVille ? 44 : Math.min(60, 44 + Math.log(count) * 8);
         const scale = isHovered ? 1.15 : 1;
@@ -180,6 +188,20 @@ const Maps = () => {
             glowColor = 'rgba(168, 237, 234, 0.6)';
         }
 
+        // Pulse ring avec GPU acceleration
+        const pulseRing = `
+            <div class="pulse-ring" style="
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                border: 2px solid ${glowColor};
+                animation: pulse-animation 2s ease-out infinite;
+                transform: translateZ(0);
+                will-change: transform, opacity;
+            "></div>
+        `;
+
         const html = `
             <div class="map-marker ${isHovered ? 'hovered' : ''}" style="
                 width: ${finalSize}px;
@@ -189,11 +211,11 @@ const Maps = () => {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                box-shadow: 0 4px 15px ${glowColor}, 0 0 30px ${glowColor};
+                box-shadow: 0 4px 15px ${glowColor};
                 border: 3px solid rgba(255,255,255,0.9);
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 cursor: pointer;
                 position: relative;
+                will-change: transform;
             ">
                 <span style="
                     color: #1a1a2e;
@@ -201,14 +223,7 @@ const Maps = () => {
                     font-size: ${isSingleVille ? 14 : 16}px;
                     text-shadow: 0 1px 2px rgba(255,255,255,0.5);
                 ">${count}</span>
-                <div class="pulse-ring" style="
-                    position: absolute;
-                    width: 100%;
-                    height: 100%;
-                    border-radius: 50%;
-                    border: 2px solid ${glowColor};
-                    animation: pulse-animation 2s ease-out infinite;
-                "></div>
+                ${pulseRing}
             </div>
         `;
 
@@ -225,42 +240,61 @@ const Maps = () => {
         markersRef.current.forEach(m => map.removeLayer(m));
         markersRef.current = [];
 
+        const isTouch = isTouchDevice();
+
         clusters.forEach(cluster => {
             const marker = L.marker([cluster.lat, cluster.lng], {
                 icon: createMarkerIcon(cluster.count, cluster.isSingleVille)
             });
 
-            marker.on('mouseover', () => {
-                marker.setIcon(createMarkerIcon(cluster.count, cluster.isSingleVille, true));
-            });
-            marker.on('mouseout', () => {
-                marker.setIcon(createMarkerIcon(cluster.count, cluster.isSingleVille, false));
-            });
+            if (!isTouch) {
+                marker.on('mouseover', () => {
+                    marker.setIcon(createMarkerIcon(cluster.count, cluster.isSingleVille, true));
+                });
+                marker.on('mouseout', () => {
+                    marker.setIcon(createMarkerIcon(cluster.count, cluster.isSingleVille, false));
+                });
+            }
 
-            marker.on('click', () => {
-                if (cluster.isSingleVille) {
-                    // Navigation directe, l'animation sera sur Categories
-                    navigate(`/auth/categories?ville=${encodeURIComponent(cluster.villes[0])}`);
-
-                } else {
-                    // Effet d'ouverture puis zoom
-                    setIsZooming(true);
-
-                    const targetZoom = Math.min(map.getZoom() + 3, 14);
-
-                    setTimeout(() => {
-                        map.flyTo([cluster.lat, cluster.lng], targetZoom, {
-                            duration: 1.2,
-                            easeLinearity: 0.1
-                        });
-                    }, 100);
-
-                    setTimeout(() => {
-                        setIsZooming(false);
-                    }, 1300);
+            const handleMarkerClick = (e) => {
+                if (e.originalEvent) {
+                    e.originalEvent.preventDefault();
+                    e.originalEvent.stopPropagation();
                 }
-            });
 
+                if (cluster.isSingleVille) {
+                    navigate(`/auth/categories?ville=${encodeURIComponent(cluster.villes[0])}`);
+                } else {
+                    const mobile = isMobile();
+
+                    // Sur mobile : animation simplifiée
+                    if (mobile) {
+                        // Pas d'effet porte sur mobile, juste le zoom
+                        const targetZoom = Math.min(map.getZoom() + 3, 14);
+                        map.flyTo([cluster.lat, cluster.lng], targetZoom, {
+                            duration: 0.5,  // Plus court sur mobile
+                            easeLinearity: 0.5
+                        });
+                    } else {
+                        // Sur desktop : animation complète avec les portes
+                        setIsZooming(true);
+                        const targetZoom = Math.min(map.getZoom() + 3, 14);
+
+                        setTimeout(() => {
+                            map.flyTo([cluster.lat, cluster.lng], targetZoom, {
+                                duration: 1.2,
+                                easeLinearity: 0.1
+                            });
+                        }, 100);
+
+                        setTimeout(() => {
+                            setIsZooming(false);
+                        }, 1300);
+                    }
+                }
+            };
+
+            marker.on('click', handleMarkerClick);
             marker.addTo(map);
             markersRef.current.push(marker);
         });
@@ -271,38 +305,60 @@ const Maps = () => {
         if (!mapRef.current || mapInstanceRef.current) return;
 
         const map = L.map(mapRef.current, {
-            center: userLocation ? [userLocation.lat, userLocation.lng] : DEFAULT_CENTER,
-            zoom: userLocation ? USER_ZOOM : DEFAULT_ZOOM,
+            center: DEFAULT_CENTER,
+            zoom: DEFAULT_ZOOM,
             zoomControl: false,
-            attributionControl: false
+            attributionControl: false,
+            tap: true,
+            tapTolerance: 15,
+            // Optimisations
+            preferCanvas: true,
+            zoomAnimation: true,  // Animation fluide pour le zoom
+            markerZoomAnimation: true,
+            fadeAnimation: true   // Fade pour les tiles
         });
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19
+            maxZoom: 19,
+            updateWhenIdle: true,  // Met à jour seulement quand on arrête de bouger
+            updateWhenZooming: false  // Pas de mise à jour pendant le zoom
         }).addTo(map);
 
         L.control.zoom({
             position: 'bottomright'
         }).addTo(map);
 
-        if (userLocation) {
-            const userIcon = L.divIcon({
-                html: `
-                    <div style="
-                        width: 20px;
-                        height: 20px;
-                        background: #4facfe;
-                        border-radius: 50%;
-                        border: 4px solid white;
-                        box-shadow: 0 0 20px rgba(79, 172, 254, 0.8);
-                    "></div>
-                `,
-                className: 'user-location-marker',
-                iconSize: [20, 20],
-                iconAnchor: [10, 10]
-            });
-            L.marker([userLocation.lat, userLocation.lng], { icon: userIcon }).addTo(map);
-        }
+        // Intercepter les boutons +/- pour un zoom fluide
+        setTimeout(() => {
+            const zoomInBtn = document.querySelector('.leaflet-control-zoom-in');
+            const zoomOutBtn = document.querySelector('.leaflet-control-zoom-out');
+
+            if (zoomInBtn) {
+                zoomInBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const currentZoom = map.getZoom();
+                    const targetZoom = Math.min(currentZoom + 1, 19);
+                    map.flyTo(map.getCenter(), targetZoom, {
+                        duration: 0.3,
+                        easeLinearity: 0.5
+                    });
+                });
+            }
+
+            if (zoomOutBtn) {
+                zoomOutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const currentZoom = map.getZoom();
+                    const targetZoom = Math.max(currentZoom - 1, 1);
+                    map.flyTo(map.getCenter(), targetZoom, {
+                        duration: 0.3,
+                        easeLinearity: 0.5
+                    });
+                });
+            }
+        }, 100);
 
         mapInstanceRef.current = map;
         setMapReady(true);
@@ -313,7 +369,53 @@ const Maps = () => {
                 mapInstanceRef.current = null;
             }
         };
-    }, [userLocation]);
+    }, []);
+
+    // Marker utilisateur
+    useEffect(() => {
+        if (!mapInstanceRef.current || !mapReady || !userLocation) return;
+
+        const map = mapInstanceRef.current;
+
+        if (userMarkerRef.current) {
+            map.removeLayer(userMarkerRef.current);
+        }
+
+        const userIcon = L.divIcon({
+            html: `
+                <div style="
+                    width: 20px;
+                    height: 20px;
+                    background: #4facfe;
+                    border-radius: 50%;
+                    border: 4px solid white;
+                    box-shadow: 0 0 20px rgba(79, 172, 254, 0.8);
+                "></div>
+            `,
+            className: 'user-location-marker',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+
+        userMarkerRef.current = L.marker([userLocation.lat, userLocation.lng], {
+            icon: userIcon,
+            interactive: false
+        }).addTo(map);
+
+        // Animation plus courte sur mobile
+        const duration = isMobile() ? 0.8 : 1.5;
+        map.flyTo([userLocation.lat, userLocation.lng], USER_ZOOM, {
+            duration: duration,
+            easeLinearity: 0.25
+        });
+
+        const onMoveEnd = () => {
+            setMarkersVersion(v => v + 1);
+            map.off('moveend', onMoveEnd);
+        };
+        map.on('moveend', onMoveEnd);
+
+    }, [userLocation, mapReady]);
 
     // Mettre à jour les markers
     useEffect(() => {
@@ -334,30 +436,19 @@ const Maps = () => {
         return () => {
             map.off('zoomend', updateMarkersForZoom);
         };
-    }, [mapReady, prestataires, groupByVille, calculateClusters, updateMarkers]);
-
-    // Centrer sur l'utilisateur
-    useEffect(() => {
-        if (mapInstanceRef.current && userLocation && mapReady) {
-            mapInstanceRef.current.flyTo([userLocation.lat, userLocation.lng], USER_ZOOM, {
-                duration: 1.5,
-                easeLinearity: 0.25
-            });
-        }
-    }, [userLocation, mapReady]);
+    }, [mapReady, prestataires, groupByVille, calculateClusters, updateMarkers, markersVersion]);
 
     return (
         <div className="maps-fullscreen">
             <div ref={mapRef} className="map-container" />
 
-            {/* Effet zoom cluster */}
-            {isZooming && (
+            {/* Effet zoom cluster - SEULEMENT sur desktop */}
+            {isZooming && !isMobile() && (
                 <div className="zoom-overlay">
                     <div className="zoom-door zoom-door-left" />
                     <div className="zoom-door zoom-door-right" />
                 </div>
             )}
-
 
             {loading && (
                 <div className="map-loader">
@@ -370,10 +461,11 @@ const Maps = () => {
                 <button
                     className="recenter-button"
                     onClick={() => {
+                        const duration = isMobile() ? 0.5 : 1;
                         mapInstanceRef.current?.flyTo(
                             [userLocation.lat, userLocation.lng],
                             USER_ZOOM,
-                            { duration: 1 }
+                            { duration }
                         );
                     }}
                 >

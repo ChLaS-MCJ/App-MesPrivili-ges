@@ -92,7 +92,32 @@ const CodePromoService = {
                 data: []
             };
         }
-    }
+    },
+    /**
+     * Valider un code promo pour le checkout (codes réduction uniquement)
+     * POST /api/codes-promo/validate-for-checkout
+     * 
+     * @param {string} code - Le code promo
+     * @param {string} abonnementCode - Code de l'abonnement sélectionné
+     * @param {number} nombreFiches - Nombre de fiches
+     * @returns {Object} { success, message, data? }
+     */
+    validateForCheckout: async (code, abonnementCode, nombreFiches = 1) => {
+        try {
+            const response = await Caller.post('/codes-promo/validate-for-checkout', {
+                code: code.toUpperCase().trim(),
+                abonnementCode,
+                nombreFiches
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Erreur validateForCheckout:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Erreur lors de la validation du code'
+            };
+        }
+    },
 };
 
 export default CodePromoService;

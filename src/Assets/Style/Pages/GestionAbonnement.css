@@ -33,7 +33,7 @@
 .gestion-abonnement-page .gestion-scroll {
     flex: 1;
     overflow-y: auto;
-    padding-bottom: 40px;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px);
 }
 
 .gestion-abonnement-page .gestion-content {
@@ -46,7 +46,10 @@
 .gestion-abonnement-page .page-header {
     display: flex;
     align-items: center;
-    padding: 16px 20px;
+    padding-top: calc(env(safe-area-inset-top, 20px) + 16px);
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 16px;
     background: transparent;
     position: sticky;
     top: 0;
@@ -130,7 +133,7 @@
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    margin-bottom: 20px;
+    margin-top: 60px;
     border-radius: 12px;
     font-size: 14px;
 }
@@ -230,6 +233,7 @@
 /* Summary Section */
 .gestion-abonnement-page .summary-section {
     margin-bottom: 24px;
+    padding-top: 50px;
 }
 
 .gestion-abonnement-page .summary-card {
@@ -1116,4 +1120,154 @@
 
 [data-theme="dark"] .promo-info-card .promo-description {
     color: #aaa;
+}
+
+
+/* ========================================
+   CSS ADDITIONNEL - GESTION ABONNEMENT
+   Styles pour codes promo (gratuits + réduction)
+   À ajouter à votre fichier CSS existant
+   ======================================== */
+
+/* Badge code promo sur la carte */
+.promo-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    margin: 0 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.promo-badge.free {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.promo-badge.free ion-icon {
+    color: #10b981;
+}
+
+.promo-badge.reduction {
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.1), rgba(254, 126, 79, 0.05));
+    color: #ea580c;
+    border: 1px solid rgba(254, 126, 79, 0.2);
+}
+
+.promo-badge.reduction ion-icon {
+    color: #fe7e4f;
+}
+
+/* Carte info promo dans le détail */
+.promo-info-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 12px;
+    margin-top: 16px;
+}
+
+.promo-info-card.free {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.promo-info-card.reduction {
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.1), rgba(107, 114, 128, 0.05));
+    border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.promo-info-card .promo-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.promo-info-card.free .promo-icon {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.promo-info-card.reduction .promo-icon {
+    background: rgba(107, 114, 128, 0.15);
+    color: #6b7280;
+}
+
+.promo-info-card .promo-icon ion-icon {
+    font-size: 20px;
+}
+
+.promo-info-card .promo-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.promo-info-card .promo-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #374151;
+}
+
+.promo-info-card .promo-description {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+/* Badge "Réduit" à côté du prix */
+.reduction-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    margin-left: 8px;
+    background: rgba(254, 126, 79, 0.15);
+    color: #ea580c;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* Dark mode */
+[data-theme="dark"] .promo-badge.free {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.25);
+    color: #34d399;
+}
+
+[data-theme="dark"] .promo-badge.reduction {
+    background: rgba(254, 126, 79, 0.15);
+    border-color: rgba(254, 126, 79, 0.25);
+    color: #fb923c;
+}
+
+[data-theme="dark"] .promo-info-card.free {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+[data-theme="dark"] .promo-info-card.reduction {
+    background: rgba(107, 114, 128, 0.1);
+    border-color: rgba(107, 114, 128, 0.2);
+}
+
+[data-theme="dark"] .promo-info-card .promo-title {
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .promo-info-card .promo-description {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .reduction-badge {
+    background: rgba(254, 126, 79, 0.2);
+    color: #fb923c;
 }

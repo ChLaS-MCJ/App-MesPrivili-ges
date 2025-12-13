@@ -22,7 +22,9 @@ import {
     sparklesOutline,
     documentTextOutline,
     chevronDownOutline,
-    chevronUpOutline
+    chevronUpOutline,
+    pricetagOutline,
+    lockClosedOutline
 } from 'ionicons/icons';
 import AbonnementService from '../../Services/Abonnement.services';
 import { useAuth } from '../../Utils/AuthContext';
@@ -228,6 +230,21 @@ const GestionAbonnement = () => {
         return souscriptions.reduce((acc, s) => acc + (s.nombreFiches || 0), 0);
     };
 
+    // Vérifier si une souscription a utilisé un code promo (mois gratuits ou réduction)
+    const hasUsedCodePromo = (souscription) => {
+        return !!souscription.codePromoId || souscription.aUtiliseCodePromo;
+    };
+
+    // Vérifier si c'est un code promo mois gratuits (pas de paiement)
+    const isFreeMonthsPromo = (souscription) => {
+        return souscription.methodePaiement === 'code_promo';
+    };
+
+    // Vérifier si c'est un code promo réduction (paiement réduit)
+    const isReductionPromo = (souscription) => {
+        return hasUsedCodePromo(souscription) && souscription.methodePaiement === 'card';
+    };
+
     return (
         <div className="gestion-abonnement-page">
             {/* Header */}
@@ -320,6 +337,9 @@ const GestionAbonnement = () => {
                                 const isExpiring = isExpiringSoon(souscription);
                                 const isExpanded = expandedCards[souscription.id];
                                 const isToggleLoading = toggleLoadingMap[souscription.id];
+                                const usedPromo = hasUsedCodePromo(souscription);
+                                const isFreePromo = isFreeMonthsPromo(souscription);
+                                const isReduction = isReductionPromo(souscription);
 
                                 return (
                                     <section key={souscription.id} className="subscription-card">
@@ -365,6 +385,14 @@ const GestionAbonnement = () => {
                                             </div>
                                         </div>
 
+                                        {/* Badge code promo si utilisé */}
+                                        {usedPromo && (
+                                            <div className={`promo-badge ${isFreePromo ? 'free' : 'reduction'}`}>
+                                                <IonIcon icon={isFreePromo ? sparklesOutline : pricetagOutline} />
+                                                <span>{isFreePromo ? 'Offert par code promo' : 'Réduction appliquée'}</span>
+                                            </div>
+                                        )}
+
                                         {/* Contenu déplié */}
                                         {isExpanded && (
                                             <div className="card-expanded">
@@ -389,14 +417,20 @@ const GestionAbonnement = () => {
                                                         <div className="info-content">
                                                             <span className="info-label">Montant payé</span>
                                                             <span className="info-value">
-                                                                {formatPrice(souscription.montantPayeTTC || 0)} TTC
+                                                                {isFreePromo
+                                                                    ? 'Gratuit (code promo)'
+                                                                    : `${formatPrice(souscription.montantPayeTTC || 0)} TTC`
+                                                                }
+                                                                {isReduction && (
+                                                                    <span className="reduction-badge">Réduit</span>
+                                                                )}
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Renouvellement automatique - SEULEMENT si pas code promo */}
-                                                {souscription.methodePaiement !== 'code_promo' ? (
+                                                {/* Renouvellement automatique - SEULEMENT si pas de code promo */}
+                                                {!usedPromo ? (
                                                     <div className="renew-card">
                                                         <div className="renew-status">
                                                             <div className={`renew-icon ${souscription.renouvellementAuto ? 'active' : ''}`}>
@@ -433,22 +467,27 @@ const GestionAbonnement = () => {
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    /* Abonnement code promo - pas de renouvellement */
-                                                    <div className="promo-info-card">
+                                                    /* Abonnement avec code promo - pas de renouvellement */
+                                                    <div className={`promo-info-card ${isReduction ? 'reduction' : 'free'}`}>
                                                         <div className="promo-icon">
-                                                            <IonIcon icon={sparklesOutline} />
+                                                            <IonIcon icon={isReduction ? lockClosedOutline : sparklesOutline} />
                                                         </div>
                                                         <div className="promo-info">
-                                                            <span className="promo-title">Abonnement offert</span>
+                                                            <span className="promo-title">
+                                                                {isFreePromo ? 'Abonnement offert' : 'Offre promotionnelle'}
+                                                            </span>
                                                             <span className="promo-description">
-                                                                Cet abonnement a été activé via un code promo et ne sera pas renouvelé automatiquement.
+                                                                {isFreePromo
+                                                                    ? 'Cet abonnement a été activé via un code promo et ne sera pas renouvelé automatiquement.'
+                                                                    : 'Cet abonnement a bénéficié d\'une réduction promotionnelle. Le renouvellement automatique n\'est pas disponible. À l\'expiration, vous pourrez souscrire un nouvel abonnement au tarif normal.'
+                                                                }
                                                             </span>
                                                         </div>
                                                     </div>
                                                 )}
 
-                                                {/* Avertissements - SEULEMENT si pas code promo */}
-                                                {souscription.methodePaiement !== 'code_promo' && !souscription.renouvellementAuto && isExpiring && (
+                                                {/* Avertissements - SEULEMENT si pas de code promo */}
+                                                {!usedPromo && !souscription.renouvellementAuto && isExpiring && (
                                                     <div className="renew-warning">
                                                         <IonIcon icon={warningOutline} />
                                                         <span>
@@ -458,7 +497,7 @@ const GestionAbonnement = () => {
                                                     </div>
                                                 )}
 
-                                                {souscription.methodePaiement !== 'code_promo' && souscription.renouvellementAuto && (
+                                                {!usedPromo && souscription.renouvellementAuto && (
                                                     <div className="renew-notice">
                                                         <IonIcon icon={informationCircleOutline} />
                                                         <span>
@@ -468,11 +507,15 @@ const GestionAbonnement = () => {
                                                 )}
 
                                                 {/* Avertissement expiration code promo */}
-                                                {souscription.methodePaiement === 'code_promo' && isExpiring && (
+                                                {usedPromo && isExpiring && (
                                                     <div className="renew-warning">
                                                         <IonIcon icon={warningOutline} />
                                                         <span>
-                                                            Expire dans {joursRestants} jours. Souscrivez à un abonnement payant pour continuer.
+                                                            Expire dans {joursRestants} jours.
+                                                            {isFreePromo
+                                                                ? ' Souscrivez à un abonnement payant pour continuer.'
+                                                                : ' Souscrivez un nouvel abonnement au tarif normal pour continuer.'
+                                                            }
                                                         </span>
                                                     </div>
                                                 )}

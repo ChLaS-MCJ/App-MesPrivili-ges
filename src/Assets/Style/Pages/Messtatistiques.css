@@ -5,7 +5,8 @@
 
 /* ===== BASE ===== */
 .stats-page {
-    padding-bottom: 100px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px);
 }
 
 .header-spacer {
@@ -1028,7 +1029,7 @@
 
 @media (min-width: 768px) {
     .stats-main-grid {
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .stats-main-grid .stat-main-card:nth-child(5) {

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mes Privilèges</string>
+    <string name="title_activity_main">Mes Privilèges</string>
+    <string name="package_name">com.mesprivileges.app</string>
+    <string name="custom_url_scheme">com.mesprivileges.app</string>
+    <string name="server_client_id">172246921916-dv3japmohouikebh4ugfaum5s6t7vdg1.apps.googleusercontent.com</string>
+</resources>

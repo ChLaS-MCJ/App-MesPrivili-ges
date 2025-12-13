@@ -1,80 +1,458 @@
-#root {
-    max-width: 1440px;
-    min-width: 280px;
-    text-align: center;
-    margin: 0px 0px 0px 0px;
-}
+/* ========================================
+   FIX FINAL - Header, Footer, Map + SCROLL
+   ======================================== */
 
-body,
-html {
+/* ========================================
+   1. RESET & BASE
+   ======================================== */
+
+html,
+body {
     margin: 0;
     padding: 0;
     width: 100%;
-}
-
-/* Pour masquer la barre de défilement, tout en permettant le défilement */
-body {
-    overflow-y: scroll;
-    /* Active le défilement vertical */
+    height: 100%;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    /* Scroll fluide pour iOS */
-}
-
-ion-header {
-    z-index: 0;
-    height: 10px;
-}
-
-ion-content {
-    background: #2d2d2d;
-}
-
-/* Cible spécifiquement les petits écrans */
-@media (max-width: 768px) {
-    .layout {
-        overflow-y: visible;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-}
-
-
-
-/* ========================================
-   FIX SCROLL GLOBAL - CORRECTION
-   ======================================== */
-
-/* Reset pour permettre le scroll */
-html,
-body {
-    min-height: 100%;
-    /* ✅ CHANGÉ DE height À min-height */
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
+    background-color: #2b2929;
 }
 
 #root {
     min-height: 100%;
-    overflow-y: visible !important;
+    height: 100%;
 }
 
-/* Fix pour le layout responsive */
-@media (max-width: 768px) {
-    .layout {
-        overflow-y: visible !important;
-        height: auto !important;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
+/* ========================================
+   2. LAYOUTS
+   ======================================== */
+
+.layout-public {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100%;
+    background: #2b2929 !important;
+    background-color: #2b2929 !important;
+}
+
+/* MAIN CONTENT - Scrollable par défaut */
+.main-content {
+    flex: 1;
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    background: #2b2929 !important;
+}
+
+/* Pas de padding par défaut - chaque page gère son propre padding */
+
+/* Pour les pages plein écran, le main-content ne doit pas interférer */
+.main-content.fullscreen-page {
+    overflow: visible !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.layout-auth {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    background-color: #2b2929;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.auth-content {
+    flex: 1;
+    min-height: 100%;
+}
+
+/* ========================================
+   3. HEADER - Z-INDEX 1000
+   ======================================== */
+
+.app-header,
+header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    padding-top: env(safe-area-inset-top);
+}
+
+/* ========================================
+   4. FOOTER - Z-INDEX 1000
+   ======================================== */
+
+.app-footer,
+footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ========================================
+   5. MAP - Z-INDEX 1 (en dessous)
+   ======================================== */
+
+.maps-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 1 !important;
+    overflow: visible !important;
+}
+
+.map-container {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.leaflet-container {
+    width: 100% !important;
+    height: 100% !important;
+    background: #e8e8e8;
+}
+
+/* Contrôles Leaflet - au dessus de la map, en dessous du footer */
+.leaflet-control-container {
+    z-index: 500 !important;
+}
+
+.leaflet-bottom.leaflet-right {
+    bottom: 110px !important;
+}
+
+
+/* ========================================
+   6. LOADER
+   ======================================== */
+
+.map-loader {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 600;
+    text-align: center;
+    color: white;
+}
+
+.loader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
     }
 }
 
-/* Permettre le scroll sur les pages */
+/* ========================================
+   7. ZOOM EFFECT
+   ======================================== */
+
+.zoom-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.zoom-door {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    background: #2b2929;
+}
+
+.zoom-door-left {
+    left: 0;
+    animation: doorOpenLeft 1.2s ease-in-out;
+}
+
+.zoom-door-right {
+    right: 0;
+    animation: doorOpenRight 1.2s ease-in-out;
+}
+
+@keyframes doorOpenLeft {
+
+    0%,
+    30% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes doorOpenRight {
+
+    0%,
+    30% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* ========================================
+   8. MARKERS
+   ======================================== */
+
+.custom-marker-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+.user-location-marker {
+    background: transparent !important;
+    border: none !important;
+}
+
+@keyframes pulse-animation {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.8);
+        opacity: 0;
+    }
+}
+
+/* ========================================
+   9. IONIC OVERRIDES
+   ======================================== */
+
+ion-app {
+    background-color: #2b2929;
+}
+
+ion-content {
+    --background: #2d2d2d;
+}
+
+ion-page {
+    position: relative;
+    overflow: visible;
+}
+
+/* ========================================
+   10. PAGES SPÉCIFIQUES
+   ======================================== */
+
 .login-screen,
-.account-settings-page,
-.register-page {
-    overflow-y: auto !important;
-    height: auto !important;
-    min-height: 100vh !important;
+.register-page,
+.account-settings-page {
+    min-height: 100vh;
+    overflow-y: auto;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Pages avec leur propre structure (plein écran) */
+.categories-page,
+.prestataires-page,
+.fiche-prestataire-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 900;
+    background-color: #2b2929;
+}
+
+/* Quand ces pages sont présentes, le main-content doit avoir overflow visible */
+.main-content.fullscreen-page {
+    overflow: visible !important;
+}
+
+/* ========================================
+   11. iOS SAFE AREA
+   ======================================== */
+
+@supports (padding: max(0px)) {
+
+    .app-header,
+    header {
+        padding-top: max(env(safe-area-inset-top), 0px);
+    }
+
+    .app-footer,
+    footer {
+        padding-bottom: max(env(safe-area-inset-bottom), 0px);
+    }
+}
+
+/* ========================================
+   12. PAGES SCROLLABLES
+   ======================================== */
+
+/* Pages qui ont besoin du scroll normal dans main-content */
+.favoris-page,
+.history-page,
+.mes-promotions-page,
+.mon-commerce-page,
+.mes-statistiques-page,
+.gestion-abonnement-page,
+.abonnement-page,
+.legal-page {
+    min-height: 100%;
+    padding-bottom: 20px;
+}
+
+/* ========================================
+   13. RESPONSIVE
+   ======================================== */
+
+/* Responsive adjustments if needed */
+
+
+
+/* ================================================
+   AUTH PAGES FIXES - Focus States & Title Centering
+   ================================================ */
+
+/* -------------------------
+   TITRES CENTRÉS - Les 3 pages
+   ------------------------- */
+
+/* Login */
+.login-header {
+    text-align: center;
+    width: 100%;
+}
+
+.login-title {
+    text-align: center;
+}
+
+/* Register */
+.register-header {
+    text-align: center;
+    width: 100%;
+}
+
+.register-title {
+    text-align: center;
+}
+
+/* Forgot Password */
+.forgot-password-header {
+    text-align: center;
+    width: 100%;
+}
+
+.forgot-password-title {
+    text-align: center;
+}
+
+
+/* -------------------------
+   FOCUS STATES - Barre blanche en bas
+   ------------------------- */
+
+/* Base : préparer la barre en bas */
+.login-input,
+.register-input,
+.forgot-password-input {
+    position: relative;
+    border-bottom: 2px solid transparent !important;
+    transition: border-color 0.2s ease;
+}
+
+/* Focus : barre blanche en bas */
+.login-input.has-focus,
+.register-input.has-focus,
+.forgot-password-input.has-focus {
+    border-bottom-color: #ffffff !important;
+}
+
+.input-group:focus-within .login-input,
+.input-group:focus-within .register-input,
+.input-group:focus-within .forgot-password-input {
+    border-bottom-color: #ffffff !important;
+}
+
+/* Supprimer l'outline par défaut */
+.login-input input:focus,
+.register-input input:focus,
+.forgot-password-input input:focus,
+ion-input.login-input::part(native):focus,
+ion-input.register-input::part(native):focus,
+ion-input.forgot-password-input::part(native):focus {
+    outline: none;
+}
+
+/* -------------------------
+   PASSWORD VALIDATION
+   ------------------------- */
+
+.password-validation-container,
+.password-match-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+    padding: 0 4px;
+}
+
+.password-criteria {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    transition: color 0.2s ease;
+}
+
+.password-criteria ion-icon {
+    font-size: 14px;
+}
+
+.password-criteria.valid {
+    color: #4CAF50;
+}
+
+.password-criteria.valid ion-icon {
+    color: #4CAF50;
+}
+
+.password-criteria.invalid {
+    color: #ff6b6b;
+}
+
+.password-criteria.invalid ion-icon {
+    color: #ff6b6b;
 }

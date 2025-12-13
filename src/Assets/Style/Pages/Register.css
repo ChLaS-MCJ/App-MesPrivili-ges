@@ -546,3 +546,120 @@ ion-input.register-input {
     --background: #f59e0b;
     --color: white;
 }
+
+/* ================================================
+   AUTH PAGES FIXES - Focus States & Title Centering
+   ================================================ */
+
+/* -------------------------
+   TITRES CENTRÉS - Les 3 pages
+   ------------------------- */
+
+/* Login */
+.login-header {
+    text-align: center;
+    width: 100%;
+}
+
+.login-title {
+    text-align: center;
+}
+
+/* Register */
+.register-header {
+    text-align: center;
+    width: 100%;
+}
+
+.register-title {
+    text-align: center;
+}
+
+/* Forgot Password */
+.forgot-password-header {
+    text-align: center;
+    width: 100%;
+}
+
+.forgot-password-title {
+    text-align: center;
+}
+
+
+/* -------------------------
+   FOCUS STATES - Barre blanche en bas
+   ------------------------- */
+
+/* Base : préparer la barre en bas */
+.login-input,
+.register-input,
+.forgot-password-input {
+    position: relative;
+    border-bottom: 2px solid transparent !important;
+    transition: border-color 0.2s ease;
+}
+
+/* Focus : barre blanche en bas */
+.login-input.has-focus,
+.register-input.has-focus,
+.forgot-password-input.has-focus {
+    border-bottom-color: #ffffff !important;
+}
+
+.input-group:focus-within .login-input,
+.input-group:focus-within .register-input,
+.input-group:focus-within .forgot-password-input {
+    border-bottom-color: #ffffff !important;
+}
+
+/* Supprimer l'outline par défaut */
+.login-input input:focus,
+.register-input input:focus,
+.forgot-password-input input:focus,
+ion-input.login-input::part(native):focus,
+ion-input.register-input::part(native):focus,
+ion-input.forgot-password-input::part(native):focus {
+    outline: none;
+}
+
+/* -------------------------
+   PASSWORD VALIDATION
+   ------------------------- */
+
+.password-validation-container,
+.password-match-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+    padding: 0 4px;
+}
+
+.password-criteria {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    transition: color 0.2s ease;
+}
+
+.password-criteria ion-icon {
+    font-size: 14px;
+}
+
+.password-criteria.valid {
+    color: #4CAF50;
+}
+
+.password-criteria.valid ion-icon {
+    color: #4CAF50;
+}
+
+.password-criteria.invalid {
+    color: #ff6b6b;
+}
+
+.password-criteria.invalid ion-icon {
+    color: #ff6b6b;
+}

@@ -2,21 +2,21 @@ import { useState, useEffect, useRef } from 'react';
 import { IonIcon } from '@ionic/react';
 import { closeOutline } from 'ionicons/icons';
 import { useAuth } from '../Utils/AuthContext';
-import QRCode from 'qrcode';
+import QRCode from 'react-qr-code';
 import RatingModal from './RatingModal';
 import AvisService from '../Services/Avis.services';
 import Caller from '../Services/Caller.services';
 
 const QRCodeModal = ({ isOpen, onClose }) => {
     const { user } = useAuth();
-    const [qrCodeUrl, setQrCodeUrl] = useState('');
     const [showRating, setShowRating] = useState(false);
     const [scanData, setScanData] = useState(null);
     const pollingRef = useRef(null);
 
+    const qrCodeData = user?.client?.qrCode;
+
     useEffect(() => {
-        if (isOpen && user?.client?.qrCode) {
-            generateQRCode(user.client.qrCode);
+        if (isOpen && qrCodeData) {
             startPolling();
         }
 
@@ -24,19 +24,6 @@ const QRCodeModal = ({ isOpen, onClose }) => {
             stopPolling();
         };
     }, [isOpen, user]);
-
-    const generateQRCode = async (qrCodeData) => {
-        try {
-            const url = await QRCode.toDataURL(qrCodeData, {
-                width: 300,
-                margin: 2,
-                color: { dark: '#000000', light: '#FFFFFF' }
-            });
-            setQrCodeUrl(url);
-        } catch (error) {
-            console.error('Erreur génération QR Code:', error);
-        }
-    };
 
     const startPolling = () => {
         checkForNewScan();
@@ -109,10 +96,16 @@ const QRCodeModal = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="qrcode-container">
-                    {qrCodeUrl ? (
+                    {qrCodeData ? (
                         <>
                             <div className="qrcode-wrapper">
-                                <img src={qrCodeUrl} alt="QR Code" className="qrcode-image" />
+                                <QRCode
+                                    value={qrCodeData}
+                                    size={250}
+                                    level="M"
+                                    bgColor="#FFFFFF"
+                                    fgColor="#000000"
+                                />
                             </div>
                             <div className="qrcode-info">
                                 <p className="qrcode-name">{user?.client?.prenom} {user?.client?.nom}</p>
@@ -122,7 +115,7 @@ const QRCodeModal = ({ isOpen, onClose }) => {
                     ) : (
                         <div className="loading-qr">
                             <div className="spinner"></div>
-                            <p>Génération du QR Code...</p>
+                            <p>Chargement du QR Code...</p>
                         </div>
                     )}
                 </div>

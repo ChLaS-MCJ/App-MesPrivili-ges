@@ -99,7 +99,7 @@ const AbonnementSuccess = () => {
     };
 
     const handleGoToAbonnement = () => {
-        navigate('/auth/abonnement');
+        navigate('/auth/gestion-abonnement');
     };
 
     const handleRetry = () => {

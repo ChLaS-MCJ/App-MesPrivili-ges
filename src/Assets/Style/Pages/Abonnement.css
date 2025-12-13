@@ -20,6 +20,7 @@
    ================================================ */
 
 .abonnement-page .page-header {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -76,6 +77,13 @@
 
 .abonnement-page .abonnement-content {
     padding: 0 16px 24px;
+    width: 90%;
+    margin: auto;
+}
+
+
+.abonnement-page {
+    padding: 0 !important;
 }
 
 /* ================================================
@@ -1368,4 +1376,207 @@
     .abonnement-page .hero-title {
         font-size: 22px;
     }
+}
+
+
+/* ========================================
+   CSS ADDITIONNEL - CODES PROMO RÉDUCTION
+   À ajouter à votre fichier CSS existant
+   ======================================== */
+
+/* Badge code promo réduction */
+.code-promo-badge.reduction {
+    background: linear-gradient(135deg, #fe7e4f, #ff6b35);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.code-promo-badge.free {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+/* Section code promo succès - style réduction */
+.code-promo-success.reduction {
+    background: linear-gradient(135deg, rgba(254, 126, 79, 0.1), rgba(254, 126, 79, 0.05));
+    border: 1px solid rgba(254, 126, 79, 0.2);
+}
+
+/* Détails prix avec réduction */
+.code-promo-details .detail-item.price-detail {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+}
+
+.code-promo-details .original-price {
+    text-decoration: line-through;
+    color: #9ca3af;
+    font-size: 16px;
+}
+
+.code-promo-details .arrow-icon {
+    color: #fe7e4f;
+    transform: rotate(180deg);
+}
+
+.code-promo-details .new-price {
+    color: #fe7e4f;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.code-promo-details .detail-item.highlight {
+    font-size: 16px;
+}
+
+.code-promo-details .detail-item.savings {
+    color: #10b981;
+}
+
+.code-promo-details .detail-item.savings ion-icon {
+    color: #10b981;
+}
+
+/* Avertissement code promo */
+.code-promo-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #92400e;
+    line-height: 1.5;
+}
+
+.code-promo-warning ion-icon {
+    color: #f59e0b;
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* Renouvellement auto bloqué */
+.auto-renew-blocked {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(107, 114, 128, 0.1);
+    border: 1px solid rgba(107, 114, 128, 0.2);
+    border-radius: 12px;
+}
+
+.auto-renew-blocked .blocked-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(107, 114, 128, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.auto-renew-blocked .blocked-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.auto-renew-blocked .blocked-title {
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
+
+.auto-renew-blocked .blocked-description {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+/* Prix avec réduction dans le footer */
+.summary-line .price-with-discount {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.summary-line .price-with-discount .original {
+    text-decoration: line-through;
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+.summary-line .price-with-discount .discounted {
+    color: #fe7e4f;
+    font-weight: 600;
+}
+
+/* Ligne promo appliquée dans le footer */
+.summary-line.promo-applied {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fe7e4f;
+    font-size: 13px;
+    padding: 8px 0;
+    border-top: 1px dashed rgba(254, 126, 79, 0.3);
+    border-bottom: 1px dashed rgba(254, 126, 79, 0.3);
+    margin: 8px 0;
+}
+
+.summary-line.promo-applied ion-icon {
+    font-size: 16px;
+}
+
+.summary-line.promo-applied .savings {
+    margin-left: auto;
+    font-weight: 600;
+    color: #10b981;
+}
+
+/* Dark mode */
+[data-theme="dark"] .code-promo-warning {
+    background: rgba(251, 191, 36, 0.15);
+    border-color: rgba(251, 191, 36, 0.25);
+    color: #fbbf24;
+}
+
+[data-theme="dark"] .auto-renew-blocked {
+    background: rgba(107, 114, 128, 0.15);
+    border-color: rgba(107, 114, 128, 0.25);
+}
+
+[data-theme="dark"] .auto-renew-blocked .blocked-title {
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .auto-renew-blocked .blocked-description {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .code-promo-details .price-detail {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .summary-line.promo-applied {
+    border-color: rgba(254, 126, 79, 0.2);
 }

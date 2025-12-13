@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+
 import { IonIcon } from '@ionic/react';
 import {
     arrowBack,
@@ -8,7 +9,6 @@ import {
     star,
     timeOutline,
     locationOutline,
-    shareOutline,
     navigateOutline,
     calendarOutline,
     closeOutline,
@@ -98,7 +98,7 @@ const FichePrestataire = () => {
                     });
                     setGeolocEnabled(true);
                 },
-                (error) => {
+                () => {
                     setGeolocEnabled(false);
                 },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
@@ -260,7 +260,7 @@ const FichePrestataire = () => {
                     }
                 }
             } catch (error) {
-                console.error('Erreur lors du chargement:', error);
+                // Silencieux en prod
             }
             setLoading(false);
         };
@@ -333,23 +333,9 @@ const FichePrestataire = () => {
                 }
             }
         } catch (error) {
-            console.error('Erreur toggle favori:', error);
+            // Silencieux en prod
         }
         setFavoriteLoading(false);
-    };
-
-    const handleShare = async () => {
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: prestataire?.nomCommerce,
-                    text: prestataire?.descriptionCourte,
-                    url: window.location.href,
-                });
-            } catch (error) {
-                // Erreur silencieuse
-            }
-        }
     };
 
     const handleNavigate = () => {
@@ -392,7 +378,6 @@ const FichePrestataire = () => {
             try {
                 horairesData = JSON.parse(horaires);
             } catch (e) {
-                console.error('Erreur parsing horaires:', e);
                 return null;
             }
         }
@@ -438,7 +423,6 @@ const FichePrestataire = () => {
                     secondaryImages = JSON.parse(secondaryImages);
                 }
             } catch (e) {
-                console.error('Erreur parsing images:', e);
                 secondaryImages = [];
             }
         }
@@ -570,9 +554,6 @@ const FichePrestataire = () => {
                         <IonIcon icon={arrowBack} />
                     </button>
                     <div className="fiche-header-actions">
-                        <button className="fiche-header-btn" onClick={handleShare}>
-                            <IonIcon icon={shareOutline} />
-                        </button>
                         {!isOwnerPreview && (
                             <button
                                 className={`fiche-header-btn ${isFavorite ? 'favorite-active' : ''} ${favoriteLoading ? 'loading' : ''}`}

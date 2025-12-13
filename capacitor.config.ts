@@ -19,30 +19,30 @@ const config: CapacitorConfig = {
         GoogleAuth: {
             scopes: ["profile", "email"],
             serverClientId: "172246921916-dv3japmohouikebh4ugfaum5s6t7vdg1.apps.googleusercontent.com",
-            forceCodeForRefreshToken: false
+            forceCodeForRefreshToken: true
         },
         SplashScreen: {
-            launchShowDuration: 2000,
+            launchShowDuration: 0,
             launchAutoHide: true,
             backgroundColor: "#2b2929",
-            androidScaleType: "CENTER_CROP",
             showSpinner: false,
-            splashFullScreen: true,
-            splashImmersive: true
+            splashFullScreen: false,
+            splashImmersive: false
         },
         StatusBar: {
-            style: "LIGHT",
-            backgroundColor: "#2b2929"
+            style: "DARK",
+            backgroundColor: "#2b2929",
+            overlaysWebView: true
         },
         Keyboard: {
-            resize: "body",
+
             resizeOnFullScreen: true
         }
     },
 
     ios: {
         scheme: "mesprivileges",
-        contentInset: "automatic",
+        contentInset: "always",
         preferredContentMode: "mobile",
         backgroundColor: "#2b2929"
     },

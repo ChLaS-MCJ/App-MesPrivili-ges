@@ -3,7 +3,8 @@
     min-height: 100vh;
     background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
     padding: 20px 15px;
-    padding-bottom: 100px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px);
 }
 
 /* ===== PAGE HEADER ===== */
@@ -310,6 +311,7 @@
 /* ===== SORT DROPDOWN ===== */
 .favoris-sort-dropdown {
     position: relative;
+    padding: 15px 0;
 }
 
 .favoris-sort-trigger {
@@ -396,22 +398,9 @@
 }
 
 .favoris-sort-option.active {
+    background: rgba(254, 126, 79, 0.15);
     color: #fe7e4f;
-    background: rgba(254, 126, 79, 0.1);
-}
-
-/* ===== RESULTS COUNT ===== */
-.favoris-results-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-    padding: 0 5px;
-}
-
-.favoris-results-count {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 12px;
+    font-weight: 600;
 }
 
 /* ===== NO RESULTS ===== */
@@ -419,14 +408,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     padding: 40px 20px;
     text-align: center;
 }
 
 .favoris-no-results ion-icon {
     font-size: 48px;
-    color: rgba(254, 126, 79, 0.3);
+    color: rgba(255, 255, 255, 0.2);
     margin-bottom: 16px;
 }
 
@@ -778,7 +766,8 @@
         max-width: 700px;
         margin: 0 auto;
         padding: 30px 20px;
-        padding-bottom: 100px;
+        padding-top: calc(env(safe-area-inset-top, 0px) + 30px);
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px);
     }
 
     .favoris-title {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
     IonContent,
     IonPage,
@@ -21,11 +21,13 @@ import {
     checkmarkCircle,
     alertCircle,
     businessOutline,
-    personOutline
+    personOutline,
+    closeCircle
 } from 'ionicons/icons';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../Utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 
 
 const Register = () => {
@@ -49,6 +51,7 @@ const Register = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', color: '' });
+    const [passwordTouched, setPasswordTouched] = useState(false);
 
     // États vérification SIRET
     const [siretVerification, setSiretVerification] = useState({
@@ -62,6 +65,41 @@ const Register = () => {
     const navigate = useNavigate();
 
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isNative = Capacitor.isNativePlatform();
+
+    // Validation du mot de passe en temps réel
+    const passwordValidation = useMemo(() => {
+        const password = formData.password || '';
+        return {
+            minLength: password.length >= 8,
+            hasUppercase: /[A-Z]/.test(password),
+            hasLowercase: /[a-z]/.test(password),
+            hasNumber: /[0-9]/.test(password),
+        };
+    }, [formData.password]);
+
+    const isPasswordValid = useMemo(() => {
+        return Object.values(passwordValidation).every(v => v);
+    }, [passwordValidation]);
+
+    // Initialiser Google Auth pour les plateformes natives
+    useEffect(() => {
+        const initGoogleAuth = async () => {
+            if (isNative) {
+                try {
+                    const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+                    await GoogleAuth.initialize({
+                        clientId: "172246921916-dv3japmohouikebh4ugfaum5s6t7vdg1.apps.googleusercontent.com",
+                        scopes: ['profile', 'email'],
+                        grantOfflineAccess: false,
+                    });
+                } catch (error) {
+                    console.log('Google Auth init error:', error);
+                }
+            }
+        };
+        initGoogleAuth();
+    }, []);
 
     // Debounce pour la vérification SIRET
     useEffect(() => {
@@ -125,6 +163,11 @@ const Register = () => {
         setFormData(prev => ({ ...prev, [field]: value || '' }));
     };
 
+    const handlePasswordChange = (value) => {
+        setFormData(prev => ({ ...prev, password: value || '' }));
+        if (!passwordTouched) setPasswordTouched(true);
+    };
+
     const formatSiret = (value) => {
         if (!value) return '';
         // Enlever tout sauf les chiffres
@@ -159,19 +202,20 @@ const Register = () => {
         const pwd = password?.trim() || '';
         const confirmPwd = confirmPassword?.trim() || '';
 
-        if (pwd !== confirmPwd) {
+        // Validation du mot de passe
+        if (!isPasswordValid) {
             setToast({
                 show: true,
-                message: 'Les mots de passe ne correspondent pas',
+                message: 'Le mot de passe ne respecte pas les critères requis',
                 color: 'danger',
             });
             return false;
         }
 
-        if (pwd.length < 8) {
+        if (pwd !== confirmPwd) {
             setToast({
                 show: true,
-                message: 'Le mot de passe doit contenir au moins 8 caractères',
+                message: 'Les mots de passe ne correspondent pas',
                 color: 'danger',
             });
             return false;
@@ -275,7 +319,8 @@ const Register = () => {
         }
     };
 
-    const handleGoogleRegister = useGoogleLogin({
+    // Google Register pour le WEB (popup)
+    const handleGoogleRegisterWeb = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             setLoading(true);
 
@@ -333,6 +378,59 @@ const Register = () => {
         },
     });
 
+    // Google Register pour ANDROID/IOS (natif)
+    const handleGoogleRegisterNative = async () => {
+        setLoading(true);
+
+        try {
+            const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+            const googleUser = await GoogleAuth.signIn();
+
+            const result = await loginWithGoogle({
+                googleId: googleUser.id,
+                email: googleUser.email,
+                prenom: googleUser.givenName,
+                nom: googleUser.familyName,
+            });
+
+            if (result.success) {
+                setToast({
+                    show: true,
+                    message: 'Inscription Google réussie !',
+                    color: 'success',
+                });
+
+                setTimeout(() => {
+                    navigate('/auth/maps');
+                }, 500);
+            } else {
+                setToast({
+                    show: true,
+                    message: result.message || 'Erreur lors de l\'inscription Google',
+                    color: 'danger',
+                });
+            }
+        } catch (error) {
+            console.error('Erreur Google Register Native:', error);
+            setToast({
+                show: true,
+                message: 'Échec de l\'inscription Google',
+                color: 'danger',
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Choisir la bonne méthode selon la plateforme
+    const handleGoogleRegister = () => {
+        if (isNative) {
+            handleGoogleRegisterNative();
+        } else {
+            handleGoogleRegisterWeb();
+        }
+    };
+
     const handleAppleRegister = async () => {
         // Apple Sign In - à implémenter selon votre configuration
         setToast({
@@ -355,6 +453,14 @@ const Register = () => {
                 return null;
         }
     };
+
+    // Composant pour afficher un critère de mot de passe
+    const PasswordCriteria = ({ isValid, text }) => (
+        <div className={`password-criteria ${isValid ? 'valid' : 'invalid'}`}>
+            <IonIcon icon={isValid ? checkmarkCircle : closeCircle} />
+            <span>{text}</span>
+        </div>
+    );
 
     return (
         <IonPage>
@@ -459,7 +565,7 @@ const Register = () => {
                                 type={showPassword ? 'text' : 'password'}
                                 placeholder="Mot de passe *"
                                 value={formData.password}
-                                onIonInput={(e) => handleChange('password', e.detail.value)}
+                                onIonInput={(e) => handlePasswordChange(e.detail.value)}
                                 autocomplete="new-password"
                                 name="password"
                             />
@@ -471,6 +577,28 @@ const Register = () => {
                                 <IonIcon icon={showPassword ? eyeOffOutline : eyeOutline} />
                             </button>
                         </div>
+
+                        {/* Indicateurs de validation du mot de passe */}
+                        {passwordTouched && (
+                            <div className="password-validation-container">
+                                <PasswordCriteria
+                                    isValid={passwordValidation.minLength}
+                                    text="8 caractères minimum"
+                                />
+                                <PasswordCriteria
+                                    isValid={passwordValidation.hasUppercase}
+                                    text="1 majuscule"
+                                />
+                                <PasswordCriteria
+                                    isValid={passwordValidation.hasLowercase}
+                                    text="1 minuscule"
+                                />
+                                <PasswordCriteria
+                                    isValid={passwordValidation.hasNumber}
+                                    text="1 chiffre"
+                                />
+                            </div>
+                        )}
 
                         <div className="input-group input-password-group">
                             <IonInput
@@ -491,6 +619,19 @@ const Register = () => {
                             </button>
                         </div>
 
+                        {/* Indicateur de correspondance des mots de passe */}
+                        {formData.confirmPassword && (
+                            <div className="password-match-container">
+                                <PasswordCriteria
+                                    isValid={formData.password === formData.confirmPassword}
+                                    text={formData.password === formData.confirmPassword
+                                        ? "Les mots de passe correspondent"
+                                        : "Les mots de passe ne correspondent pas"
+                                    }
+                                />
+                            </div>
+                        )}
+
                         <p className="required-text">* Champs obligatoires</p>
 
                         <IonButton
@@ -509,7 +650,7 @@ const Register = () => {
                                     expand="block"
                                     fill="outline"
                                     className="google-button"
-                                    onClick={() => handleGoogleRegister()}
+                                    onClick={handleGoogleRegister}
                                     disabled={loading}
                                 >
                                     <IonIcon icon={logoGoogle} slot="start" />

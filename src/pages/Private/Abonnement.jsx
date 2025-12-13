@@ -23,7 +23,9 @@ import {
     informationCircleOutline,
     ticketOutline,
     checkmarkOutline,
-    closeCircleOutline
+    closeCircleOutline,
+    pricetagOutline,
+    lockClosedOutline
 } from 'ionicons/icons';
 import AbonnementService from '../../Services/Abonnement.services';
 import CodePromoService from '../../Services/CodePromo.services';
@@ -61,6 +63,8 @@ const Abonnement = () => {
     const [codePromoValid, setCodePromoValid] = useState(null); // null, true, false
     const [codePromoInfo, setCodePromoInfo] = useState(null);
     const [codePromoError, setCodePromoError] = useState(null);
+    // Nouveau : type de code promo ('free_months' ou 'reduction')
+    const [codePromoType, setCodePromoType] = useState(null);
 
     const MAX_FICHES = 10;
     const MIN_FICHES = 1;
@@ -114,11 +118,24 @@ const Abonnement = () => {
         const prixUnitaireTTC = parseFloat(abonnement.prixTotalTTC);
         const prixMensuelHT = parseFloat(abonnement.prixMensuelHT);
 
+        let totalHT = prixUnitaireHT * nombreFiches;
+        let totalTTC = prixUnitaireTTC * nombreFiches;
+
+        // Appliquer la réduction si code promo de type 'reduction'
+        if (codePromoValid && codePromoType === 'reduction' && codePromoInfo?.pourcentageReduction) {
+            const reduction = codePromoInfo.pourcentageReduction / 100;
+            totalHT = Math.round((totalHT * (1 - reduction)) * 100) / 100;
+            totalTTC = Math.round((totalTTC * (1 - reduction)) * 100) / 100;
+        }
+
         return {
-            ht: prixUnitaireHT * nombreFiches,
-            ttc: prixUnitaireTTC * nombreFiches,
+            ht: totalHT,
+            ttc: totalTTC,
             mensuel: prixMensuelHT * nombreFiches,
-            duree: abonnement.dureeEnMois
+            duree: abonnement.dureeEnMois,
+            // Prix originaux (avant réduction)
+            originalHT: prixUnitaireHT * nombreFiches,
+            originalTTC: prixUnitaireTTC * nombreFiches
         };
     };
 
@@ -129,10 +146,17 @@ const Abonnement = () => {
         setError(null);
 
         try {
+            // Passer le code promo si c'est un code de type réduction
+            const codePromoToSend = (codePromoValid && codePromoType === 'reduction') ? codePromo : null;
+
+            // Si code promo réduction, le renouvellement auto est forcé à false
+            const finalRenouvellementAuto = codePromoToSend ? false : renouvellementAuto;
+
             const result = await AbonnementService.createCheckout(
                 selectedDuration,
                 nombreFiches,
-                renouvellementAuto
+                finalRenouvellementAuto,
+                codePromoToSend // Nouveau paramètre
             );
 
             if (result.success && result.data.checkoutUrl) {
@@ -159,20 +183,52 @@ const Abonnement = () => {
             return;
         }
 
+        if (!selectedDuration) {
+            setCodePromoError('Veuillez d\'abord sélectionner une durée d\'abonnement');
+            return;
+        }
+
         setCodePromoLoading(true);
         setCodePromoError(null);
         setCodePromoValid(null);
         setCodePromoInfo(null);
+        setCodePromoType(null);
 
         try {
-            const result = await CodePromoService.validateCode(codePromo);
+            // D'abord, on vérifie le type de code avec validate simple
+            const checkResult = await CodePromoService.validateCode(codePromo);
 
-            if (result.success) {
-                setCodePromoValid(true);
-                setCodePromoInfo(result.data);
-            } else {
+            if (!checkResult.success) {
                 setCodePromoValid(false);
-                setCodePromoError(result.message);
+                setCodePromoError(checkResult.message);
+                setCodePromoLoading(false);
+                return;
+            }
+
+            const type = checkResult.data.type; // 'free_months' ou 'reduction'
+            setCodePromoType(type);
+
+            if (type === 'reduction') {
+                // Pour les codes réduction, on appelle validate-for-checkout pour avoir les prix
+                const result = await CodePromoService.validateForCheckout(
+                    codePromo,
+                    selectedDuration,
+                    nombreFiches
+                );
+
+                if (result.success) {
+                    setCodePromoValid(true);
+                    setCodePromoInfo(result.data);
+                    // Désactiver le renouvellement auto
+                    setRenouvellementAuto(false);
+                } else {
+                    setCodePromoValid(false);
+                    setCodePromoError(result.message);
+                }
+            } else {
+                // Pour les codes mois gratuits, on garde l'ancien comportement
+                setCodePromoValid(true);
+                setCodePromoInfo(checkResult.data);
             }
         } catch (err) {
             console.error('Erreur validation code promo:', err);
@@ -185,9 +241,10 @@ const Abonnement = () => {
 
     /**
      * Appliquer le code promo et créer la souscription gratuite
+     * (Uniquement pour les codes "mois gratuits")
      */
     const handleApplyCodePromo = async () => {
-        if (!codePromoValid || !codePromoInfo) return;
+        if (!codePromoValid || !codePromoInfo || codePromoType !== 'free_months') return;
 
         setCodePromoLoading(true);
         setCodePromoError(null);
@@ -225,7 +282,16 @@ const Abonnement = () => {
         setCodePromoValid(null);
         setCodePromoInfo(null);
         setCodePromoError(null);
+        setCodePromoType(null);
     };
+
+    // Revalider le code promo si le nombre de fiches ou la durée change
+    useEffect(() => {
+        if (codePromoValid && codePromoType === 'reduction' && codePromo) {
+            // Revalider pour mettre à jour les prix
+            handleValidateCodePromo();
+        }
+    }, [nombreFiches, selectedDuration]);
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('fr-FR', {
@@ -248,6 +314,9 @@ const Abonnement = () => {
 
     const totals = calculateTotal();
     const selectedAbonnement = getSelectedAbonnement();
+
+    // Vérifier si le renouvellement auto est bloqué (code promo réduction)
+    const isAutoRenewBlocked = codePromoValid && codePromoType === 'reduction';
 
     if (loading) {
         return (
@@ -447,6 +516,7 @@ const Abonnement = () => {
                                                 setCodePromoValid(null);
                                                 setCodePromoError(null);
                                                 setCodePromoInfo(null);
+                                                setCodePromoType(null);
                                             }}
                                             onKeyPress={(e) => {
                                                 if (e.key === 'Enter') handleValidateCodePromo();
@@ -491,11 +561,11 @@ const Abonnement = () => {
                                     </div>
                                 )}
 
-                                {/* Code promo valide - Afficher les infos */}
-                                {codePromoValid && codePromoInfo && (
+                                {/* ========== CODE PROMO TYPE: MOIS GRATUITS ========== */}
+                                {codePromoValid && codePromoInfo && codePromoType === 'free_months' && (
                                     <div className="code-promo-success">
                                         <div className="code-promo-info">
-                                            <div className="code-promo-badge">
+                                            <div className="code-promo-badge free">
                                                 <IonIcon icon={giftOutline} />
                                                 <span>{codePromoInfo.nom}</span>
                                             </div>
@@ -536,19 +606,57 @@ const Abonnement = () => {
                                         </button>
                                     </div>
                                 )}
+
+                                {/* ========== CODE PROMO TYPE: RÉDUCTION ========== */}
+                                {codePromoValid && codePromoInfo && codePromoType === 'reduction' && (
+                                    <div className="code-promo-success reduction">
+                                        <div className="code-promo-info">
+                                            <div className="code-promo-badge reduction">
+                                                <IonIcon icon={pricetagOutline} />
+                                                <span>-{codePromoInfo.pourcentageReduction}%</span>
+                                            </div>
+                                            <div className="code-promo-details">
+                                                <div className="detail-item highlight">
+                                                    <IonIcon icon={checkmarkOutline} />
+                                                    <span>
+                                                        <strong>-{codePromoInfo.pourcentageReduction}%</strong> sur votre commande
+                                                    </span>
+                                                </div>
+                                                <div className="detail-item price-detail">
+                                                    <span className="original-price">{formatPrice(totals.originalTTC)}</span>
+                                                    <IonIcon icon={arrowBackOutline} className="arrow-icon" />
+                                                    <span className="new-price">{formatPrice(totals.ttc)}</span>
+                                                </div>
+                                                <div className="detail-item savings">
+                                                    <IonIcon icon={sparklesOutline} />
+                                                    <span>Vous économisez <strong>{formatPrice(totals.originalTTC - totals.ttc)}</strong></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Avertissement renouvellement auto bloqué */}
+                                        <div className="code-promo-warning">
+                                            <IonIcon icon={informationCircleOutline} />
+                                            <span>
+                                                Le renouvellement automatique n'est pas disponible avec ce code.
+                                                À l'expiration, vous devrez souscrire un nouvel abonnement au tarif normal.
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </section>
 
-                    {/* Séparateur "ou" si code promo n'est pas appliqué */}
-                    {!codePromoValid && (
+                    {/* Séparateur "ou" si code promo mois gratuits n'est pas appliqué */}
+                    {!(codePromoValid && codePromoType === 'free_months') && (
                         <div className="section-separator">
-                            <span>ou payer par carte</span>
+                            <span>{codePromoValid && codePromoType === 'reduction' ? 'Continuez avec votre réduction' : 'ou payer par carte'}</span>
                         </div>
                     )}
 
-                    {/* Section 3: Renouvellement automatique - Masquer si code promo validé */}
-                    {!codePromoValid && (
+                    {/* Section 3: Renouvellement automatique - Masquer si code promo mois gratuits validé */}
+                    {!(codePromoValid && codePromoType === 'free_months') && (
                         <section className="selection-section">
                             <div className="section-header">
                                 <div className="section-icon">
@@ -561,63 +669,81 @@ const Abonnement = () => {
                             </div>
 
                             <div className="auto-renew-option">
-                                <label className="auto-renew-checkbox">
-                                    <input
-                                        type="checkbox"
-                                        checked={renouvellementAuto}
-                                        onChange={(e) => setRenouvellementAuto(e.target.checked)}
-                                    />
-                                    <span className="checkbox-custom">
-                                        {renouvellementAuto && <IonIcon icon={checkmarkCircle} />}
-                                    </span>
-                                    <div className="checkbox-content">
-                                        <span className="checkbox-label">
-                                            <IonIcon icon={refreshOutline} />
-                                            Activer le renouvellement automatique
-                                        </span>
-                                        <span className="checkbox-description">
-                                            Votre abonnement sera renouvelé automatiquement à chaque échéance
-                                        </span>
-                                    </div>
-                                </label>
-
-                                <button
-                                    className="info-toggle"
-                                    onClick={() => setShowAutoRenewInfo(!showAutoRenewInfo)}
-                                >
-                                    <IonIcon icon={informationCircleOutline} />
-                                    <span>En savoir plus</span>
-                                    <IonIcon icon={showAutoRenewInfo ? chevronUpOutline : chevronDownOutline} />
-                                </button>
-
-                                {showAutoRenewInfo && (
-                                    <div className="auto-renew-info">
-                                        <div className="info-item">
-                                            <IonIcon icon={checkmarkCircle} />
-                                            <span>Vous serez prélevé de <strong>{formatPrice(totals.ttc)}</strong> à chaque renouvellement</span>
+                                {/* Si code promo réduction, afficher message bloqué */}
+                                {isAutoRenewBlocked ? (
+                                    <div className="auto-renew-blocked">
+                                        <div className="blocked-icon">
+                                            <IonIcon icon={lockClosedOutline} />
                                         </div>
-                                        <div className="info-item">
-                                            <IonIcon icon={checkmarkCircle} />
-                                            <span>Un email de rappel sera envoyé <strong>30 jours</strong> et <strong>7 jours</strong> avant le prélèvement</span>
-                                        </div>
-                                        <div className="info-item">
-                                            <IonIcon icon={checkmarkCircle} />
-                                            <span>Vous pouvez <strong>désactiver</strong> le renouvellement à tout moment depuis votre espace</span>
-                                        </div>
-                                        <div className="info-item">
-                                            <IonIcon icon={checkmarkCircle} />
-                                            <span>Votre carte sera <strong>sauvegardée de manière sécurisée</strong> par Stripe</span>
+                                        <div className="blocked-content">
+                                            <span className="blocked-title">Renouvellement automatique non disponible</span>
+                                            <span className="blocked-description">
+                                                L'utilisation d'un code promo désactive le renouvellement automatique.
+                                                À l'expiration de votre abonnement, vous pourrez en souscrire un nouveau au tarif normal.
+                                            </span>
                                         </div>
                                     </div>
-                                )}
+                                ) : (
+                                    <>
+                                        <label className="auto-renew-checkbox">
+                                            <input
+                                                type="checkbox"
+                                                checked={renouvellementAuto}
+                                                onChange={(e) => setRenouvellementAuto(e.target.checked)}
+                                            />
+                                            <span className="checkbox-custom">
+                                                {renouvellementAuto && <IonIcon icon={checkmarkCircle} />}
+                                            </span>
+                                            <div className="checkbox-content">
+                                                <span className="checkbox-label">
+                                                    <IonIcon icon={refreshOutline} />
+                                                    Activer le renouvellement automatique
+                                                </span>
+                                                <span className="checkbox-description">
+                                                    Votre abonnement sera renouvelé automatiquement à chaque échéance
+                                                </span>
+                                            </div>
+                                        </label>
 
-                                {renouvellementAuto && (
-                                    <div className="auto-renew-summary">
-                                        <IonIcon icon={refreshOutline} />
-                                        <span>
-                                            Prochain prélèvement prévu : <strong>{formatPrice(totals.ttc)}</strong> dans <strong>{totals.duree} mois</strong>
-                                        </span>
-                                    </div>
+                                        <button
+                                            className="info-toggle"
+                                            onClick={() => setShowAutoRenewInfo(!showAutoRenewInfo)}
+                                        >
+                                            <IonIcon icon={informationCircleOutline} />
+                                            <span>En savoir plus</span>
+                                            <IonIcon icon={showAutoRenewInfo ? chevronUpOutline : chevronDownOutline} />
+                                        </button>
+
+                                        {showAutoRenewInfo && (
+                                            <div className="auto-renew-info">
+                                                <div className="info-item">
+                                                    <IonIcon icon={checkmarkCircle} />
+                                                    <span>Vous serez prélevé de <strong>{formatPrice(totals.originalTTC)}</strong> à chaque renouvellement (tarif normal)</span>
+                                                </div>
+                                                <div className="info-item">
+                                                    <IonIcon icon={checkmarkCircle} />
+                                                    <span>Un email de rappel sera envoyé <strong>30 jours</strong> et <strong>7 jours</strong> avant le prélèvement</span>
+                                                </div>
+                                                <div className="info-item">
+                                                    <IonIcon icon={checkmarkCircle} />
+                                                    <span>Vous pouvez <strong>désactiver</strong> le renouvellement à tout moment depuis votre espace</span>
+                                                </div>
+                                                <div className="info-item">
+                                                    <IonIcon icon={checkmarkCircle} />
+                                                    <span>Votre carte sera <strong>sauvegardée de manière sécurisée</strong> par Stripe</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {renouvellementAuto && (
+                                            <div className="auto-renew-summary">
+                                                <IonIcon icon={refreshOutline} />
+                                                <span>
+                                                    Prochain prélèvement prévu : <strong>{formatPrice(totals.originalTTC)}</strong> dans <strong>{totals.duree} mois</strong>
+                                                </span>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </section>
@@ -634,7 +760,7 @@ const Abonnement = () => {
                                 <div className="feature-icon">
                                     <IonIcon icon={storefrontOutline} />
                                 </div>
-                                <span>{codePromoValid ? '1' : nombreFiches} fiche{(!codePromoValid && nombreFiches > 1) ? 's' : ''} commerce</span>
+                                <span>{(codePromoValid && codePromoType === 'free_months') ? '1' : nombreFiches} fiche{(!(codePromoValid && codePromoType === 'free_months') && nombreFiches > 1) ? 's' : ''} commerce</span>
                             </div>
                             <div className="feature-item">
                                 <div className="feature-icon">
@@ -669,11 +795,19 @@ const Abonnement = () => {
                                 </div>
                                 <div className="faq-item">
                                     <h4>J'ai un code promo, comment l'utiliser ?</h4>
-                                    <p>Cliquez sur "J'ai un code promo" et entrez votre code. Si le code est valide, vous pourrez bénéficier d'un abonnement gratuit sans paiement.</p>
+                                    <p>Cliquez sur "J'ai un code promo" et entrez votre code. Selon le type de code, vous bénéficierez soit de mois gratuits, soit d'une réduction sur le prix.</p>
                                 </div>
                                 <div className="faq-item">
-                                    <h4>Que se passe-t-il après un abonnement offert par code promo ?</h4>
-                                    <p>À la fin de la période offerte, votre fiche sera désactivée. Vous pourrez alors souscrire un abonnement payant pour continuer.</p>
+                                    <h4>Quelle est la différence entre les types de codes promo ?</h4>
+                                    <p><strong>Codes "mois gratuits"</strong> : Vous obtenez un abonnement sans paiement. <strong>Codes "réduction"</strong> : Vous payez un prix réduit (ex: -50%) mais le renouvellement automatique n'est pas disponible.</p>
+                                </div>
+                                <div className="faq-item">
+                                    <h4>Que se passe-t-il après un abonnement avec code promo ?</h4>
+                                    <p>À la fin de la période, votre fiche sera désactivée. Vous pourrez alors souscrire un nouvel abonnement au tarif normal (6 mois ou 12 mois).</p>
+                                </div>
+                                <div className="faq-item">
+                                    <h4>Pourquoi le renouvellement auto n'est pas disponible avec un code promo réduction ?</h4>
+                                    <p>Les codes promo de réduction sont des offres exceptionnelles valables une seule fois. Le renouvellement se ferait au tarif normal, donc nous préférons que vous fassiez ce choix consciemment.</p>
                                 </div>
                                 <div className="faq-item">
                                     <h4>Comment fonctionne le renouvellement automatique ?</h4>
@@ -682,10 +816,6 @@ const Abonnement = () => {
                                 <div className="faq-item">
                                     <h4>Puis-je désactiver le renouvellement automatique ?</h4>
                                     <p>Oui, à tout moment depuis la page "Gérer mon abonnement" de votre espace.</p>
-                                </div>
-                                <div className="faq-item">
-                                    <h4>Que se passe-t-il à expiration sans renouvellement auto ?</h4>
-                                    <p>Vos fiches seront automatiquement désactivées. Vous pourrez souscrire un nouvel abonnement pour les réactiver.</p>
                                 </div>
                                 <div className="faq-item">
                                     <h4>Ma carte est-elle en sécurité ?</h4>
@@ -701,21 +831,39 @@ const Abonnement = () => {
                 </div>
             </div>
 
-            {/* Footer fixe - Masquer si code promo appliqué */}
-            {!codePromoValid && (
+            {/* Footer fixe - Masquer si code promo mois gratuits appliqué */}
+            {!(codePromoValid && codePromoType === 'free_months') && (
                 <div className="checkout-footer">
                     <div className="checkout-summary">
                         <div className="summary-details">
                             <div className="summary-line">
                                 <span>{nombreFiches} fiche{nombreFiches > 1 ? 's' : ''} × {totals.duree} mois</span>
-                                <span>{formatPrice(totals.ht)} HT</span>
+                                {codePromoValid && codePromoType === 'reduction' ? (
+                                    <span className="price-with-discount">
+                                        <span className="original">{formatPrice(totals.originalHT)}</span>
+                                        <span className="discounted">{formatPrice(totals.ht)} HT</span>
+                                    </span>
+                                ) : (
+                                    <span>{formatPrice(totals.ht)} HT</span>
+                                )}
                             </div>
-                            {renouvellementAuto && (
+
+                            {/* Badge code promo appliqué */}
+                            {codePromoValid && codePromoType === 'reduction' && (
+                                <div className="summary-line promo-applied">
+                                    <IonIcon icon={ticketOutline} />
+                                    <span>Code {codePromo} (-{codePromoInfo?.pourcentageReduction}%)</span>
+                                    <span className="savings">-{formatPrice(totals.originalTTC - totals.ttc)}</span>
+                                </div>
+                            )}
+
+                            {renouvellementAuto && !isAutoRenewBlocked && (
                                 <div className="summary-line auto-renew">
                                     <IonIcon icon={refreshOutline} />
                                     <span>Renouvellement auto activé</span>
                                 </div>
                             )}
+
                             <div className="summary-total">
                                 <span>Total TTC</span>
                                 <span className="total-amount">{formatPrice(totals.ttc)}</span>

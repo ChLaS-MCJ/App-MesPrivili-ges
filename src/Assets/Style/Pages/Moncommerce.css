@@ -8,7 +8,8 @@
     min-height: 100vh;
     background: linear-gradient(180deg, #303030 0%, #181818 100%);
     padding: 20px 15px;
-    padding-bottom: 100px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px);
 }
 
 /* ===== LOADING ===== */
@@ -683,6 +684,8 @@
 
 /* ===== DELETE MODAL ===== */
 .delete-modal-overlay {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
     position: fixed;
     top: 0;
     left: 0;
@@ -947,6 +950,8 @@
 
 /* ===== ACTIVATION MODAL ===== */
 .activation-modal-overlay {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
     position: fixed;
     top: 0;
     left: 0;
@@ -1285,12 +1290,16 @@
 }
 
 /* ===== RESPONSIVE ===== */
+.auth-content {
+    background: linear-gradient(180deg, #303030 0%, #181818 100%);
+}
+
 @media (min-width: 768px) {
     .prestataire-page {
-        max-width: 600px;
+        max-width: 70%;
         margin: 0 auto;
         padding: 30px 20px;
-        padding-bottom: 100px;
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px);
     }
 
     .page-header h1 {
