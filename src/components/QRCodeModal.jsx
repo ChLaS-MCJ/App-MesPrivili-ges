@@ -6,24 +6,62 @@ import QRCode from 'react-qr-code';
 import RatingModal from './RatingModal';
 import AvisService from '../Services/Avis.services';
 import Caller from '../Services/Caller.services';
+import UserService from '../Services/User.service';
 
 const QRCodeModal = ({ isOpen, onClose }) => {
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const [showRating, setShowRating] = useState(false);
     const [scanData, setScanData] = useState(null);
+    const [qrCodeData, setQrCodeData] = useState(null);
+    const [loading, setLoading] = useState(true);
     const pollingRef = useRef(null);
 
-    const qrCodeData = user?.client?.qrCode;
-
+    // Charger le QR Code quand le modal s'ouvre
     useEffect(() => {
-        if (isOpen && qrCodeData) {
-            startPolling();
+        if (isOpen) {
+            loadQRCode();
+        } else {
+            // Reset quand on ferme
+            setLoading(true);
+            setQrCodeData(null);
         }
 
         return () => {
             stopPolling();
         };
-    }, [isOpen, user]);
+    }, [isOpen]);
+
+    const loadQRCode = async () => {
+        setLoading(true);
+
+        // D'abord vérifier si on a déjà le QR Code dans le contexte
+        if (user?.client?.qrCode) {
+            setQrCodeData(user.client.qrCode);
+            setLoading(false);
+            startPolling();
+            return;
+        }
+
+        // Sinon, rafraîchir le profil pour récupérer le QR Code
+        try {
+            const result = await UserService.getProfile();
+
+            if (result.success && result.data?.client?.qrCode) {
+                setQrCodeData(result.data.client.qrCode);
+                // Rafraîchir aussi le contexte
+                if (refreshUser) {
+                    await refreshUser();
+                }
+                startPolling();
+            } else {
+                console.error('QR Code non trouvé dans le profil');
+            }
+        } catch (error) {
+            console.error('Erreur chargement QR Code:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const startPolling = () => {
         checkForNewScan();
@@ -90,7 +128,7 @@ const QRCodeModal = ({ isOpen, onClose }) => {
                     <IonIcon icon={closeOutline} />
                 </button>
 
-                <div className="modal-header">
+                <div className="modal-headerqr">
                     <h2 className="modal-title">Mon QR Code</h2>
                     <p className="modal-subtitle">Présentez ce code au commerçant</p>
                 </div>
@@ -115,7 +153,7 @@ const QRCodeModal = ({ isOpen, onClose }) => {
                     ) : (
                         <div className="loading-qr">
                             <div className="spinner"></div>
-                            <p>Chargement du QR Code...</p>
+                            <p>{loading ? 'Chargement du QR Code...' : 'QR Code non disponible'}</p>
                         </div>
                     )}
                 </div>

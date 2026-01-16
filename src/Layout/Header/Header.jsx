@@ -232,6 +232,15 @@ const Header = () => {
                     </svg>
                 </div>
 
+                {/* Icône Mon Compte à droite */}
+                <button 
+                    className="account-icon-button"
+                    onClick={toggleDrawer}
+                    aria-label="Mon compte"
+                >
+                    <UserOutlined />
+                </button>
+
                 <div className="profile-container" onClick={toggleDrawer}>
                     <div className="profile-circle">
                         <img

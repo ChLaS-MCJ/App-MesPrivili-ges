@@ -464,7 +464,12 @@ const Register = () => {
 
     return (
         <IonPage>
-            <IonContent className="register-screen">
+            <IonContent 
+                className="register-screen" 
+                scrollY={true}
+                fullscreen={true}
+                forceOverscroll={true}
+            >
                 <div className="register-container">
                     <button className="back-button-register" onClick={() => navigate(-1)}>
                         <IonIcon icon={arrowBack} />

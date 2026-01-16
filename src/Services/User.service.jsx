@@ -24,8 +24,27 @@ const UserService = {
             const response = await axiosInstance.get('/users/me');
 
             if (response.data.success) {
-                // Mettre à jour le storage local
-                await AuthService.setUser(response.data.data);
+                // Récupérer l'utilisateur actuel du localStorage
+                const currentUser = await AuthService.getUser();
+
+                // Fusionner intelligemment - les données de l'API ont priorité SAUF si null/undefined
+                const mergedUser = {
+                    ...currentUser,
+                    ...response.data.data,
+                    client: {
+                        ...currentUser?.client,
+                        ...response.data.data.client,
+                        // Garder l'image locale si l'API renvoie null/undefined
+                        profileImage: response.data.data.client?.profileImage || currentUser?.client?.profileImage
+                    }
+                };
+
+                await AuthService.setUser(mergedUser);
+
+                return {
+                    success: true,
+                    data: mergedUser
+                };
             }
 
             return {
@@ -57,7 +76,9 @@ const UserService = {
                     ...response.data.data,
                     client: {
                         ...currentUser?.client,
-                        ...response.data.data.client
+                        ...response.data.data.client,
+                        // Garder l'image locale si l'API renvoie null/undefined
+                        profileImage: response.data.data.client?.profileImage || currentUser?.client?.profileImage
                     }
                 };
                 await AuthService.setUser(updatedUser);
@@ -91,6 +112,21 @@ const UserService = {
                     'Content-Type': 'multipart/form-data',
                 },
             });
+
+            if (response.data.success) {
+                // Mettre à jour le localStorage avec la nouvelle image
+                const currentUser = await AuthService.getUser();
+                if (currentUser && response.data.data?.client?.profileImage) {
+                    const updatedUser = {
+                        ...currentUser,
+                        client: {
+                            ...currentUser.client,
+                            profileImage: response.data.data.client.profileImage
+                        }
+                    };
+                    await AuthService.setUser(updatedUser);
+                }
+            }
 
             return {
                 success: true,

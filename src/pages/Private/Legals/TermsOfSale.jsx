@@ -1,13 +1,27 @@
+import { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, ArrowUpOutlined } from '@ant-design/icons';
 
 const TermsOfSale = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const previousPath = location.state?.previousPath || '/auth/maps';
+    const [showScrollTop, setShowScrollTop] = useState(false);
+    const pageRef = useRef(null);
+
+    const handleScroll = (e) => {
+        const scrollTop = e.target.scrollTop;
+        setShowScrollTop(scrollTop > 300);
+    };
+
+    const scrollToTop = () => {
+        if (pageRef.current) {
+            pageRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     return (
-        <div className="legal-page">
+        <div className="legal-page" ref={pageRef} onScroll={handleScroll}>
             {/* Header */}
             <div className="legal-header">
                 <button className="back-button" onClick={() => navigate(previousPath, { state: { openDrawer: true } })}>
@@ -15,6 +29,15 @@ const TermsOfSale = () => {
                 </button>
                 <h1>Conditions Générales de Vente</h1>
             </div>
+
+            {/* Scroll to top button */}
+            <button
+                className={`scroll-to-top-btn ${showScrollTop ? 'visible' : ''}`}
+                onClick={scrollToTop}
+                aria-label="Remonter en haut"
+            >
+                <ArrowUpOutlined />
+            </button>
 
             {/* Content */}
             <div className="legal-content">

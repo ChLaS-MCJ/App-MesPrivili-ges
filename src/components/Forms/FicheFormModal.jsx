@@ -1248,6 +1248,9 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                         value={formData.nomCommerce}
                                         onChange={handleChange}
                                         placeholder="Ex: Boulangerie du Centre"
+                                        autoComplete="organization"
+                                        autoCapitalize="words"
+                                        autoCorrect="on"
                                     />
                                 </div>
 
@@ -1314,6 +1317,10 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                         onChange={handleChange}
                                         rows={3}
                                         placeholder="Décrivez votre commerce..."
+                                        autoComplete="on"
+                                        autoCapitalize="sentences"
+                                        autoCorrect="on"
+                                        spellCheck={true}
                                     />
                                 </div>
 
@@ -1328,6 +1335,9 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                         value={formData.website}
                                         onChange={handleChange}
                                         placeholder="https://www.moncommerce.fr"
+                                        autoComplete="url"
+                                        autoCapitalize="off"
+                                        autoCorrect="off"
                                     />
                                     <small className="help-text">Optionnel - L'adresse de votre site internet</small>
                                 </div>
@@ -1393,6 +1403,9 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                         value={formData.adresse}
                                         onChange={handleChange}
                                         placeholder="123 Rue..."
+                                        autoComplete="street-address"
+                                        autoCapitalize="words"
+                                        autoCorrect="on"
                                     />
                                 </div>
 
@@ -1406,6 +1419,8 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                             onChange={handleChange}
                                             pattern="[0-9]{5}"
                                             placeholder="75001"
+                                            autoComplete="postal-code"
+                                            inputMode="numeric"
                                         />
                                     </div>
                                     <div className="form-group">
@@ -1416,6 +1431,9 @@ const FicheFormModal = ({ isOpen, onClose, onSuccess, fiche }) => {
                                             value={formData.ville}
                                             onChange={handleChange}
                                             placeholder="Paris"
+                                            autoComplete="address-level2"
+                                            autoCapitalize="words"
+                                            autoCorrect="on"
                                         />
                                     </div>
                                 </div>

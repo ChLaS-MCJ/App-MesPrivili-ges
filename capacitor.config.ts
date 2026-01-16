@@ -11,7 +11,8 @@ const config: CapacitorConfig = {
         iosScheme: "https",
         allowNavigation: [
             "https://cacao.mesprivileges.fr/*",
-            "https://applitwo.fr/*"
+            "https://applitwo.fr/*",
+            "https://checkout.stripe.com/*"  // Permettre Stripe
         ]
     },
 
@@ -35,7 +36,6 @@ const config: CapacitorConfig = {
             overlaysWebView: true
         },
         Keyboard: {
-
             resizeOnFullScreen: true
         }
     },

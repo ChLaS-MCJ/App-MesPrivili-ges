@@ -231,6 +231,23 @@ class AbonnementService {
       return { success: false, message: error.message };
     }
   }
+
+  /**
+   * Vérifier et activer les souscriptions pending
+   * Utile quand la redirection Stripe a échoué (cas mobile)
+   */
+  static async checkPendingSubscriptions() {
+    try {
+      const response = await fetch(`${API_URL}/abonnements/check-pending`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Erreur checkPendingSubscriptions:', error);
+      return { success: false, message: error.message };
+    }
+  }
 }
 
 export default AbonnementService;

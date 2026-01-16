@@ -27,6 +27,14 @@
             android:screenOrientation="portrait"
             android:exported="true">
 
+            <!-- 🆕 AJOUTER CECI - Deep Links pour retour Stripe -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="mesprivileges" />
+            </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

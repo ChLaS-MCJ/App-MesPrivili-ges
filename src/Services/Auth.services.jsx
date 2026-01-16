@@ -518,14 +518,14 @@ const AuthService = {
     },
 
     /**
-     * Nettoyer tout le storage
+     * Nettoyer tout le storage (garde les préférences "Se souvenir de moi")
      */
     async clearStorage() {
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
-        localStorage.removeItem('rememberMe');
         localStorage.removeItem('prestataire');
+        // Note: On garde 'rememberMe' et 'rememberedEmail' pour pré-remplir le formulaire
     }
 };
 

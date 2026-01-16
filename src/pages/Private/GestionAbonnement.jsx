@@ -66,6 +66,17 @@ const GestionAbonnement = () => {
     const loadData = async () => {
         setLoading(true);
         try {
+            // D'ABORD : Vérifier s'il y a des souscriptions pending à activer
+            // (en cas d'échec de redirection Stripe sur mobile)
+            try {
+                const pendingResult = await AbonnementService.checkPendingSubscriptions();
+                if (pendingResult.success && pendingResult.data?.activated?.length > 0) {
+                    setSuccess(`${pendingResult.data.activated.length} abonnement(s) activé(s) !`);
+                }
+            } catch (e) {
+                console.log('Check pending subscriptions error (non-bloquant):', e);
+            }
+
             // Charger TOUTES les souscriptions
             const souscriptionsResult = await AbonnementService.getMesSouscriptions();
 

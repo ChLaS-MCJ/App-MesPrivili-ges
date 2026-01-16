@@ -15,6 +15,8 @@ import {
     walkOutline,
     chevronBackOutline,
     chevronForwardOutline,
+    chevronDownOutline,
+    chevronUpOutline,
     giftOutline,
     ticketOutline,
     globeOutline,
@@ -55,6 +57,7 @@ const FichePrestataire = () => {
     // Expand description et filtres
     const [descriptionExpanded, setDescriptionExpanded] = useState(false);
     const [filtresExpanded, setFiltresExpanded] = useState(false);
+    const [infoCollapsed, setInfoCollapsed] = useState(false);
 
     // Modal horaires
     const [showHorairesModal, setShowHorairesModal] = useState(false);
@@ -578,22 +581,16 @@ const FichePrestataire = () => {
                     </div>
                 )}
 
-                {/* Tab latéral promo discret */}
-                {promotions.length > 0 && (
-                    <div
-                        className="fiche-promo-side-tab"
-                        onClick={() => openPromoDetail(promotions[0])}
-                    >
-                        <span className="fiche-promo-side-dot"></span>
-                        <IonIcon icon={giftOutline} className="fiche-promo-side-tab-icon" />
-                        <span className="fiche-promo-side-tab-text">{promotions[0].etiquette || 'PROMO'}</span>
-                    </div>
-                )}
-
             </div>
 
             {/* Contenu en bas - Card glassmorphism */}
-            <div className="fiche-content">
+            <div className={`fiche-content ${infoCollapsed ? 'collapsed' : ''}`}>
+                {/* Barre de collapse */}
+                <div className="fiche-content-handle" onClick={() => setInfoCollapsed(!infoCollapsed)}>
+                    <div className="fiche-handle-bar"></div>
+                    <IonIcon icon={infoCollapsed ? chevronUpOutline : chevronDownOutline} className="fiche-handle-icon" />
+                </div>
+
                 <div className="fiche-content-inner">
                     {/* Titre et note */}
                     <div className="fiche-title-row">
@@ -608,74 +605,85 @@ const FichePrestataire = () => {
                         </div>
                     </div>
 
-                    {/* Localisation et statut */}
-                    <div className="fiche-meta-row">
-                        <div className="fiche-meta-item">
-                            <IonIcon icon={locationOutline} />
-                            <span>{prestataire.adresse}, {prestataire.ville}{prestataire.codePostal ? ` ${prestataire.codePostal}` : ''}</span>
-                        </div>
+                    {/* Contenu collapsible */}
+                    {!infoCollapsed && (
+                        <>
+                            {/* Localisation et statut */}
+                            <div className="fiche-meta-row">
+                                <div className="fiche-meta-item">
+                                    <IonIcon icon={locationOutline} />
+                                    <span>{prestataire.adresse}, {prestataire.ville}{prestataire.codePostal ? ` ${prestataire.codePostal}` : ''}</span>
+                                </div>
 
-                        {/* Distance - affiché seulement si géoloc activée */}
-                        {geolocEnabled && distance !== null && (
-                            <div className="fiche-meta-item">
-                                <IonIcon icon={walkOutline} />
-                                <span>{formatDistance(distance)} (à vol d'oiseau)</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Avatars + nombre de visites */}
-                    <div className="fiche-visitors">
-                        <div className="visitor-avatars">
-                            {getDisplayAvatars().map((avatar, index) => (
-                                <div
-                                    key={avatar.id}
-                                    className="avatar"
-                                    style={{ backgroundImage: `url(${avatar.image})` }}
-                                />
-                            ))}
-                        </div>
-                        <span className="visitor-count">
-                            {prestataire.nombreVisitesFiche || 0}+ personnes ont visité
-                        </span>
-                    </div>
-
-                    {/* Description avec expand */}
-                    <div
-                        className={`fiche-description-wrapper ${descriptionExpanded ? 'expanded' : ''}`}
-                        onClick={() => shouldTruncate(prestataire.descriptionCourte) && setDescriptionExpanded(!descriptionExpanded)}
-                    >
-                        <p className="fiche-description">
-                            {descriptionExpanded
-                                ? (prestataire.descriptionCourte || 'Découvrez ce lieu unique et profitez d\'une expérience exceptionnelle.')
-                                : truncateText(prestataire.descriptionCourte || 'Découvrez ce lieu unique et profitez d\'une expérience exceptionnelle.', 100)
-                            }
-                        </p>
-                    </div>
-
-                    {/* Filtres/Tags du prestataire avec expand */}
-                    {prestataire.filtres && prestataire.filtres.length > 0 && (
-                        <div
-                            className={`fiche-tags-wrapper ${filtresExpanded ? 'expanded' : ''}`}
-                            onClick={() => shouldTruncateFiltres() && setFiltresExpanded(!filtresExpanded)}
-                        >
-                            <div className="fiche-tags">
-                                {(filtresExpanded ? prestataire.filtres : prestataire.filtres.slice(0, 3)).map((filtre) => (
-                                    <span key={filtre.id} className="fiche-tag">
-                                        {filtre.nom}
-                                    </span>
-                                ))}
-                                {!filtresExpanded && prestataire.filtres.length > 3 && (
-                                    <span className="fiche-tag fiche-tag-more">
-                                        +{prestataire.filtres.length - 3}
-                                    </span>
+                                {/* Distance - affiché seulement si géoloc activée */}
+                                {geolocEnabled && distance !== null && (
+                                    <div className="fiche-meta-item">
+                                        <IonIcon icon={walkOutline} />
+                                        <span>{formatDistance(distance)} (à vol d'oiseau)</span>
+                                    </div>
                                 )}
                             </div>
-                        </div>
+
+                            {/* Avatars + nombre de visites */}
+                            <div className="fiche-visitors">
+                                <div className="visitor-avatars">
+                                    {getDisplayAvatars().map((avatar, index) => (
+                                        <div
+                                            key={avatar.id}
+                                            className="avatar"
+                                            style={{ backgroundImage: `url(${avatar.image})` }}
+                                        />
+                                    ))}
+                                </div>
+                                <span className="visitor-count">
+                                    {prestataire.nombreVisitesFiche || 0}+ personnes ont visité
+                                </span>
+                            </div>
+
+                            {/* Description avec expand */}
+                            <div
+                                className={`fiche-description-wrapper ${descriptionExpanded ? 'expanded' : ''}`}
+                                onClick={() => shouldTruncate(prestataire.descriptionCourte) && setDescriptionExpanded(!descriptionExpanded)}
+                            >
+                                <p className="fiche-description">
+                                    {descriptionExpanded
+                                        ? (prestataire.descriptionCourte || 'Découvrez ce lieu unique et profitez d\'une expérience exceptionnelle.')
+                                        : truncateText(prestataire.descriptionCourte || 'Découvrez ce lieu unique et profitez d\'une expérience exceptionnelle.', 100)
+                                    }
+                                </p>
+                            </div>
+
+                            {/* Filtres/Tags du prestataire avec expand */}
+                            {prestataire.filtres && prestataire.filtres.length > 0 && (
+                                <div
+                                    className={`fiche-tags-wrapper ${filtresExpanded ? 'expanded' : ''}`}
+                                    onClick={() => shouldTruncateFiltres() && setFiltresExpanded(!filtresExpanded)}
+                                >
+                                    <div className="fiche-tags">
+                                        {(filtresExpanded ? prestataire.filtres : prestataire.filtres.slice(0, 3)).map((filtre) => (
+                                            <span key={filtre.id} className="fiche-tag">
+                                                {filtre.nom}
+                                            </span>
+                                        ))}
+                                        {!filtresExpanded && prestataire.filtres.length > 3 && (
+                                            <span className="fiche-tag fiche-tag-more">
+                                                +{prestataire.filtres.length - 3}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
 
                     {/* Boutons d'action */}
                     <div className="fiche-action-buttons">
+                        {promotions.length > 0 && (
+                            <button className="fiche-action-btn fiche-action-btn-promo" onClick={() => openPromoDetail(promotions[0])}>
+                                <IonIcon icon={giftOutline} />
+                                <span>Promotion</span>
+                            </button>
+                        )}
                         <button className="fiche-action-btn" onClick={handleNavigate}>
                             <IonIcon icon={navigateOutline} />
                             <span>Itinéraire</span>

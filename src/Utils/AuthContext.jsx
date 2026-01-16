@@ -78,17 +78,8 @@ export const AuthProvider = ({ children }) => {
                 const result = await UserService.getProfile();
 
                 if (result.success) {
-                    const mergedUser = {
-                        ...storedUser,
-                        ...result.data,
-                        client: {
-                            ...storedUser?.client,
-                            ...result.data.client
-                        }
-                    };
-
-                    setUser(mergedUser);
-                    await AuthService.setUser(mergedUser);
+                    // getProfile fait déjà la fusion et met à jour le localStorage
+                    setUser(result.data);
                 } else {
                     console.warn('⚠️ getProfile échoué, utilisation des données locales');
 
@@ -101,16 +92,7 @@ export const AuthProvider = ({ children }) => {
                             await AuthService.refreshToken();
                             const retryResult = await UserService.getProfile();
                             if (retryResult.success) {
-                                const mergedUser = {
-                                    ...storedUser,
-                                    ...retryResult.data,
-                                    client: {
-                                        ...storedUser?.client,
-                                        ...retryResult.data.client
-                                    }
-                                };
-                                setUser(mergedUser);
-                                await AuthService.setUser(mergedUser);
+                                setUser(retryResult.data);
                             }
                         } catch (refreshError) {
                             console.error('❌ Refresh token échoué, déconnexion');
@@ -143,18 +125,8 @@ export const AuthProvider = ({ children }) => {
         try {
             const result = await UserService.getProfile();
             if (result.success) {
-                setUser(prevUser => {
-                    const updatedUser = {
-                        ...prevUser,
-                        ...result.data,
-                        client: {
-                            ...prevUser?.client,
-                            ...result.data.client
-                        }
-                    };
-                    AuthService.setUser(updatedUser);
-                    return updatedUser;
-                });
+                // getProfile fait déjà la fusion et met à jour le localStorage
+                setUser(result.data);
             }
         } catch (error) {
             console.error('Erreur refresh user:', error);
@@ -166,17 +138,8 @@ export const AuthProvider = ({ children }) => {
         try {
             const result = await UserService.getProfile();
             if (result.success) {
-                const storedUser = await AuthService.getUser();
-                const mergedUser = {
-                    ...storedUser,
-                    ...result.data,
-                    client: {
-                        ...storedUser?.client,
-                        ...result.data.client
-                    }
-                };
-                setUser(mergedUser);
-                await AuthService.setUser(mergedUser);
+                // getProfile fait déjà la fusion et met à jour le localStorage
+                setUser(result.data);
                 return { success: true };
             }
             return { success: false };
@@ -198,6 +161,16 @@ export const AuthProvider = ({ children }) => {
                 if (result.data.user?.role?.name === 'prestataire' && result.data.prestataire) {
                     setPrestataire(result.data.prestataire);
                     localStorage.setItem('prestataire', JSON.stringify(result.data.prestataire));
+                }
+
+                // Récupérer le profil complet (avec image) après le login
+                try {
+                    const profileResult = await UserService.getProfile();
+                    if (profileResult.success) {
+                        setUser(profileResult.data);
+                    }
+                } catch (e) {
+                    console.warn('Impossible de récupérer le profil complet:', e);
                 }
             }
 
@@ -253,6 +226,16 @@ export const AuthProvider = ({ children }) => {
                 setUser(result.data.user);
                 setToken(result.data.token);
                 setIsAuthenticated(true);
+
+                // Récupérer le profil complet après le login
+                try {
+                    const profileResult = await UserService.getProfile();
+                    if (profileResult.success) {
+                        setUser(profileResult.data);
+                    }
+                } catch (e) {
+                    console.warn('Impossible de récupérer le profil complet:', e);
+                }
             }
 
             return result;
@@ -273,6 +256,16 @@ export const AuthProvider = ({ children }) => {
                 setUser(result.data.user);
                 setToken(result.data.token);
                 setIsAuthenticated(true);
+
+                // Récupérer le profil complet après le login
+                try {
+                    const profileResult = await UserService.getProfile();
+                    if (profileResult.success) {
+                        setUser(profileResult.data);
+                    }
+                } catch (e) {
+                    console.warn('Impossible de récupérer le profil complet:', e);
+                }
             }
 
             return result;
@@ -301,14 +294,9 @@ export const AuthProvider = ({ children }) => {
             const result = await UserService.updateProfile(data);
 
             if (result.success) {
-                setUser(prevUser => ({
-                    ...prevUser,
-                    ...result.data,
-                    client: {
-                        ...prevUser?.client,
-                        ...result.data.client
-                    }
-                }));
+                // Récupérer les données fusionnées du localStorage (UserService les a déjà mises à jour)
+                const updatedUser = await AuthService.getUser();
+                setUser(updatedUser);
             }
 
             return result;

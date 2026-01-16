@@ -54,6 +54,18 @@ const MonCommerce = () => {
     const loadFiches = async () => {
         setLoading(true);
         try {
+            // D'ABORD : Vérifier s'il y a des souscriptions pending à activer
+            // (en cas d'échec de redirection Stripe sur mobile)
+            try {
+                const AbonnementService = (await import('../../Services/Abonnement.services')).default;
+                const pendingResult = await AbonnementService.checkPendingSubscriptions();
+                if (pendingResult.success && pendingResult.data?.activated?.length > 0) {
+                    setSuccess(`${pendingResult.data.activated.length} abonnement(s) activé(s) ! Vous pouvez maintenant activer votre fiche.`);
+                }
+            } catch (e) {
+                console.log('Check pending subscriptions error (non-bloquant):', e);
+            }
+
             const result = await PrestataireService.getMyFiches();
             if (result.success) {
                 setFiches(result.data.fiches || []);

@@ -6,6 +6,7 @@ import { AuthProvider } from './Utils/AuthContext';
 import PublicRouter from './Router/PublicRouter';
 import PrivateRouter from './Router/PrivateRouter';
 import AnimatedSplash from './components/AnimatedSplash/AnimatedSplash';
+import DeepLinkHandler from './components/DeepLinkHandler';
 import { Capacitor } from '@capacitor/core';
 
 import '@ionic/react/css/core.css';
@@ -59,6 +60,8 @@ const App = () => {
         <IonApp>
           <BrowserRouter>
             <AuthProvider>
+              {/* Handler pour les deep links (retour Stripe) */}
+              <DeepLinkHandler />
               <Routes>
                 <Route path="/*" element={<PublicRouter />} />
                 <Route path="/auth/*" element={<PrivateRouter />} />

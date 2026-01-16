@@ -1,25 +1,26 @@
 /* Reset pour IonContent */
 .register-screen {
     --background: transparent;
+    /* Force le contenu à être scrollable */
+    --overflow: auto;
 }
 
+/* IMPORTANT: Forcer le scroll sur IonContent */
 .register-screen::part(scroll) {
-    overflow-y: auto;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
-    /* Pour un scroll fluide sur iOS */
-}
-
-/* Fond avec gradient + image + blur */
-.register-screen::part(scroll) {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    /* Pour un scroll fluide sur iOS */
+    overscroll-behavior-y: contain;
+    /* Fond avec gradient + image */
     background:
         linear-gradient(135deg, rgba(224, 195, 179, 0.3) 0%, rgba(197, 166, 143, 0.3) 50%, rgba(158, 168, 184, 0.3) 100%),
         url('../../Images/register-bg6.jpg') center/cover no-repeat;
-    background-attachment: fixed;
+    background-attachment: scroll;
     background-position: center top;
     position: relative;
+    /* FIX Android keyboard: permettre le scroll même avec clavier */
+    min-height: 100%;
+    height: auto !important;
 }
 
 .register-screen::part(scroll)::before {
@@ -43,9 +44,11 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    min-height: 100vh;
-    padding: 30px 24px 40px 24px;
+    min-height: auto;
+    /* BEAUCOUP de padding en bas pour compenser le clavier */
+    padding: 30px 24px 250px 24px;
     position: relative;
+    flex-shrink: 0;
 }
 
 /* Back button */
@@ -461,7 +464,7 @@ ion-input.register-input {
 /* Pour les très petits écrans */
 @media (max-height: 700px) {
     .register-container {
-        padding: 20px 24px 30px 24px;
+        padding: 20px 24px 80px 24px; /* Plus de padding en bas */
     }
 
     .register-header {
@@ -488,6 +491,47 @@ ion-input.register-input {
         --padding-top: 10px;
         --padding-bottom: 10px;
         min-height: 44px;
+    }
+}
+
+/* Fix iOS Safari: assurer que le contenu est scrollable avec clavier */
+@supports (-webkit-touch-callout: none) {
+    .register-screen {
+        /* iOS specific fix */
+        height: 100%;
+        height: -webkit-fill-available;
+    }
+    
+    .register-container {
+        padding-bottom: 120px; /* Extra padding pour iOS */
+    }
+}
+
+/* Fix pour quand le clavier est ouvert */
+@media (max-height: 500px) {
+    .register-container {
+        padding-top: 15px;
+        padding-bottom: 60px;
+    }
+    
+    .register-header {
+        margin-bottom: 10px;
+    }
+    
+    .register-title {
+        font-size: 24px;
+    }
+    
+    .register-form {
+        padding: 20px 16px;
+    }
+    
+    .input-group {
+        margin-bottom: 12px;
+    }
+    
+    .register-button {
+        margin-top: 20px;
     }
 }
 

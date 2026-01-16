@@ -317,6 +317,82 @@
 }
 
 /* =============================================
+   BARRE DE COLLAPSE (HANDLE)
+   ============================================= */
+
+.fiche-content-handle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 0;
+    margin: -20px -24px 8px -24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.fiche-content-handle:active {
+    opacity: 0.7;
+}
+
+.fiche-handle-bar {
+    width: 50px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.fiche-content-handle:hover .fiche-handle-bar {
+    background: rgba(255, 255, 255, 0.5);
+    width: 60px;
+}
+
+.fiche-handle-icon {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.fiche-content-handle:hover .fiche-handle-icon {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* État collapsed */
+.fiche-content.collapsed {
+    max-height: none;
+    padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 20px);
+}
+
+.fiche-content.collapsed .fiche-content-inner {
+    gap: 12px;
+}
+
+/* =============================================
+   BOUTON PROMOTION (CORAIL/ORANGE)
+   ============================================= */
+
+.fiche-action-btn-promo {
+    background: linear-gradient(135deg, #fe7e4f 0%, #f3a285 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(254, 126, 79, 0.4);
+}
+
+.fiche-action-btn-promo ion-icon {
+    color: #ffffff !important;
+}
+
+.fiche-action-btn-promo:hover {
+    background: linear-gradient(135deg, #ff8f63 0%, #f5b199 100%) !important;
+    box-shadow: 0 6px 20px rgba(254, 126, 79, 0.5);
+}
+
+.fiche-action-btn-promo:active {
+    transform: scale(0.98);
+}
+
+/* =============================================
    TITRE ET NOTE
    ============================================= */
 

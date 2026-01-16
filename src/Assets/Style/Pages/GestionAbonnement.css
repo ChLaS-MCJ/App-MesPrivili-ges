@@ -46,7 +46,7 @@
 .gestion-abonnement-page .page-header {
     display: flex;
     align-items: center;
-    padding-top: calc(env(safe-area-inset-top, 20px) + 16px);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 50px);
     padding-left: 20px;
     padding-right: 20px;
     padding-bottom: 16px;

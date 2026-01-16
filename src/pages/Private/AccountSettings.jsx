@@ -13,10 +13,12 @@ import {
     QuestionCircleOutlined,
     LoadingOutlined,
     ArrowLeftOutlined,
+    DeleteOutlined,
+    WarningOutlined,
 } from '@ant-design/icons';
 
 const AccountSettings = () => {
-    const { user, updateProfile, changePassword, getProfileImageUrl, refreshUser } = useAuth();
+    const { user, updateProfile, changePassword, getProfileImageUrl, refreshUser, deleteAccount, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const previousPath = location.state?.previousPath || '/auth/maps';
@@ -36,11 +38,11 @@ const AccountSettings = () => {
 
     const [imagePreview, setImagePreview] = useState(profilimg);
     const [imageKey, setImageKey] = useState(Date.now());
-    const [imageInitialized, setImageInitialized] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
     const [openSection, setOpenSection] = useState(null);
+    const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
     const canChangePassword = user?.oauthProvider === 'local' || !user?.oauthProvider;
 
@@ -50,8 +52,8 @@ const AccountSettings = () => {
         { label: 'Au moins un chiffre', met: /[0-9]/.test(passwordData.newPassword) },
     ];
 
+    // Mettre à jour les données du profil
     useEffect(() => {
-
         if (user) {
             setProfileData({
                 prenom: user.client?.prenom || user.prenom || '',
@@ -59,18 +61,19 @@ const AccountSettings = () => {
                 email: user.email || '',
                 telephone: user.client?.telephone || user.telephone || '',
             });
-
-            if (!imageInitialized) {
-                const profileImg = getProfileImageUrl();
-
-                setImagePreview(profileImg || profilimg);
-                setImageInitialized(true);
-            } else {
-
-            }
         }
-
     }, [user]);
+
+    // Mettre à jour l'image séparément - écouter spécifiquement le changement d'image
+    useEffect(() => {
+        const profileImg = getProfileImageUrl();
+        if (profileImg) {
+            setImagePreview(profileImg);
+            setImageKey(Date.now());
+        } else {
+            setImagePreview(profilimg);
+        }
+    }, [user?.client?.profileImage]);
 
     const showToast = (message, type) => {
         setToast({ show: true, message, type });
@@ -78,7 +81,6 @@ const AccountSettings = () => {
             setToast({ show: false, message: '', type: '' });
         }, 3000);
     };
-
     const toggleSection = (section) => {
         setOpenSection(openSection === section ? null : section);
     };
@@ -193,6 +195,36 @@ const AccountSettings = () => {
             }
         } catch (error) {
             showToast('Erreur', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (deleteConfirmText !== 'SUPPRESSION') {
+            showToast('Veuillez écrire SUPPRESSION pour confirmer', 'error');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const result = await deleteAccount();
+
+            if (result.success) {
+                showToast('Compte supprimé avec succès', 'success');
+                // Nettoyer les données de "Se souvenir de moi"
+                localStorage.removeItem('rememberedEmail');
+                localStorage.removeItem('rememberedPassword');
+                localStorage.removeItem('rememberMe');
+
+                setTimeout(() => {
+                    navigate('/login');
+                }, 1500);
+            } else {
+                showToast(result.message || 'Erreur lors de la suppression', 'error');
+            }
+        } catch (error) {
+            showToast('Erreur lors de la suppression', 'error');
         } finally {
             setLoading(false);
         }
@@ -403,6 +435,61 @@ const AccountSettings = () => {
                                 <p style={{ color: '#fff', fontSize: '14px', fontWeight: '500' }}>
                                     📧 Email : <a href="mailto:contact@mesprivileges.com" style={{ color: '#ffffff', textDecoration: 'none' }}>contact@mesprivileges.com</a>
                                 </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 4. Suppression du compte */}
+                    <div className={`menu-item ${openSection === 'delete' ? 'active' : ''}`}>
+                        <div className="menu-header" onClick={() => toggleSection('delete')}>
+                            <div className="menu-left">
+                                <div className="menu-icon delete-icon">
+                                    <DeleteOutlined />
+                                </div>
+                                <span className="menu-label">Suppression du compte</span>
+                            </div>
+                            <div className="menu-right">
+                                <DownOutlined className="menu-arrow" />
+                            </div>
+                        </div>
+                        <div className="menu-content">
+                            <div className="menu-content-inner">
+                                <div className="delete-warning">
+                                    <WarningOutlined className="warning-icon" />
+                                    <div className="warning-text">
+                                        <p className="warning-title">Attention : Cette action est irréversible !</p>
+                                        <p>En supprimant votre compte, vous perdrez définitivement :</p>
+                                        <ul>
+                                            <li>- Toutes vos données personnelles</li>
+                                            <li>- Votre historique de scans et avantages</li>
+                                            <li>- Vos avis et notes laissés</li>
+                                            <li>- Votre QR code personnel</li>
+                                        </ul>
+                                        <p>Cette action ne peut pas être annulée.</p>
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">
+                                        Pour confirmer, écrivez <strong>SUPPRESSION</strong> ci-dessous :
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="settings-input delete-input"
+                                        placeholder="Écrivez SUPPRESSION"
+                                        value={deleteConfirmText}
+                                        onChange={(e) => setDeleteConfirmText(e.target.value.toUpperCase())}
+                                    />
+                                </div>
+
+                                <button
+                                    className="delete-button"
+                                    onClick={handleDeleteAccount}
+                                    disabled={loading || deleteConfirmText !== 'SUPPRESSION'}
+                                >
+                                    <DeleteOutlined />
+                                    <span>Supprimer définitivement mon compte</span>
+                                </button>
                             </div>
                         </div>
                     </div>

@@ -29,6 +29,21 @@ const Login = () => {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isNative = Capacitor.isNativePlatform();
 
+    // Charger l'email et mot de passe sauvegardés si "Se souvenir de moi" était activé
+    useEffect(() => {
+        const savedRememberMe = localStorage.getItem('rememberMe') === 'true';
+        const savedEmail = localStorage.getItem('rememberedEmail');
+        const savedPassword = localStorage.getItem('rememberedPassword');
+
+        if (savedRememberMe && savedEmail) {
+            setEmail(savedEmail);
+            setRememberMe(true);
+            if (savedPassword) {
+                setPassword(savedPassword);
+            }
+        }
+    }, []);
+
     // Initialiser Google Auth pour les plateformes natives
     useEffect(() => {
         const initGoogleAuth = async () => {
@@ -65,6 +80,15 @@ const Login = () => {
         setLoading(false);
 
         if (result.success) {
+            // Sauvegarder ou supprimer l'email et mot de passe selon "Se souvenir de moi"
+            if (rememberMe) {
+                localStorage.setItem('rememberedEmail', email);
+                localStorage.setItem('rememberedPassword', password);
+            } else {
+                localStorage.removeItem('rememberedEmail');
+                localStorage.removeItem('rememberedPassword');
+            }
+
             setToast({
                 show: true,
                 message: 'Connexion réussie !',

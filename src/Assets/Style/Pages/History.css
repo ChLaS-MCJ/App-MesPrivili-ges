@@ -3,7 +3,7 @@
     min-height: 100vh;
     background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
     padding: 20px 15px;
-    padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 50px);
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px);
 }
 
@@ -312,7 +312,7 @@
         max-width: 600px;
         margin: 0 auto;
         padding: 30px 20px;
-        padding-top: calc(env(safe-area-inset-top, 0px) + 30px);
+        padding-top: calc(env(safe-area-inset-top, 0px) + 50px);
         padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px);
     }
 
